@@ -42,6 +42,7 @@ const Signals = lazy(() => import('../signals'));
 const CopyTrading = lazy(() => import('../copy-trading'));
 const SmartTrader = lazy(() => import('../smart-trader'));
 const Generater = lazy(() => import('../generater'));
+const Plan = lazy(() => import('../plan'));
 
 
 const Dtrader = lazy(() => import('../dtrader'));
@@ -80,7 +81,7 @@ const AppWrapper = observer(() => {
     const { clear } = summary_card;
     const { DASHBOARD, BOT_BUILDER } = DBOT_TABS;
     const init_render = React.useRef(true);
-    const hash = ['dashboard', 'bot_builder', 'chart', 'free_bots', 'dcircle', 'copy_trading', 'smart_trader', 'dtrader', 'auto_trades', 'tradingview', 'analysis-tool', 'signals', 'generater'];
+    const hash = ['dashboard', 'bot_builder', 'chart', 'free_bots', 'dcircle', 'copy_trading', 'smart_trader', 'dtrader', 'auto_trades', 'tradingview', 'analysis-tool', 'signals', 'generater', 'plan'];
 
     const { isDesktop } = useDevice();
     const location = useLocation();
@@ -480,6 +481,25 @@ const AppWrapper = observer(() => {
                                     fallback={<ChunkLoader message={localize('Please wait, loading Generater...')} />}
                                 >
                                     <Generater />
+                                </Suspense>
+                            </div>
+                            <div
+                                label={
+                                    <>
+                                        <LabelPairedObjectsColumnCaptionRegularIcon
+                                            height='16px'
+                                            width='16px'
+                                            fill='var(--text-general)'
+                                        />
+                                        <Localize i18n_default_text='Plan' />
+                                    </>
+                                }
+                                id='id-plan'
+                            >
+                                <Suspense
+                                    fallback={<ChunkLoader message={localize('Please wait, loading Plan...')} />}
+                                >
+                                    <Plan />
                                 </Suspense>
                             </div>
 

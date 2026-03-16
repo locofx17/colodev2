@@ -22,6 +22,7 @@ export const DBOT_TABS: TDashboardTabIndex = Object.freeze({
     DTRADER: 7,
     AUTO_TRADES: 8,
     GENERATER: 12,
+    PLAN: 13,
     // Keep TUTORIAL as a non-active sentinel to avoid index mismatches in legacy checks
     TUTORIAL: 999,
 });
@@ -43,6 +44,7 @@ export const TAB_IDS = [
     'id-analysis-tool',
     'id-signals',
     'id-generater',
+    'id-plan',
 ];
 
 

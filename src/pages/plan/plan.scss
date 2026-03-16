@@ -1,0 +1,27 @@
+.plan-wrapper {
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100%;
+    background-color: var(--fill-secondary);
+
+    .card {
+        background: var(--fill-primary);
+        padding: 2.4rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        width: 100%;
+
+        h2 {
+            margin-bottom: 1.6rem;
+            color: var(--text-general);
+        }
+
+        p {
+            color: var(--text-prominent);
+            line-height: 1.5;
+        }
+    }
+}
