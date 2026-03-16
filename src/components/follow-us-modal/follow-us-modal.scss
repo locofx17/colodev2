@@ -1,0 +1,113 @@
+@use 'components/shared/styles/mixins' as *;
+
+.follow-us-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    backdrop-filter: blur(4px);
+}
+
+.follow-us-modal {
+    background: #111111;
+    width: 90%;
+    max-width: 340px;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    &__header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 24px;
+        position: relative;
+        width: 100%;
+
+        h2 {
+            font-size: 2rem;
+            margin: 0;
+            color: #ffffff;
+        }
+    }
+
+    &__close-icon {
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+
+    &__content {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    &__link {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: background-color 0.2s;
+
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        span {
+            font-size: 1.6rem;
+            color: #ffffff;
+        }
+    }
+
+    &__icon {
+        margin-right: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+    }
+
+    &__footer {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 24px;
+    }
+
+    &__close-button {
+        background: #ff444f !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 8px 24px !important;
+        height: auto !important;
+        min-height: 40px !important;
+
+        span {
+            color: #ffffff !important;
+            font-weight: bold !important;
+        }
+
+        &:hover {
+            background: #eb3e48 !important;
+        }
+    }
+}

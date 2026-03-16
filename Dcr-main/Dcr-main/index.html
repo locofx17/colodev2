@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Digit Direction Elite • Pro Suite 2026</title>
+    <style>
+        :root {
+            --bg-main: #0a0c10;
+            --card-bg: rgba(22, 27, 34, 0.95);
+            --border-clr: rgba(56, 139, 253, 0.2);
+            --accent: #58a6ff;
+            --success: #238636;   
+            --danger: #da3633;    
+            --sec-high: #0052cc;  
+            --sec-low: #d29922;
+            --neutral: #8b949e;   
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; cursor: default; }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-main);
+            color: #e6edf3;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            background: radial-gradient(circle at 50% 10%, #1c2128, #0a0c10 90%);
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%; max-width: 500px; height: 100vh;
+            background: var(--card-bg); backdrop-filter: blur(20px);
+            border-left: 1px solid var(--border-clr); border-right: 1px solid var(--border-clr);
+            padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto;
+        }
+
+        .container::-webkit-scrollbar { width: 4px; }
+        .container::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
+
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+        .status-badge { display: flex; align-items: center; gap: 6px; font-size: 11px; background: #0d1117; padding: 5px 12px; border-radius: 20px; border: 1px solid #30363d; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
+
+        .card { background: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .card-title { font-size: 10px; font-weight: 700; color: #8b949e; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .card-title::before { content: ""; width: 3px; height: 10px; background: var(--accent); border-radius: 2px; }
+
+        select, input { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 8px 12px; color: var(--accent); font-size: 13px; width: 100%; outline: none; }
+
+        .price-display { text-align: center; padding: 15px; background: #0d1117; border-radius: 12px; border: 1px solid #30363d; margin-bottom: 10px; }
+        .price-value { font-size: 34px; font-weight: 800; color: #f0f6fc; font-variant-numeric: tabular-nums; }
+        
+        .digits-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; position: relative; margin-top: 15px; }
+        
+        #digit-cursor {
+            position: absolute; top: 0; left: 0; border: 3px solid #ffffff; border-radius: 50%;
+            transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 20; box-shadow: 0 0 20px #fff, 0 0 40px var(--accent);
+            opacity: 0; display: flex; align-items: center; justify-content: center; pointer-events: none;
+        }
+
+        #streak-badge {
+            position: absolute; top: -12px; right: -12px;
+            background: #fff; color: #000; font-size: 11px; font-weight: 900;
+            padding: 2px 7px; border-radius: 10px; box-shadow: 0 0 15px #fff;
+            display: none; border: 1px solid var(--accent);
+        }
+
+        .digit-circle { aspect-ratio: 1; border-radius: 50%; background: #0d1117; border: 2px solid #30363d; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; cursor: pointer; }
+        .digit-circle:hover { filter: brightness(1.5); }
+
+        .circle-max1 { background: rgba(35, 134, 54, 0.2) !important; border-color: var(--success) !important; color: #4ade80 !important; box-shadow: 0 0 15px rgba(35, 134, 54, 0.2); }
+        .circle-max2 { background: rgba(0, 82, 204, 0.2) !important; border-color: var(--sec-high) !important; color: #79c0ff !important; }
+        .circle-min1 { background: rgba(218, 54, 51, 0.2) !important; border-color: var(--danger) !important; color: #f87171 !important; opacity: 0.7; }
+        .digit-num { font-size: 20px; font-weight: 900; }
+        .digit-pct { font-size: 10px; font-weight: 700; opacity: 0.8; }
+
+        .dist-bar { display: flex; height: 50px; border-radius: 10px; overflow: hidden; border: 1px solid #30363d; margin-top: 10px; }
+        .side { display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: 800; transition: all 0.4s ease; min-width: 10%; position: relative; }
+        .side-a { background: linear-gradient(135deg, #238636, #1a6328); }
+        .side-b { background: linear-gradient(135deg, #da3633, #a12826); }
+        .side-c { background: #444; }
+
+        .history-grid-60 { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
+        .h-dot { width: 100%; aspect-ratio: 1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900; color: white; border: 1px solid rgba(255,255,255,0.05); }
+        .h-newest { border: 2px solid #fff !important; box-shadow: 0 0 12px #fff; transform: scale(1.1); z-index: 5; }
+
+        .control-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .hidden { display: none !important; }
+        
+        .stat-tag { font-size:9px; text-transform:uppercase; letter-spacing:1px; opacity:0.8; margin-bottom:2px; }
+        .stat-val { font-size:16px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1 style="font-size: 18px; font-weight: 900; color: var(--accent);">DIGIT ELITE PRO</h1>
+        <div class="status-badge">
+            <div id="status-dot" class="status-dot" style="background: var(--danger);"></div>
+            <span id="status-text">Connecting...</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="control-row">
+            <div>
+                <div class="card-title">Market</div>
+                <select id="market-select">
+                    <optgroup label="Volatility (1s)">
+                        <option value="1HZ10V">V10 (1s)</option>
+                        <option value="1HZ15V">V15 (1s)</option>
+                        <option value="1HZ25V">V25 (1s)</option>
+                        <option value="1HZ30V">V30 (1s)</option>
+                        <option value="1HZ50V">V50 (1s)</option>
+                        <option value="1HZ75V">V75 (1s)</option>
+                        <option value="1HZ90V">V90 (1s)</option>
+                        <option value="1HZ100V" selected>V100 (1s)</option>
+                    </optgroup>
+                    <optgroup label="Volatility Standard">
+                        <option value="R_10">V10</option>
+                        <option value="R_25">V25</option>
+                        <option value="R_50">V50</option>
+                        <option value="R_75">V75</option>
+                        <option value="R_100">V100</option>
+                    </optgroup>
+                    <optgroup label="Daily Reset Indices">
+                        <option value="RDBULL">Bull Market</option>
+                        <option value="RDBEAR">Bear Market</option>
+                    </optgroup>
+                    <optgroup label="Jump Indices">
+                        <option value="JD10">Jump 10</option>
+                        <option value="JD25">Jump 25</option>
+                        <option value="JD50">Jump 50</option>
+                        <option value="JD75">Jump 75</option>
+                        <option value="JD100">Jump 100</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div>
+                <div class="card-title">Trade Type</div>
+                <select id="type-select">
+                    <option value="Rise/Fall">Rise / Fall</option>
+                    <option value="Even/Odd">Even / Odd</option>
+                    <option value="Over/Under" selected>Over / Under</option>
+                    <option value="Matches/Differs">Matches / Differs</option>
+                </select>
+            </div>
+        </div>
+        <div class="control-row">
+            <div>
+                <div class="card-title">Analysis Ticks</div>
+                <input type="number" id="ticks-input" value="1000" min="1" max="1000">
+            </div>
+            <div id="barrier-container">
+                <div class="card-title">Prediction</div>
+                <input type="number" id="barrier-input" value="4" min="0" max="9">
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Market Pulse</div>
+        <div class="price-display">
+            <div id="price-val" class="price-value">0.0000</div>
+            <div id="l5-row" style="display:flex; justify-content:center; gap:8px; margin-top:10px;"></div>
+        </div>
+        <div style="position:relative">
+            <div id="digit-cursor"><div id="streak-badge">x2</div></div>
+            <div class="digits-grid" id="digits-grid"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Forecast (Last <span id="tick-count-lbl">1000</span> Ticks)</div>
+        <div class="dist-bar">
+            <div id="side-a" class="side side-a" style="flex: 1;"><span id="tag-a" class="stat-tag">UP</span><span id="val-a" class="stat-val">0%</span></div>
+            <div id="side-c" class="side side-c" style="flex: 0.1;"><span class="stat-tag">BAR</span><span id="val-c" class="stat-val">0%</span></div>
+            <div id="side-b" class="side side-b" style="flex: 1;"><span id="tag-b" class="stat-tag">DOWN</span><span id="val-b" class="stat-val">0%</span></div>
+        </div>
+        <div style="text-align:center; margin-top:12px; font-size:10px; color:var(--accent); cursor:pointer; opacity:0.7" onclick="toggleHistory()">TOGGLE HISTORY GRID</div>
+    </div>
+
+    <div class="card" id="history-card" style="display:block">
+        <div class="card-title">History (Newest Bottom-Right)</div>
+        <div id="history-grid-60" class="history-grid-60"></div>
+    </div>
+</div>
+
+<script>
+let state = {
+    symbol: '1HZ100V',
+    type: 'Over/Under',
+    ticks: 1000,
+    barrier: 4,
+    ws: null,
+    history: [],
+    digitFreq: Array(10).fill(0),
+    pipSize: -1,
+    showHistory: true,
+    streak: 1,
+    app_id: 120181
+};
+
+let updateTimeout;
+function debounceUpdate() {
+    clearTimeout(updateTimeout);
+    updateTimeout = setTimeout(autoUpdate, 300);
+}
+
+function detectPrecision(quote) {
+    if (Math.floor(quote) === quote) return 0;
+    const str = quote.toString();
+    if (str.includes('.')) return str.split('.')[1].length;
+    return 0;
+}
+
+function connect() {
+    if (state.ws) { state.ws.onclose = null; state.ws.close(); }
+    state.ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${state.app_id}`);
+    
+    state.ws.onopen = () => {
+        setStatus(true);
+        state.pipSize = -1; 
+        state.ws.send(JSON.stringify({ forget_all: "ticks" }));
+        state.ws.send(JSON.stringify({ ticks_history: state.symbol, count: state.ticks, end: 'latest', style: 'ticks' }));
+        state.ws.send(JSON.stringify({ ticks: state.symbol, subscribe: 1 }));
+    };
+
+    state.ws.onmessage = (msg) => {
+        const data = JSON.parse(msg.data);
+        if (data.history) {
+            resetData();
+            if (data.history.prices.length > 0) state.pipSize = detectPrecision(data.history.prices[data.history.prices.length - 1]);
+            data.history.prices.forEach(q => handleTick(q, true));
+            updateUI();
+        }
+        if (data.tick) handleTick(data.tick.quote);
+    };
+
+state.ws.onclose = () => { setStatus(false); setTimeout(connect, 3000); };
+}
+
+function handleTick(quote, isBulk = false) {
+    if (state.pipSize === -1) state.pipSize = detectPrecision(quote);
+    const str = quote.toFixed(state.pipSize);
+    const d = parseInt(str.slice(-1));
+
+    if (!isNaN(d)) {
+        const prev = state.history[state.history.length-1]?.digit;
+        if (!isBulk && prev !== undefined) state.streak = (prev === d) ? state.streak + 1 : 1;
+        state.history.push({ digit: d, quote: quote });
+        state.digitFreq[d]++;
+    }
+
+    if (state.history.length > state.ticks) {
+        const old = state.history.shift();
+        if (old) state.digitFreq[old.digit]--;
+    }
+
+    if (!isBulk) updateUI(str, d);
+}
+
+function setBarrierFromDigit(digit) {
+    state.barrier = digit;
+    document.getElementById('barrier-input').value = digit;
+    if (['Over/Under', 'Matches/Differs'].includes(state.type)) {
+        updateUI();
+    }
+}
+
+// Helper to format percentage, show "0%" for near-zero values
+function formatPercent(value, total) {
+    if (total === 0) return "0%";
+    let pct = (value / total) * 100;
+    if (pct < 0.05) return "0%";
+    return pct.toFixed(1) + "%";
+}
+
+function updateUI(pStr, activeD) {
+    if (pStr) document.getElementById('price-val').innerText = pStr;
+    const total = state.history.length;
+    document.getElementById('tick-count-lbl').innerText = total;
+    if (total === 0) return;
+
+    // Digits Grid logic
+    const grid = document.getElementById('digits-grid');
+    const sorted = [...state.digitFreq].sort((a,b) => b-a);
+    const maxVal = sorted[0], maxVal2 = sorted[1], minVal = sorted[9];
+
+    grid.innerHTML = state.digitFreq.map((f, i) => {
+        let r = '';
+        if (f === maxVal && f > 0) r = 'circle-max1';
+        else if (f === maxVal2 && f > 0) r = 'circle-max2';
+        else if (f === minVal) r = 'circle-min1';
+        return `<div class="digit-circle ${r}" data-digit="${i}"><span class="digit-num">${i}</span><span class="digit-pct">${total > 0 ? ((f/total)*100).toFixed(1) : 0}%</span></div>`;
+    }).join('');
+
+    // Attach click event to each digit circle to set prediction
+    Array.from(grid.children).forEach(circle => {
+        circle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const digit = parseInt(circle.dataset.digit);
+            setBarrierFromDigit(digit);
+        });
+    });
+
+    // Cursor Ring
+    if (activeD !== undefined) {
+        const cur = document.getElementById('digit-cursor'), bdg = document.getElementById('streak-badge'), tar = grid.children[activeD];
+        if (tar) {
+            cur.style.opacity = '1'; 
+            cur.style.transform = `translate(${tar.offsetLeft}px, ${tar.offsetTop}px)`;
+            cur.style.width = tar.offsetWidth + 'px'; cur.style.height = tar.offsetHeight + 'px';
+            if (state.streak >= 2) { bdg.style.display = 'block'; bdg.innerText = `x${state.streak}`; bdg.style.color = state.streak > 4 ? '#da3633' : '#000'; } 
+            else { bdg.style.display = 'none'; }
+        }
+    }
+
+    // L5 Row dynamic coloring
+    const l5 = document.getElementById('l5-row');
+    l5.innerHTML = state.history.slice(-5).map(h => {
+        let col = '#8b949e'; 
+        if (state.type === 'Over/Under') {
+            if (h.digit > state.barrier) col = '#3fb950'; 
+            else if (h.digit < state.barrier) col = '#f85149'; 
+            else col = '#8b949e'; 
+        } else {
+            col = (h.digit % 2 === 0) ? '#3fb950' : '#f85149';
+        }
+        return `<div style="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;border:1px solid ${col};color:${col};background:rgba(0,0,0,0.3)">${h.digit}</div>`;
+    }).join('');
+
+    // Update History Grid
+    if (state.showHistory) {
+        const last60 = state.history.slice(-60);
+        document.getElementById('history-grid-60').innerHTML = last60.map((h, i) => {
+            const isNewest = i === last60.length - 1;
+            let bg = '#8b949e'; // Default Grey
+            
+            if (state.type === 'Over/Under') {
+                if (h.digit > state.barrier) bg = '#238636'; // Green
+                else if (h.digit < state.barrier) bg = '#da3633'; // Red
+                else bg = '#8b949e'; // Grey (Barrier Match)
+            } else {
+                bg = (h.digit % 2 === 0) ? '#238636' : '#da3633';
+            }
+
+            return `<div class="h-dot ${isNewest?'h-newest':''}" style="background:${bg}">${h.digit}</div>`;
+        }).join('');
+    }
+
+    // Forecast Bars Logic
+    let a=0, b=0, c=0;
+    const tA = document.getElementById('tag-a'), tB = document.getElementById('tag-b'), sC = document.getElementById('side-c');
+
+if (state.type === 'Rise/Fall') { 
+        tA.innerText="RISE"; tB.innerText="FALL"; sC.classList.add('hidden'); 
+        for(let i=1; i<state.history.length; i++) {
+            if (state.history[i].quote > state.history[i-1].quote) a++;
+            else if (state.history[i].quote < state.history[i-1].quote) b++;
+        }
+    }
+    else if (state.type === 'Even/Odd') { 
+        tA.innerText="EVEN"; tB.innerText="ODD"; sC.classList.add('hidden'); 
+        state.history.forEach(h => h.digit % 2 === 0 ? a++ : b++); 
+    }
+    else if (state.type === 'Over/Under') { 
+        tA.innerText = `OVER ${state.barrier}`;
+        tB.innerText = `UNDER ${state.barrier}`;
+        sC.classList.remove('hidden'); 
+        state.history.forEach(h => { 
+            if(h.digit > state.barrier) a++; else if(h.digit < state.barrier) b++; else c++; 
+        }); 
+    }
+    else if (state.type === 'Matches/Differs') { 
+        tA.innerText = `MATCH ${state.barrier}`;
+        tB.innerText = `DIFF ${state.barrier}`;
+        sC.classList.add('hidden'); 
+        a = state.digitFreq[state.barrier]; b = total - a; 
+    }
+
+    const sum = (a+b+c);
+    const totalCalc = sum === 0 ? 1 : sum;
+    
+    // Use formatPercent to avoid "0.0%"
+    document.getElementById('val-a').innerText = formatPercent(a, totalCalc);
+    document.getElementById('val-b').innerText = formatPercent(b, totalCalc);
+    document.getElementById('val-c').innerText = formatPercent(c, totalCalc);
+    
+    document.getElementById('side-a').style.flex = a || 0.001; 
+    document.getElementById('side-b').style.flex = b || 0.001; 
+    document.getElementById('side-c').style.flex = c || 0;
+}
+
+function toggleHistory() { 
+    state.showHistory = !state.showHistory; 
+    document.getElementById('history-card').style.display = state.showHistory ? 'block' : 'none'; 
+    if(state.showHistory) updateUI(); 
+}
+
+function setStatus(o) { 
+    document.getElementById('status-dot').style.background = o ? '#3fb950' : '#f85149'; 
+    document.getElementById('status-text').innerText = o ? 'Connected' : 'Disconnected'; 
+}
+
+function resetData() { state.history = []; state.digitFreq.fill(0); state.streak = 1; state.pipSize = -1; }
+
+function autoUpdate() {
+    state.symbol = document.getElementById('market-select').value;
+    state.type = document.getElementById('type-select').value;
+    state.ticks = parseInt(document.getElementById('ticks-input').value) || 1000;
+    state.barrier = parseInt(document.getElementById('barrier-input').value);
+    document.getElementById('barrier-container').classList.toggle('hidden', !['Over/Under', 'Matches/Differs'].includes(state.type));
+    resetData(); connect();
+}
+
+// Attach events
+document.getElementById('market-select').addEventListener('change', autoUpdate);
+document.getElementById('type-select').addEventListener('change', autoUpdate);
+document.getElementById('barrier-input').addEventListener('change', autoUpdate);
+document.getElementById('ticks-input').addEventListener('input', debounceUpdate);
+
+window.onload = autoUpdate;
+</script>
+</body>
+</html>
