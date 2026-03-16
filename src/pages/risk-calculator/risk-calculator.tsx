@@ -1,8 +1,8 @@
 import React from 'react';
 import { Localize, localize } from '@deriv-com/translations';
-import './generater.scss';
+import './risk-calculator.scss';
 
-const Generater: React.FC = () => {
+const RiskCalculator: React.FC = () => {
     const [balance, setBalance] = React.useState(1000);
     const [balanceInput, setBalanceInput] = React.useState('1000');
     const [baseStake, setBaseStake] = React.useState(20);
@@ -193,7 +193,7 @@ const Generater: React.FC = () => {
     const payoutPercent = ((currentPayoutPerDollar - 1) * 100).toFixed(1);
 
     return (
-        <div className='generater-wrapper'>
+        <div className='risk-calculator-wrapper'>
             <div className='card'>
                 <div className='balance-section'>
                     <div className='balance-row'>
@@ -489,4 +489,4 @@ const Generater: React.FC = () => {
     );
 };
 
-export default Generater;
+export default RiskCalculator;

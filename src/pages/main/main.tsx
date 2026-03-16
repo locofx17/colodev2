@@ -41,8 +41,7 @@ const AnalysisTool = lazy(() => import('../analysis-tool'));
 const Signals = lazy(() => import('../signals'));
 const CopyTrading = lazy(() => import('../copy-trading'));
 const SmartTrader = lazy(() => import('../smart-trader'));
-const Generater = lazy(() => import('../generater'));
-const Plan = lazy(() => import('../plan'));
+const TradingPlans = lazy(() => import('../trading-plans'));
 
 
 const Dtrader = lazy(() => import('../dtrader'));
@@ -81,7 +80,7 @@ const AppWrapper = observer(() => {
     const { clear } = summary_card;
     const { DASHBOARD, BOT_BUILDER } = DBOT_TABS;
     const init_render = React.useRef(true);
-    const hash = ['dashboard', 'bot_builder', 'chart', 'free_bots', 'dcircle', 'copy_trading', 'smart_trader', 'dtrader', 'auto_trades', 'tradingview', 'analysis-tool', 'signals', 'generater', 'plan'];
+    const hash = ['dashboard', 'bot_builder', 'chart', 'free_bots', 'dcircle', 'copy_trading', 'smart_trader', 'dtrader', 'auto_trades', 'tradingview', 'analysis-tool', 'signals', 'trading-plans'];
 
     const { isDesktop } = useDevice();
     const location = useLocation();
@@ -467,39 +466,20 @@ const AppWrapper = observer(() => {
                             <div
                                 label={
                                     <>
-                                        <LabelPairedSignalCaptionRegularIcon
-                                            height='16px'
-                                            width='16px'
-                                            fill='var(--text-general)'
-                                        />
-                                        <Localize i18n_default_text='Generater' />
-                                    </>
-                                }
-                                id='id-generater'
-                            >
-                                <Suspense
-                                    fallback={<ChunkLoader message={localize('Please wait, loading Generater...')} />}
-                                >
-                                    <Generater />
-                                </Suspense>
-                            </div>
-                            <div
-                                label={
-                                    <>
                                         <LabelPairedObjectsColumnCaptionRegularIcon
                                             height='16px'
                                             width='16px'
                                             fill='var(--text-general)'
                                         />
-                                        <Localize i18n_default_text='Plan' />
+                                        <Localize i18n_default_text='Trading Plans' />
                                     </>
                                 }
-                                id='id-plan'
+                                id='id-trading-plans'
                             >
                                 <Suspense
-                                    fallback={<ChunkLoader message={localize('Please wait, loading Plan...')} />}
+                                    fallback={<ChunkLoader message={localize('Please wait, loading Trading Plans...')} />}
                                 >
-                                    <Plan />
+                                    <TradingPlans />
                                 </Suspense>
                             </div>
 
