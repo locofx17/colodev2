@@ -1,0 +1,414 @@
+<xml xmlns="https://developers.google.com/blockly/xml" is_dbot="true" collection="false">
+  <variables>
+    <variable id="ZxJ:K%g5L@:*25Yr0L5.">stake</variable>
+    <variable id="d:VVgYYt{akr{=,ig2BO">initial stake</variable>
+    <variable id="f|c6tI[YV[6aezVuw58H">target profit</variable>
+    <variable id="mBoP0)9=K78NRy#b/4Vq">stoploss</variable>
+    <variable id="*B4$qjUXe]2:[wde-ErD">martingale</variable>
+    <variable id="ranks_var">ranks</variable>
+    <variable id="prediction_var">prediction</variable>
+  </variables>
+  <block type="trade_definition" id="trade_def" deletable="false" x="0" y="0">
+    <statement name="TRADE_OPTIONS">
+      <block type="trade_definition_market" id="market_def" deletable="false" movable="false">
+        <field name="MARKET_LIST">synthetic_index</field>
+        <field name="SUBMARKET_LIST">random_index</field>
+        <field name="SYMBOL_LIST">1HZ10V</field>
+        <next>
+          <block type="trade_definition_tradetype" id="type_def" deletable="false" movable="false">
+            <field name="TRADETYPECAT_LIST">digits</field>
+            <field name="TRADETYPE_LIST">overunder</field>
+            <next>
+              <block type="trade_definition_contracttype" id="contract_def" deletable="false" movable="false">
+                <field name="TYPE_LIST">DIGITUNDER</field>
+                <next>
+                  <block type="trade_definition_candleinterval" id="interval_def" deletable="false" movable="false">
+                    <field name="CANDLEINTERVAL_LIST">60</field>
+                    <next>
+                      <block type="trade_definition_restartbuysell" id="restart_def" deletable="false" movable="false">
+                        <field name="TIME_MACHINE_ENABLED">FALSE</field>
+                        <next>
+                          <block type="trade_definition_restartonerror" id="error_def" deletable="false" movable="false">
+                            <field name="RESTARTONERROR">TRUE</field>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="INITIALIZATION">
+      <block type="variables_set" id="init_stake">
+        <field name="VAR" id="ZxJ:K%g5L@:*25Yr0L5.">stake</field>
+        <value name="VALUE">
+          <block type="math_number"><field name="NUM">0.35</field></block>
+        </value>
+        <next>
+          <block type="variables_set" id="init_initial_stake">
+            <field name="VAR" id="d:VVgYYt{akr{=,ig2BO">initial stake</field>
+            <value name="VALUE">
+              <block type="math_number"><field name="NUM">0.35</field></block>
+            </value>
+            <next>
+              <block type="variables_set" id="init_target">
+                <field name="VAR" id="f|c6tI[YV[6aezVuw58H">target profit</field>
+                <value name="VALUE">
+                  <block type="math_number"><field name="NUM">2</field></block>
+                </value>
+                <next>
+                  <block type="variables_set" id="init_sl">
+                    <field name="VAR" id="mBoP0)9=K78NRy#b/4Vq">stoploss</field>
+                    <value name="VALUE">
+                      <block type="math_number"><field name="NUM">10</field></block>
+                    </value>
+                    <next>
+                      <block type="variables_set" id="init_martingale">
+                        <field name="VAR" id="*B4$qjUXe]2:[wde-ErD">martingale</field>
+                        <value name="VALUE">
+                          <block type="math_number"><field name="NUM">2</field></block>
+                        </value>
+                        <next>
+                          <block type="variables_set" id="init_pred">
+                            <field name="VAR" id="prediction_var">prediction</field>
+                            <value name="VALUE">
+                              <block type="math_number"><field name="NUM">4</field></block>
+                            </value>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="SUBMARKET">
+      <block type="trade_definition_tradeoptions" id="trade_opts">
+        <mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="true"></mutation>
+        <field name="DURATIONTYPE_LIST">t</field>
+        <value name="DURATION">
+          <shadow type="math_number_positive"><field name="NUM">1</field></shadow>
+        </value>
+        <value name="AMOUNT">
+          <block type="variables_get"><field name="VAR" id="ZxJ:K%g5L@:*25Yr0L5.">stake</field></block>
+        </value>
+        <value name="PREDICTION">
+          <block type="variables_get"><field name="VAR" id="prediction_var">prediction</field></block>
+        </value>
+      </block>
+    </statement>
+  </block>
+  <block type="before_purchase" id="before_buy" deletable="false" x="0" y="800">
+    <statement name="BEFOREPURCHASE_STACK">
+      <block type="notify" id="journal_notify">
+        <field name="NOTIFICATION_TYPE">info</field>
+        <field name="NOTIFICATION_SOUND">silent</field>
+        <value name="MESSAGE">
+          <block type="text_join" id="journal_join">
+            <mutation items="16"></mutation>
+            <value name="ADD0"><block type="text"><field name="TEXT">Most Appearing 🟢&gt;&gt;&gt; </field></block></value>
+            <value name="ADD1">
+              <block type="digit_frequency">
+                <field name="RANK">MOST</field>
+                <field name="RETURN_TYPE">DIGIT</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD2"><block type="text"><field name="TEXT"> 👉 </field></block></value>
+            <value name="ADD3">
+              <block type="digit_frequency">
+                <field name="RANK">MOST</field>
+                <field name="RETURN_TYPE">PERCENTAGE</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD4"><block type="text"><field name="TEXT">% || 2nd Most Appearing 🔵&gt;&gt;&gt; </field></block></value>
+            <value name="ADD5">
+              <block type="digit_frequency">
+                <field name="RANK">SECOND_MOST</field>
+                <field name="RETURN_TYPE">DIGIT</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD6"><block type="text"><field name="TEXT"> 👉 </field></block></value>
+            <value name="ADD7">
+              <block type="digit_frequency">
+                <field name="RANK">SECOND_MOST</field>
+                <field name="RETURN_TYPE">PERCENTAGE</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD8"><block type="text"><field name="TEXT">% || Least Appearing 🔴&gt;&gt;&gt; </field></block></value>
+            <value name="ADD9">
+              <block type="digit_frequency">
+                <field name="RANK">LEAST</field>
+                <field name="RETURN_TYPE">DIGIT</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD10"><block type="text"><field name="TEXT"> 👉 </field></block></value>
+            <value name="ADD11">
+              <block type="digit_frequency">
+                <field name="RANK">LEAST</field>
+                <field name="RETURN_TYPE">PERCENTAGE</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD12"><block type="text"><field name="TEXT">% 2nd Least Appearing 🟠&gt;&gt;&gt; </field></block></value>
+            <value name="ADD13">
+              <block type="digit_frequency">
+                <field name="RANK">SECOND_LEAST</field>
+                <field name="RETURN_TYPE">DIGIT</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD14"><block type="text"><field name="TEXT"> 👉 </field></block></value>
+            <value name="ADD15">
+              <block type="digit_frequency">
+                <field name="RANK">SECOND_LEAST</field>
+                <field name="RETURN_TYPE">PERCENTAGE</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <next>
+          <block type="controls_if" id="check_logic">
+            <value name="IF0">
+              <block type="logic_operation" id="under_all" inline="false">
+                <field name="OP">AND</field>
+                <value name="A">
+                  <block type="logic_operation" id="under_cond" inline="false">
+                    <field name="OP">AND</field>
+                    <value name="A">
+                      <block type="logic_operation" id="under_most" inline="false">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="logic_compare">
+                            <field name="OP">LTE</field>
+                            <value name="A">
+                              <block type="digit_frequency">
+                                <field name="RANK">MOST</field>
+                                <field name="N">60</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number"><field name="NUM">3</field></block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_compare">
+                            <field name="OP">LTE</field>
+                            <value name="A">
+                              <block type="digit_frequency">
+                                <field name="RANK">SECOND_MOST</field>
+                                <field name="N">60</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number"><field name="NUM">3</field></block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <value name="B">
+                      <block type="logic_operation" id="under_least" inline="false">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="logic_compare">
+                            <field name="OP">LTE</field>
+                            <value name="A">
+                              <block type="digit_frequency">
+                                <field name="RANK">SECOND_LEAST</field>
+                                <field name="N">60</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number"><field name="NUM">3</field></block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_compare">
+                            <field name="OP">GTE</field>
+                            <value name="A">
+                              <block type="digit_frequency">
+                                <field name="RANK">LEAST</field>
+                                <field name="N">60</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number"><field name="NUM">6</field></block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <value name="B">
+                  <block type="last_digits_condition">
+                    <field name="N">3</field>
+                    <field name="CONDITION">GREATER</field>
+                    <field name="DIGIT">5</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <statement name="DO0">
+              <block type="purchase"><field name="PURCHASE_LIST">DIGITUNDER</field></block>
+            </statement>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="during_purchase" id="during_trade" x="850" y="800">
+    <statement name="DURING_PURCHASE_STACK">
+      <block type="notify" id="during_notify">
+        <field name="NOTIFICATION_TYPE">info</field>
+        <field name="NOTIFICATION_SOUND">silent</field>
+        <value name="MESSAGE">
+          <block type="text_join" id="during_join">
+            <mutation items="16"></mutation>
+            <value name="ADD0"><block type="text"><field name="TEXT">Most Appearing 🟢&gt;&gt;&gt; </field></block></value>
+            <value name="ADD1">
+              <block type="digit_frequency">
+                <field name="RANK">MOST</field>
+                <field name="RETURN_TYPE">DIGIT</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD2"><block type="text"><field name="TEXT"> 👉 </field></block></value>
+            <value name="ADD3">
+              <block type="digit_frequency">
+                <field name="RANK">MOST</field>
+                <field name="RETURN_TYPE">PERCENTAGE</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD4"><block type="text"><field name="TEXT">% || 2nd Most Appearing 🔵&gt;&gt;&gt; </field></block></value>
+            <value name="ADD5">
+              <block type="digit_frequency">
+                <field name="RANK">SECOND_MOST</field>
+                <field name="RETURN_TYPE">DIGIT</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD6"><block type="text"><field name="TEXT"> 👉 </field></block></value>
+            <value name="ADD7">
+              <block type="digit_frequency">
+                <field name="RANK">SECOND_MOST</field>
+                <field name="RETURN_TYPE">PERCENTAGE</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD8"><block type="text"><field name="TEXT">% || Least Appearing 🔴&gt;&gt;&gt; </field></block></value>
+            <value name="ADD9">
+              <block type="digit_frequency">
+                <field name="RANK">LEAST</field>
+                <field name="RETURN_TYPE">DIGIT</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD10"><block type="text"><field name="TEXT"> 👉 </field></block></value>
+            <value name="ADD11">
+              <block type="digit_frequency">
+                <field name="RANK">LEAST</field>
+                <field name="RETURN_TYPE">PERCENTAGE</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD12"><block type="text"><field name="TEXT">% 2nd Least Appearing 🟠&gt;&gt;&gt; </field></block></value>
+            <value name="ADD13">
+              <block type="digit_frequency">
+                <field name="RANK">SECOND_LEAST</field>
+                <field name="RETURN_TYPE">DIGIT</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD14"><block type="text"><field name="TEXT"> 👉 </field></block></value>
+            <value name="ADD15">
+              <block type="digit_frequency">
+                <field name="RANK">SECOND_LEAST</field>
+                <field name="RETURN_TYPE">PERCENTAGE</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+          </block>
+        </value>
+      </block>
+    </statement>
+  </block>
+  <block type="after_purchase" id="after_buy" x="800" y="0">
+    <statement name="AFTERPURCHASE_STACK">
+      <block type="controls_if" id="result_check">
+        <mutation xmlns="http://www.w3.org/1999/xhtml" else="1"></mutation>
+        <value name="IF0">
+          <block type="contract_check_result"><field name="CHECK_RESULT">win</field></block>
+        </value>
+        <statement name="DO0">
+          <block type="variables_set">
+            <field name="VAR" id="ZxJ:K%g5L@:*25Yr0L5.">stake</field>
+            <value name="VALUE"><block type="variables_get"><field name="VAR" id="d:VVgYYt{akr{=,ig2BO">initial stake</field></block></value>
+          </block>
+        </statement>
+        <statement name="ELSE">
+          <block type="variables_set">
+            <field name="VAR" id="ZxJ:K%g5L@:*25Yr0L5.">stake</field>
+            <value name="VALUE">
+              <block type="math_arithmetic">
+                <field name="OP">MULTIPLY</field>
+                <value name="A"><block type="variables_get"><field name="VAR" id="ZxJ:K%g5L@:*25Yr0L5.">stake</field></block></value>
+                <value name="B"><block type="variables_get"><field name="VAR" id="*B4$qjUXe]2:[wde-ErD">martingale</field></block></value>
+              </block>
+            </value>
+          </block>
+        </statement>
+        <next>
+          <block type="controls_if" id="target_sl_check">
+            <mutation xmlns="http://www.w3.org/1999/xhtml" elseif="1" else="1"></mutation>
+            <value name="IF0">
+              <block type="logic_compare">
+                <field name="OP">GTE</field>
+                <value name="A"><block type="total_profit"></block></value>
+                <value name="B"><block type="variables_get"><field name="VAR" id="f|c6tI[YV[6aezVuw58H">target profit</field></block></value>
+              </block>
+            </value>
+            <statement name="DO0">
+              <block type="text_print"><value name="TEXT"><shadow type="text"><field name="TEXT">Target Profit Hit!</field></shadow></value></block>
+            </statement>
+            <value name="IF1">
+              <block type="logic_compare">
+                <field name="OP">LTE</field>
+                <value name="A"><block type="total_profit"></block></value>
+                <value name="B">
+                  <block type="math_single">
+                    <field name="OP">NEG</field>
+                    <value name="NUM"><block type="variables_get"><field name="VAR" id="mBoP0)9=K78NRy#b/4Vq">stoploss</field></block></value>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <statement name="DO1">
+              <block type="text_print"><value name="TEXT"><shadow type="text"><field name="TEXT">Stop Loss Hit.</field></shadow></value></block>
+            </statement>
+            <statement name="ELSE">
+              <block type="trade_again"></block>
+            </statement>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+</xml>
