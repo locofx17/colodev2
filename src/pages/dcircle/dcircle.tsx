@@ -25,8 +25,6 @@ const DCircle = observer(() => {
     useEffect(() => { localStorage.setItem('dcircle_tradeType', tradeType); }, [tradeType]);
     useEffect(() => { localStorage.setItem('dcircle_ticks', ticks.toString()); }, [ticks]);
     useEffect(() => { localStorage.setItem('dcircle_barrier', barrier.toString()); }, [barrier]);
-    useEffect(() => { localStorage.setItem('dcircle_ticks', ticks.toString()); }, [ticks]);
-    useEffect(() => { localStorage.setItem('dcircle_barrier', barrier.toString()); }, [barrier]);
 
     const detectPrecision = (quote: number) => {
         if (Math.floor(quote) === quote) return 0;
@@ -126,17 +124,34 @@ const DCircle = observer(() => {
 
         ws.current.onopen = () => {
             setIsConnected(true);
-            subscribeMarket();
+            // Redundant call removed here, useEffect([isConnected]) handles it
         };
 
         ws.current.onmessage = (msg) => {
             const data = JSON.parse(msg.data);
             if (data.history) {
-                if (data.history.prices.length > 0) {
-                    const lastPrice = data.history.prices[data.history.prices.length - 1];
-                    setPipSize(detectPrecision(lastPrice));
+                const prices = data.history.prices;
+                if (prices && prices.length > 0) {
+                    const lastPrice = prices[prices.length - 1];
+                    const precision = detectPrecision(lastPrice);
+                    setPipSize(precision);
+                    setPrice(lastPrice.toFixed(precision));
+
+                    // Process history in bulk
+                    const limitedPrices = prices.slice(-ticksRef.current);
+                    const newFreq = Array(10).fill(0);
+                    const newHistory = limitedPrices.map((q: number) => {
+                        const d = parseInt(q.toFixed(precision).slice(-1));
+                        newFreq[d]++;
+                        return { digit: d, quote: q };
+                    });
+
+                    setHistory(newHistory);
+                    setDigitFreq(newFreq);
+                    if (newHistory.length > 0) {
+                        setActiveDigit(newHistory[newHistory.length - 1].digit);
+                    }
                 }
-                data.history.prices.forEach((q: number) => handleTick(q, true));
             }
             if (data.tick) handleTick(data.tick.quote);
         };
