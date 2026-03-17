@@ -6,6 +6,7 @@ import ChunkLoader from '@/components/loader/chunk-loader';
 import { localize } from '@deriv-com/translations';
 import Chart from './chart';
 import ChartToggle from './chart-toggle';
+import Div100vhContainer from '@/components/shared_ui/div100vh-container/div100vh-container';
 import './chart.scss';
 
 const TradingView = lazy(() => import('../tradingview'));
@@ -23,7 +24,7 @@ const ChartWrapper = observer(({ prefix = 'chart', show_digits_stats }: ChartWra
     const uniqueKey = client.loginid ? `${prefix}-${client.loginid}` : `${prefix}-${uuid}`;
 
     return (
-        <div className="chart-wrapper-container" style={{ position: 'relative', height: '100%', width: '100%' }}>
+        <Div100vhContainer className="chart-wrapper-container" height_offset='200px' style={{ position: 'relative', width: '100%' }}>
             <ChartToggle active_chart={active_chart} onToggle={setActiveChart} />
             {active_chart === 'chart' ? (
                 <Chart key={uniqueKey} show_digits_stats={show_digits_stats} />
@@ -32,7 +33,7 @@ const ChartWrapper = observer(({ prefix = 'chart', show_digits_stats }: ChartWra
                     <TradingView />
                 </Suspense>
             )}
-        </div>
+        </Div100vhContainer>
     );
 });
 
