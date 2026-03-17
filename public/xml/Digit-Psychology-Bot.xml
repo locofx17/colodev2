@@ -133,7 +133,7 @@
                               <block type="digit_frequency">
                                 <field name="RANK">MOST</field>
                                 <field name="RETURN_TYPE">DIGIT</field>
-                                <field name="N">120</field>
+                                <field name="N">200</field>
                               </block>
                             </value>
                             <value name="B">
@@ -148,48 +148,28 @@
                               <block type="digit_frequency">
                                 <field name="RANK">SECOND_MOST</field>
                                 <field name="RETURN_TYPE">DIGIT</field>
-                                <field name="N">120</field>
+                                <field name="N">200</field>
                               </block>
                             </value>
                             <value name="B">
-                              <block type="math_number"><field name="NUM">6</field></block>
+                              <block type="math_number"><field name="NUM">5</field></block>
                             </value>
                           </block>
                         </value>
                       </block>
                     </value>
                     <value name="B">
-                      <block type="logic_operation" id="over_least" inline="false">
-                        <field name="OP">AND</field>
+                      <block type="logic_compare" id="over_least">
+                        <field name="OP">LTE</field>
                         <value name="A">
-                          <block type="logic_compare">
-                            <field name="OP">GTE</field>
-                            <value name="A">
-                              <block type="digit_frequency">
-                                <field name="RANK">SECOND_LEAST</field>
-                                <field name="RETURN_TYPE">DIGIT</field>
-                                <field name="N">120</field>
-                              </block>
-                            </value>
-                            <value name="B">
-                              <block type="math_number"><field name="NUM">6</field></block>
-                            </value>
+                          <block type="digit_frequency">
+                            <field name="RANK">LEAST</field>
+                            <field name="RETURN_TYPE">DIGIT</field>
+                            <field name="N">200</field>
                           </block>
                         </value>
                         <value name="B">
-                          <block type="logic_compare">
-                            <field name="OP">LTE</field>
-                            <value name="A">
-                              <block type="digit_frequency">
-                                <field name="RANK">LEAST</field>
-                                <field name="RETURN_TYPE">DIGIT</field>
-                                <field name="N">120</field>
-                              </block>
-                            </value>
-                            <value name="B">
-                              <block type="math_number"><field name="NUM">3</field></block>
-                            </value>
-                          </block>
+                          <block type="math_number"><field name="NUM">4</field></block>
                         </value>
                       </block>
                     </value>
@@ -198,7 +178,7 @@
                 <value name="B">
                   <block type="last_digits_condition">
                     <field name="N">3</field>
-                    <field name="CONDITION">EQ</field>
+                    <field name="CONDITION">LTE</field>
                     <field name="DIGIT">4</field>
                   </block>
                 </value>
@@ -210,8 +190,8 @@
                 <value name="VALUE"><block type="math_number"><field name="NUM">5</field></block></value>
                 <next>
                   <block type="notify" id="loco_notify_multi_over">
-                    <field name="NOTIFICATION_TYPE">info</field>
-                    <field name="NOTIFICATION_SOUND">silent</field>
+                <field name="NOTIFICATION_TYPE">info</field>
+                <field name="NOTIFICATION_SOUND">announcement</field>
                     <value name="MESSAGE">
                       <block type="text"><field name="TEXT">loco the trader</field></block>
                     </value>
@@ -238,7 +218,7 @@
                               <block type="digit_frequency">
                                 <field name="RANK">MOST</field>
                                 <field name="RETURN_TYPE">DIGIT</field>
-                                <field name="N">120</field>
+                                <field name="N">200</field>
                               </block>
                             </value>
                             <value name="B">
@@ -253,48 +233,28 @@
                               <block type="digit_frequency">
                                 <field name="RANK">SECOND_MOST</field>
                                 <field name="RETURN_TYPE">DIGIT</field>
-                                <field name="N">120</field>
+                                <field name="N">200</field>
                               </block>
                             </value>
                             <value name="B">
-                              <block type="math_number"><field name="NUM">3</field></block>
+                              <block type="math_number"><field name="NUM">4</field></block>
                             </value>
                           </block>
                         </value>
                       </block>
                     </value>
                     <value name="B">
-                      <block type="logic_operation" id="under_least" inline="false">
-                        <field name="OP">AND</field>
+                      <block type="logic_compare" id="under_least">
+                        <field name="OP">GTE</field>
                         <value name="A">
-                          <block type="logic_compare">
-                            <field name="OP">LTE</field>
-                            <value name="A">
-                              <block type="digit_frequency">
-                                <field name="RANK">SECOND_LEAST</field>
-                                <field name="RETURN_TYPE">DIGIT</field>
-                                <field name="N">120</field>
-                              </block>
-                            </value>
-                            <value name="B">
-                              <block type="math_number"><field name="NUM">3</field></block>
-                            </value>
+                          <block type="digit_frequency">
+                            <field name="RANK">LEAST</field>
+                            <field name="RETURN_TYPE">DIGIT</field>
+                            <field name="N">200</field>
                           </block>
                         </value>
                         <value name="B">
-                          <block type="logic_compare">
-                            <field name="OP">GTE</field>
-                            <value name="A">
-                              <block type="digit_frequency">
-                                <field name="RANK">LEAST</field>
-                                <field name="RETURN_TYPE">DIGIT</field>
-                                <field name="N">120</field>
-                              </block>
-                            </value>
-                            <value name="B">
-                              <block type="math_number"><field name="NUM">6</field></block>
-                            </value>
-                          </block>
+                          <block type="math_number"><field name="NUM">5</field></block>
                         </value>
                       </block>
                     </value>
@@ -303,7 +263,7 @@
                 <value name="B">
                   <block type="last_digits_condition">
                     <field name="N">3</field>
-                    <field name="CONDITION">GREATER</field>
+                    <field name="CONDITION">GTE</field>
                     <field name="DIGIT">5</field>
                   </block>
                 </value>
@@ -315,8 +275,8 @@
                 <value name="VALUE"><block type="math_number"><field name="NUM">4</field></block></value>
                 <next>
                   <block type="notify" id="loco_notify_multi_under">
-                    <field name="NOTIFICATION_TYPE">info</field>
-                    <field name="NOTIFICATION_SOUND">silent</field>
+                <field name="NOTIFICATION_TYPE">info</field>
+                <field name="NOTIFICATION_SOUND">announcement</field>
                     <value name="MESSAGE">
                       <block type="text"><field name="TEXT">loco the trader</field></block>
                     </value>
@@ -345,7 +305,7 @@
               <block type="digit_frequency">
                 <field name="RANK">MOST</field>
                 <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">120</field>
+                <field name="N">200</field>
               </block>
             </value>
             <value name="ADD2"><block type="text"><field name="TEXT"> 👉 </field></block></value>
@@ -353,7 +313,7 @@
               <block type="digit_frequency">
                 <field name="RANK">MOST</field>
                 <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">120</field>
+                <field name="N">200</field>
               </block>
             </value>
             <value name="ADD4"><block type="text"><field name="TEXT">% || 2nd Most Appearing 🔵&gt;&gt;&gt; </field></block></value>
@@ -361,7 +321,7 @@
               <block type="digit_frequency">
                 <field name="RANK">SECOND_MOST</field>
                 <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">120</field>
+                <field name="N">200</field>
               </block>
             </value>
             <value name="ADD6"><block type="text"><field name="TEXT"> 👉 </field></block></value>
@@ -369,7 +329,7 @@
               <block type="digit_frequency">
                 <field name="RANK">SECOND_MOST</field>
                 <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">120</field>
+                <field name="N">200</field>
               </block>
             </value>
             <value name="ADD8"><block type="text"><field name="TEXT">% || Least Appearing 🔴&gt;&gt;&gt; </field></block></value>
@@ -377,7 +337,7 @@
               <block type="digit_frequency">
                 <field name="RANK">LEAST</field>
                 <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">120</field>
+                <field name="N">200</field>
               </block>
             </value>
             <value name="ADD10"><block type="text"><field name="TEXT"> 👉 </field></block></value>
@@ -385,7 +345,7 @@
               <block type="digit_frequency">
                 <field name="RANK">LEAST</field>
                 <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">120</field>
+                <field name="N">200</field>
               </block>
             </value>
             <value name="ADD12"><block type="text"><field name="TEXT">% 2nd Least Appearing 🟠&gt;&gt;&gt; </field></block></value>
@@ -393,7 +353,7 @@
               <block type="digit_frequency">
                 <field name="RANK">SECOND_LEAST</field>
                 <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">120</field>
+                <field name="N">200</field>
               </block>
             </value>
             <value name="ADD14"><block type="text"><field name="TEXT"> 👉 </field></block></value>
@@ -401,7 +361,7 @@
               <block type="digit_frequency">
                 <field name="RANK">SECOND_LEAST</field>
                 <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">120</field>
+                <field name="N">200</field>
               </block>
             </value>
           </block>
