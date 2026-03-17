@@ -155,6 +155,13 @@ const DCircle = observer(() => {
         connect();
     }, [connect]);
 
+    // Automatically re-subscribe and refresh analysis when market or ticks change
+    useEffect(() => {
+        if (isConnected) {
+            subscribeMarket();
+        }
+    }, [subscribeMarket, isConnected]);
+
     useEffect(() => {
         return () => {
             if (ws.current) {
