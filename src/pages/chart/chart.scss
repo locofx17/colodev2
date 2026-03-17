@@ -1,5 +1,26 @@
 @use 'components/shared/styles/mixins' as *;
 
+.chart-wrapper-container {
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+
+    .tradingview-scroll-wrapper {
+        padding-bottom: 8rem;
+        flex: 1;
+        min-height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+
+        > * {
+            flex: 1;
+            min-height: 100%;
+        }
+    }
+}
+
 .bot {
     &__chart-container {
         position: relative;
