@@ -10,7 +10,8 @@
     --neutral: #8b949e;
 
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     width: 100%;
     height: 100%;
     background: radial-gradient(circle at 50% 10%, #1c2128, #0a0c10 90%);
@@ -33,7 +34,7 @@
     .dcircle-container {
         width: 100%;
         max-width: 100%;
-        padding: 24px;
+        padding: 24px 24px 12rem;
         display: grid;
         grid-template-columns: 1fr;
         gap: 24px;
@@ -382,7 +383,36 @@
         &.side-c { background: #444; }
     }
 
-    .history-grid-60 {
+    .history-scroll-container {
+        max-height: 250px;
+        overflow-y: auto;
+        padding-right: 8px;
+        margin-top: 10px;
+
+        &::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+            box-shadow: 0 0 10px var(--accent);
+            
+            &:hover {
+                background: #fff;
+            }
+        }
+
+        scrollbar-width: thin;
+        scrollbar-color: var(--accent) rgba(0, 0, 0, 0.2);
+    }
+
+    .history-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
         gap: 8px;

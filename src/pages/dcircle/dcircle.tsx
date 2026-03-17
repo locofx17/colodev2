@@ -11,7 +11,6 @@ const DCircle = observer(() => {
     const [history, setHistory] = useState<any[]>([]);
     const [digitFreq, setDigitFreq] = useState<number[]>(Array(10).fill(0));
     const [pipSize, setPipSize] = useState(-1);
-    const [showHistory, setShowHistory] = useState(() => localStorage.getItem('dcircle_showHistory') !== 'false');
     const [streak, setStreak] = useState(1);
     const [price, setPrice] = useState('0.0000');
     const [activeDigit, setActiveDigit] = useState<number | undefined>(undefined);
@@ -25,7 +24,8 @@ const DCircle = observer(() => {
     useEffect(() => { localStorage.setItem('dcircle_tradeType', tradeType); }, [tradeType]);
     useEffect(() => { localStorage.setItem('dcircle_ticks', ticks.toString()); }, [ticks]);
     useEffect(() => { localStorage.setItem('dcircle_barrier', barrier.toString()); }, [barrier]);
-    useEffect(() => { localStorage.setItem('dcircle_showHistory', showHistory.toString()); }, [showHistory]);
+    useEffect(() => { localStorage.setItem('dcircle_ticks', ticks.toString()); }, [ticks]);
+    useEffect(() => { localStorage.setItem('dcircle_barrier', barrier.toString()); }, [barrier]);
 
     const detectPrecision = (quote: number) => {
         if (Math.floor(quote) === quote) return 0;
@@ -208,7 +208,7 @@ const DCircle = observer(() => {
     const valB = formatPercent(b, totalCalc);
     const valC = formatPercent(c, totalCalc);
 
-    const last60 = history.slice(-60);
+    const last120 = history.slice(-120);
 
     return (
         <div className='dcircle-page'>
@@ -277,7 +277,7 @@ const DCircle = observer(() => {
                                 max="1000"
                             />
                         </div>
-                        <div className={['Over/Under', 'Matches/Differs'].includes(tradeType) ? '' : 'hidden'}>
+                        <div>
                             <div className="card-title">Prediction</div>
                             <input 
                                 type="number" 
@@ -374,17 +374,14 @@ const DCircle = observer(() => {
                             <span className="stat-val">{valB}</span>
                         </div>
                     </div>
-                    <div className="toggle-history" onClick={() => setShowHistory(!showHistory)}>
-                        TOGGLE HISTORY GRID
-                    </div>
                 </div>
 
-                {showHistory && (
-                    <div className="card">
-                        <div className="card-title">History (Newest Bottom-Right)</div>
-                        <div className="history-grid-60">
-                            {last60.map((h, i) => {
-                                const isNewest = i === last60.length - 1;
+                <div className="card">
+                    <div className="card-title">History (Last {last120.length} Ticks)</div>
+                    <div className="history-scroll-container">
+                        <div className="history-grid">
+                            {last120.map((h, i) => {
+                                const isNewest = i === last120.length - 1;
                                 let bg = '#8b949e';
                                 
                                 if (tradeType === 'Over/Under') {
@@ -393,7 +390,7 @@ const DCircle = observer(() => {
                                 } else if (tradeType === 'Even/Odd') {
                                     bg = (h.digit % 2 === 0) ? '#238636' : '#da3633';
                                 } else if (tradeType === 'Rise/Fall') {
-                                    const prev = last60[i-1] || (history[history.length - last60.length + i - 1]);
+                                    const prev = last120[i-1] || (history[history.length - last120.length + i - 1]);
                                     if (prev) {
                                         bg = h.quote > prev.quote ? '#238636' : '#da3633';
                                     }
@@ -407,7 +404,7 @@ const DCircle = observer(() => {
                             })}
                         </div>
                     </div>
-                )}
+                </div>
             </div>
         </div>
     );
