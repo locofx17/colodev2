@@ -1,9 +1,9 @@
 .smart-analysis {
     display: flex;
     flex-direction: column;
-    height: 100%;
     width: 100%;
     overflow: hidden;
+    position: relative;
 
     &__subtab-bar {
         display: flex;
@@ -67,10 +67,12 @@
         overflow-x: hidden;
         display: flex;
         flex-direction: column;
+        padding-bottom: 8rem;
 
         > * {
             flex-shrink: 0;
-            height: 100%;
+            min-height: 100%;
+            height: auto;
             width: 100%;
         }
     }

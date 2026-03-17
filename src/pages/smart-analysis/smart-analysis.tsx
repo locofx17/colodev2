@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useState } from 'react';
 import ChunkLoader from '@/components/loader/chunk-loader';
 import { localize } from '@deriv-com/translations';
+import Div100vhContainer from '@/components/shared_ui/div100vh-container';
 import './smart-analysis.scss';
 
 const SmartTrader = lazy(() => import('../smart-trader'));
@@ -19,7 +20,7 @@ const SmartAnalysis: React.FC = () => {
     const [active_sub_tab, setActiveSubTab] = useState<TSubTab>('smart-trader');
 
     return (
-        <div className='smart-analysis'>
+        <Div100vhContainer className='smart-analysis' height_offset='260px'>
             <div className='smart-analysis__subtab-bar'>
                 {SMART_ANALYSIS_SUBTABS.map(tab => (
                     <button
@@ -49,7 +50,7 @@ const SmartAnalysis: React.FC = () => {
                     </Suspense>
                 )}
             </div>
-        </div>
+        </Div100vhContainer>
     );
 };
 
