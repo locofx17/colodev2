@@ -246,6 +246,30 @@
     </div>
 
     <div class="panel p-6 space-y-4 shadow-2xl border-slate-700">
+        <!-- AI Stats Display (Hidden by default) -->
+        <div id="ai-stats-panel" class="hidden bg-slate-800/80 border border-slate-600 rounded-xl p-3 mb-2 animate-pulse">
+            <h3 class="text-[9px] text-blue-400 font-bold uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping"></span> Live AI Psychology Scan
+            </h3>
+            <div class="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                <div class="bg-slate-900/50 p-1.5 rounded border border-slate-700">
+                    <span class="text-green-400">Most 🟢:</span> <span id="stat-most" class="text-white font-bold ml-1">-</span>
+                </div>
+                <div class="bg-slate-900/50 p-1.5 rounded border border-slate-700">
+                    <span class="text-blue-400">2nd Most 🔵:</span> <span id="stat-second-most" class="text-white font-bold ml-1">-</span>
+                </div>
+                <div class="bg-slate-900/50 p-1.5 rounded border border-slate-700">
+                    <span class="text-red-400">Least 🔴:</span> <span id="stat-least" class="text-white font-bold ml-1">-</span>
+                </div>
+                <div class="bg-slate-900/50 p-1.5 rounded border border-slate-700">
+                    <span class="text-orange-400">2nd Least 🟠:</span> <span id="stat-second-least" class="text-white font-bold ml-1">-</span>
+                </div>
+            </div>
+            <div class="mt-1 text-right">
+                <span id="stat-symbol" class="text-[8px] text-slate-500 font-bold tracking-wider">awaiting ticks...</span>
+            </div>
+        </div>
+
         <div class="grid grid-cols-2 gap-3">
             <div>
                 <label class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">🎯 main strategy</label>
@@ -259,6 +283,8 @@
                     <option value="under7_7_ge6">Under 7 (last 7 digits ≥6)</option>
                     <option value="over3_7_le3">Over 3 (last 7 digits ≤3)</option>
                     <option value="under6_7_ge6">Under 6 (last 7 digits ≥6)</option>
+                    <option value="digit_psych_over">Digit Psychology AI - Over</option>
+                    <option value="digit_psych_under">Digit Psychology AI - Under</option>
                 </select>
             </div>
             <!-- RECOVERY (no max attempts field) -->
@@ -453,6 +479,12 @@
                 logicTitle: document.getElementById('logic-title'),
                 logicDesc: document.getElementById('logic-desc'),
                 recoveryAlert: document.getElementById('recovery-alert'),
+                aiStatsPanel: document.getElementById('ai-stats-panel'),
+                statMost: document.getElementById('stat-most'),
+                statSecondMost: document.getElementById('stat-second-most'),
+                statLeast: document.getElementById('stat-least'),
+                statSecondLeast: document.getElementById('stat-second-least'),
+                statSymbol: document.getElementById('stat-symbol'),
                 tokenInput: document.getElementById('token'),
                 baseStakeInput: document.getElementById('base-stake'),
                 multiplierInput: document.getElementById('multiplier'),
@@ -603,6 +635,16 @@
                 return false;
             }
 
+            function getDigitRanks(hist) {
+                const counts = Array(10).fill(0);
+                hist.forEach(d => counts[d]++);
+                const ranks = counts.map((count, digit) => ({ digit, count })).sort((a, b) => {
+                    if (b.count !== a.count) return b.count - a.count;
+                    return b.digit - a.digit;
+                });
+                return ranks;
+            }
+
             // For trade side: implied operator (over -> >, under -> <, equal -> =)
             function getContractForTrade(tradeType, barrier) {
                 if (tradeType === 'odd') return { contract: 'DIGITODD', barrier: '0' };
@@ -634,7 +676,7 @@
                 if (!state.tickHistory.has(symbol)) state.tickHistory.set(symbol, []);
                 const hist = state.tickHistory.get(symbol);
                 hist.push(lastDigit);
-                if (hist.length > 10) hist.shift();
+                if (hist.length > 120) hist.shift();
 
                 updateMarketTile(symbol, lastDigit, formattedPrice);
                 
@@ -724,6 +766,40 @@
                         if (last7.every(d => d >= 6)) {
                             state.pendingProposalSymbol = symbol;
                             requestProposal(symbol, 'DIGITUNDER', '6');
+                        }
+                    }
+                    else if (mainType === 'digit_psych_over') {
+                        if (hist.length < 120) return;
+                        const ranks = getDigitRanks(hist.slice(-120));
+                        
+                        // Update UI
+                        dom.statMost.innerText = `${ranks[0].digit} (${((ranks[0].count/120)*100).toFixed(1)}%)`;
+                        dom.statSecondMost.innerText = `${ranks[1].digit} (${((ranks[1].count/120)*100).toFixed(1)}%)`;
+                        dom.statLeast.innerText = `${ranks[9].digit} (${((ranks[9].count/120)*100).toFixed(1)}%)`;
+                        dom.statSecondLeast.innerText = `${ranks[8].digit} (${((ranks[8].count/120)*100).toFixed(1)}%)`;
+                        dom.statSymbol.innerText = symbol;
+
+                        const last3 = hist.slice(-3);
+                        if (ranks[0].digit >= 6 && ranks[1].digit >= 5 && ranks[9].digit <= 4 && last3.every(d => d <= 4)) {
+                            state.pendingProposalSymbol = symbol;
+                            requestProposal(symbol, 'DIGITOVER', '5');
+                        }
+                    }
+                    else if (mainType === 'digit_psych_under') {
+                        if (hist.length < 120) return;
+                        const ranks = getDigitRanks(hist.slice(-120));
+
+                        // Update UI
+                        dom.statMost.innerText = `${ranks[0].digit} (${((ranks[0].count/120)*100).toFixed(1)}%)`;
+                        dom.statSecondMost.innerText = `${ranks[1].digit} (${((ranks[1].count/120)*100).toFixed(1)}%)`;
+                        dom.statLeast.innerText = `${ranks[9].digit} (${((ranks[9].count/120)*100).toFixed(1)}%)`;
+                        dom.statSecondLeast.innerText = `${ranks[8].digit} (${((ranks[8].count/120)*100).toFixed(1)}%)`;
+                        dom.statSymbol.innerText = symbol;
+
+                        const last3 = hist.slice(-3);
+                        if (ranks[0].digit <= 3 && ranks[1].digit <= 4 && ranks[9].digit >= 5 && last3.every(d => d >= 5)) {
+                            state.pendingProposalSymbol = symbol;
+                            requestProposal(symbol, 'DIGITUNDER', '4');
                         }
                     }
                 } else {
@@ -1029,6 +1105,8 @@
                     const mainText = dom.mainStrategySelect.options[dom.mainStrategySelect.selectedIndex].text;
                     updateLogicUI("MAIN LOGIC", mainText, "main-glow", "text-green-500", false);
                 }
+                const isPsych = dom.mainStrategySelect.value === 'digit_psych_over' || dom.mainStrategySelect.value === 'digit_psych_under';
+                dom.aiStatsPanel.classList.toggle('hidden', !isPsych);
             });
 
             // ==================== FETCH PIP SIZES ====================

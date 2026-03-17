@@ -133,7 +133,7 @@
                               <block type="digit_frequency">
                                 <field name="RANK">MOST</field>
                                 <field name="RETURN_TYPE">DIGIT</field>
-                                <field name="N">200</field>
+                                <field name="N">120</field>
                               </block>
                             </value>
                             <value name="B">
@@ -148,7 +148,7 @@
                               <block type="digit_frequency">
                                 <field name="RANK">SECOND_MOST</field>
                                 <field name="RETURN_TYPE">DIGIT</field>
-                                <field name="N">200</field>
+                                <field name="N">120</field>
                               </block>
                             </value>
                             <value name="B">
@@ -165,7 +165,7 @@
                           <block type="digit_frequency">
                             <field name="RANK">LEAST</field>
                             <field name="RETURN_TYPE">DIGIT</field>
-                            <field name="N">200</field>
+                            <field name="N">120</field>
                           </block>
                         </value>
                         <value name="B">
@@ -218,7 +218,7 @@
                               <block type="digit_frequency">
                                 <field name="RANK">MOST</field>
                                 <field name="RETURN_TYPE">DIGIT</field>
-                                <field name="N">200</field>
+                                <field name="N">120</field>
                               </block>
                             </value>
                             <value name="B">
@@ -233,7 +233,7 @@
                               <block type="digit_frequency">
                                 <field name="RANK">SECOND_MOST</field>
                                 <field name="RETURN_TYPE">DIGIT</field>
-                                <field name="N">200</field>
+                                <field name="N">120</field>
                               </block>
                             </value>
                             <value name="B">
@@ -250,7 +250,7 @@
                           <block type="digit_frequency">
                             <field name="RANK">LEAST</field>
                             <field name="RETURN_TYPE">DIGIT</field>
-                            <field name="N">200</field>
+                            <field name="N">120</field>
                           </block>
                         </value>
                         <value name="B">
@@ -305,7 +305,7 @@
               <block type="digit_frequency">
                 <field name="RANK">MOST</field>
                 <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">200</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD2"><block type="text"><field name="TEXT"> 👉 </field></block></value>
@@ -313,7 +313,7 @@
               <block type="digit_frequency">
                 <field name="RANK">MOST</field>
                 <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">200</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD4"><block type="text"><field name="TEXT">% || 2nd Most Appearing 🔵&gt;&gt;&gt; </field></block></value>
@@ -321,7 +321,7 @@
               <block type="digit_frequency">
                 <field name="RANK">SECOND_MOST</field>
                 <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">200</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD6"><block type="text"><field name="TEXT"> 👉 </field></block></value>
@@ -329,7 +329,7 @@
               <block type="digit_frequency">
                 <field name="RANK">SECOND_MOST</field>
                 <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">200</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD8"><block type="text"><field name="TEXT">% || Least Appearing 🔴&gt;&gt;&gt; </field></block></value>
@@ -337,7 +337,7 @@
               <block type="digit_frequency">
                 <field name="RANK">LEAST</field>
                 <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">200</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD10"><block type="text"><field name="TEXT"> 👉 </field></block></value>
@@ -345,7 +345,7 @@
               <block type="digit_frequency">
                 <field name="RANK">LEAST</field>
                 <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">200</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD12"><block type="text"><field name="TEXT">% 2nd Least Appearing 🟠&gt;&gt;&gt; </field></block></value>
@@ -353,7 +353,7 @@
               <block type="digit_frequency">
                 <field name="RANK">SECOND_LEAST</field>
                 <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">200</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD14"><block type="text"><field name="TEXT"> 👉 </field></block></value>
@@ -361,7 +361,7 @@
               <block type="digit_frequency">
                 <field name="RANK">SECOND_LEAST</field>
                 <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">200</field>
+                <field name="N">120</field>
               </block>
             </value>
           </block>
