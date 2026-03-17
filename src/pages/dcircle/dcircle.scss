@@ -52,17 +52,17 @@
         }
 
         @media (max-width: 768px) {
-            padding: 12px;
+            padding: 12px 12px 12rem;
             gap: 12px;
         }
 
         @media (max-width: 500px) {
-            padding: 8px;
+            padding: 8px 8px 12rem;
             gap: 6px;
         }
 
         @media (max-width: 360px) {
-            padding: 4px;
+            padding: 4px 4px 12rem;
             gap: 4px;
         }
     }
@@ -418,11 +418,17 @@
         gap: 8px;
 
         @media (max-width: 500px) {
-            grid-template-columns: repeat(10, 1fr);
+            grid-template-columns: repeat(8, 1fr);
             gap: 4px;
         }
 
-        @media (max-width: 360px) {
+        @media (max-width: 400px) {
+            grid-template-columns: repeat(6, 1fr);
+            gap: 4px;
+        }
+
+        @media (max-width: 320px) {
+            grid-template-columns: repeat(5, 1fr);
             gap: 2px;
         }
 
