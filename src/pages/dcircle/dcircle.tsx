@@ -183,11 +183,12 @@ const DCircle = observer(() => {
         return {
             max1: sorted[0],
             max2: sorted[1],
-            min1: sorted[sorted.length - 1]
+            min1: sorted[sorted.length - 1],
+            min2: sorted[sorted.length - 2]
         };
     };
 
-    const { max1, max2, min1 } = getSortedFreq();
+    const { max1, max2, min1, min2 } = getSortedFreq();
 
     // Forecast calculation
     let a=0, b=0, c=0;
@@ -215,6 +216,7 @@ const DCircle = observer(() => {
     const valB = formatPercent(b, totalCalc);
     const valC = formatPercent(c, totalCalc);
 
+    const last60 = history.slice(-60);
     const last120 = history.slice(-120);
 
     return (
@@ -333,6 +335,7 @@ const DCircle = observer(() => {
                                 let r = '';
                                 if (f === max1 && f > 0) r = 'circle-max1';
                                 else if (f === max2 && f > 0) r = 'circle-max2';
+                                else if (f === min2 && f > 0) r = 'circle-min2';
                                 else if (f === min1) r = 'circle-min1';
                                 
                                 return (
@@ -386,6 +389,43 @@ const DCircle = observer(() => {
                 </div>
 
                 <div className="card">
+                    <div className="card-title">History (Last {last60.length} Ticks)</div>
+                    <div className="history-scroll-container" style={{ maxHeight: '150px' }}>
+                        <div className="history-grid">
+                            {last60.map((h, i) => {
+                                const isNewest = i === last60.length - 1;
+                                let bg = '#8b949e';
+                                let displayVal: string | number = h.digit;
+                                
+                                if (tradeType === 'Over/Under') {
+                                    if (h.digit > barrier) bg = '#238636';
+                                    else if (h.digit < barrier) bg = '#da3633';
+                                } else if (tradeType === 'Even/Odd') {
+                                    bg = (h.digit % 2 === 0) ? '#238636' : '#da3633';
+                                } else if (tradeType === 'Rise/Fall') {
+                                    const slice60 = last60;
+                                    const actualIndex = history.length - slice60.length + i;
+                                    const prev = history[actualIndex - 1];
+                                    if (prev) {
+                                        const isRise = h.quote > prev.quote;
+                                        bg = isRise ? '#238636' : '#da3633';
+                                        displayVal = isRise ? 'R' : 'F';
+                                    }
+                                } else if (tradeType === 'Matches/Differs') {
+                                    bg = (h.digit === barrier) ? '#238636' : '#da3633';
+                                }
+
+                                return (
+                                    <div key={i} className={`h-dot ${isNewest ? 'h-newest' : ''}`} style={{ background: bg }}>
+                                        {displayVal}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card">
                     <div className="card-title">History (Last {last120.length} Ticks)</div>
                     <div className="history-scroll-container">
                         <div className="history-grid">
@@ -400,19 +440,16 @@ const DCircle = observer(() => {
                                 } else if (tradeType === 'Even/Odd') {
                                     bg = (h.digit % 2 === 0) ? '#238636' : '#da3633';
                                 } else if (tradeType === 'Rise/Fall') {
-                                    const prev = last120[i-1] || (history[history.length - last120.length + i - 1]);
+                                    const slice120 = last120;
+                                    const actualIndex = history.length - slice120.length + i;
+                                    const prev = history[actualIndex - 1];
                                     if (prev) {
                                         const isRise = h.quote > prev.quote;
                                         bg = isRise ? '#238636' : '#da3633';
                                         displayVal = isRise ? 'R' : 'F';
                                     }
                                 } else if (tradeType === 'Matches/Differs') {
-                                    if (tradeType === 'Matches/Differs') {
-                                        // Since we don't know if the user intended "Match" or "Differ" specifically, 
-                                        // and the trade type name is "Matches/Differs", we'll check the digit vs barrier.
-                                        // Usually "Match" means digit == barrier.
-                                        bg = (h.digit === barrier) ? '#238636' : '#da3633';
-                                    }
+                                    bg = (h.digit === barrier) ? '#238636' : '#da3633';
                                 }
 
                                 return (
