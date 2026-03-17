@@ -114,7 +114,18 @@ export default Engine =>
             });
             const entries = freq.map((c, i) => ({ d: i, c }));
             entries.sort((a, b) => b.c - a.c);
-            return rank === 'LEAST' ? entries[9].d : entries[0].d;
+
+            switch (rank) {
+                case 'SECOND_MOST':
+                    return entries[1].d;
+                case 'SECOND_LEAST':
+                    return entries[8].d;
+                case 'LEAST':
+                    return entries[9].d;
+                case 'MOST':
+                default:
+                    return entries[0].d;
+            }
         }
 
         async getEvenOddPercent({ type = 'EVEN', n = 1000 } = {}) {

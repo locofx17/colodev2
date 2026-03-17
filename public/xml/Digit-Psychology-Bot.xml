@@ -149,53 +149,84 @@
           <block type="controls_if" id="check_logic">
             <mutation elseif="1"></mutation>
             <value name="IF0">
-              <block type="logic_operation" id="over_cond" inline="false">
+              <block type="logic_operation" id="over_all" inline="false">
                 <field name="OP">AND</field>
                 <value name="A">
-                  <block type="logic_compare">
-                    <field name="OP">GTE</field>
+                  <block type="logic_operation" id="over_cond" inline="false">
+                    <field name="OP">AND</field>
                     <value name="A">
-                      <block type="digit_frequency">
-                        <field name="RANK">MOST</field>
-                        <field name="N">120</field>
+                      <block type="logic_operation" id="over_most" inline="false">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="logic_compare">
+                            <field name="OP">GTE</field>
+                            <value name="A">
+                              <block type="digit_frequency">
+                                <field name="RANK">MOST</field>
+                                <field name="N">120</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number"><field name="NUM">6</field></block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_compare">
+                            <field name="OP">GTE</field>
+                            <value name="A">
+                              <block type="digit_frequency">
+                                <field name="RANK">SECOND_MOST</field>
+                                <field name="N">120</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number"><field name="NUM">6</field></block>
+                            </value>
+                          </block>
+                        </value>
                       </block>
                     </value>
                     <value name="B">
-                      <block type="math_number"><field name="NUM">6</field></block>
+                      <block type="logic_operation" id="over_least" inline="false">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="logic_compare">
+                            <field name="OP">GTE</field>
+                            <value name="A">
+                              <block type="digit_frequency">
+                                <field name="RANK">SECOND_LEAST</field>
+                                <field name="N">120</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number"><field name="NUM">6</field></block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_compare">
+                            <field name="OP">LTE</field>
+                            <value name="A">
+                              <block type="digit_frequency">
+                                <field name="RANK">LEAST</field>
+                                <field name="N">120</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number"><field name="NUM">3</field></block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
                     </value>
                   </block>
                 </value>
                 <value name="B">
-                  <block type="logic_operation" id="over_avoid" inline="false">
-                    <field name="OP">AND</field>
-                    <value name="A">
-                      <block type="logic_compare">
-                        <field name="OP">LTE</field>
-                        <value name="A">
-                          <block type="digit_frequency">
-                            <field name="RANK">LEAST</field>
-                            <field name="N">120</field>
-                          </block>
-                        </value>
-                        <value name="B">
-                          <block type="math_number"><field name="NUM">3</field></block>
-                        </value>
-                      </block>
-                    </value>
-                    <value name="B">
-                      <block type="logic_compare">
-                        <field name="OP">GT</field>
-                        <value name="A">
-                          <block type="digit_frequency">
-                            <field name="RANK">MOST</field>
-                            <field name="N">120</field>
-                          </block>
-                        </value>
-                        <value name="B">
-                          <block type="math_number"><field name="NUM">5</field></block>
-                        </value>
-                      </block>
-                    </value>
+                  <block type="last_digits_condition">
+                    <field name="N">3</field>
+                    <field name="CONDITION">EQ</field>
+                    <field name="DIGIT">4</field>
                   </block>
                 </value>
               </block>
@@ -210,53 +241,84 @@
               </block>
             </statement>
             <value name="IF1">
-              <block type="logic_operation" id="under_cond" inline="false">
+              <block type="logic_operation" id="under_all" inline="false">
                 <field name="OP">AND</field>
                 <value name="A">
-                  <block type="logic_compare">
-                    <field name="OP">LTE</field>
+                  <block type="logic_operation" id="under_cond" inline="false">
+                    <field name="OP">AND</field>
                     <value name="A">
-                      <block type="digit_frequency">
-                        <field name="RANK">MOST</field>
-                        <field name="N">120</field>
+                      <block type="logic_operation" id="under_most" inline="false">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="logic_compare">
+                            <field name="OP">LTE</field>
+                            <value name="A">
+                              <block type="digit_frequency">
+                                <field name="RANK">MOST</field>
+                                <field name="N">120</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number"><field name="NUM">3</field></block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_compare">
+                            <field name="OP">LTE</field>
+                            <value name="A">
+                              <block type="digit_frequency">
+                                <field name="RANK">SECOND_MOST</field>
+                                <field name="N">120</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number"><field name="NUM">3</field></block>
+                            </value>
+                          </block>
+                        </value>
                       </block>
                     </value>
                     <value name="B">
-                      <block type="math_number"><field name="NUM">3</field></block>
+                      <block type="logic_operation" id="under_least" inline="false">
+                        <field name="OP">AND</field>
+                        <value name="A">
+                          <block type="logic_compare">
+                            <field name="OP">LTE</field>
+                            <value name="A">
+                              <block type="digit_frequency">
+                                <field name="RANK">SECOND_LEAST</field>
+                                <field name="N">120</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number"><field name="NUM">3</field></block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="B">
+                          <block type="logic_compare">
+                            <field name="OP">GTE</field>
+                            <value name="A">
+                              <block type="digit_frequency">
+                                <field name="RANK">LEAST</field>
+                                <field name="N">120</field>
+                              </block>
+                            </value>
+                            <value name="B">
+                              <block type="math_number"><field name="NUM">6</field></block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
                     </value>
                   </block>
                 </value>
                 <value name="B">
-                  <block type="logic_operation" id="under_avoid" inline="false">
-                    <field name="OP">AND</field>
-                    <value name="A">
-                      <block type="logic_compare">
-                        <field name="OP">GTE</field>
-                        <value name="A">
-                          <block type="digit_frequency">
-                            <field name="RANK">LEAST</field>
-                            <field name="N">120</field>
-                          </block>
-                        </value>
-                        <value name="B">
-                          <block type="math_number"><field name="NUM">6</field></block>
-                        </value>
-                      </block>
-                    </value>
-                    <value name="B">
-                      <block type="logic_compare">
-                        <field name="OP">LT</field>
-                        <value name="A">
-                          <block type="digit_frequency">
-                            <field name="RANK">MOST</field>
-                            <field name="N">120</field>
-                          </block>
-                        </value>
-                        <value name="B">
-                          <block type="math_number"><field name="NUM">4</field></block>
-                        </value>
-                      </block>
-                    </value>
+                  <block type="last_digits_condition">
+                    <field name="N">3</field>
+                    <field name="CONDITION">GREATER</field>
+                    <field name="DIGIT">5</field>
                   </block>
                 </value>
               </block>

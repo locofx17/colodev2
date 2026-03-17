@@ -14,6 +14,8 @@ Blockly.Blocks.digit_frequency = {
                     name: 'RANK',
                     options: [
                         [localize('Most'), 'MOST'],
+                        [localize('Second Most'), 'SECOND_MOST'],
+                        [localize('Second Least'), 'SECOND_LEAST'],
                         [localize('Least'), 'LEAST'],
                     ],
                 },
