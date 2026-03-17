@@ -518,8 +518,8 @@ const AutoTrades = observer(() => {
         >
             <header className="dash-header">
                 <div className="brand">
-                    <h1 className="title">ULTIMATE 2026</h1>
-                    <p className="subtitle">FLEX ENGINE</p>
+                    <h1 className="title">LOCO THE TRADER</h1>
+                    <p className="subtitle">ELITE AUTO ENGINE</p>
                 </div>
                 <div className="status-badge">
                     <Shield className="icon text-blue-400" size={14} />
@@ -528,7 +528,7 @@ const AutoTrades = observer(() => {
                     </span>
                 </div>
                 <button 
-                    onClick={() => window.open('https://www.youtube.com/@LocoTradinghub', '_blank')}
+                    onClick={() => window.open('https://youtu.be/_6-6kHGF-1s?si=1PVqAAIgIRXFL4Z8', '_blank')}
                     className="btn-guide"
                 >
                     <BrandedYouTubeIcon size={20} />
