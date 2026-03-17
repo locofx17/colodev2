@@ -78,26 +78,6 @@
                             <value name="VALUE">
                               <block type="math_number"><field name="NUM">5</field></block>
                             </value>
-                            <next>
-                              <block type="variables_set" id="init_ranks">
-                                <field name="VAR" id="ranks_var">ranks</field>
-                                <value name="VALUE">
-                                  <block type="lists_create_with">
-                                    <mutation items="10"></mutation>
-                                    <value name="ADD0"><block type="math_number"><field name="NUM">0</field></block></value>
-                                    <value name="ADD1"><block type="math_number"><field name="NUM">1</field></block></value>
-                                    <value name="ADD2"><block type="math_number"><field name="NUM">2</field></block></value>
-                                    <value name="ADD3"><block type="math_number"><field name="NUM">3</field></block></value>
-                                    <value name="ADD4"><block type="math_number"><field name="NUM">4</field></block></value>
-                                    <value name="ADD5"><block type="math_number"><field name="NUM">5</field></block></value>
-                                    <value name="ADD6"><block type="math_number"><field name="NUM">6</field></block></value>
-                                    <value name="ADD7"><block type="math_number"><field name="NUM">7</field></block></value>
-                                    <value name="ADD8"><block type="math_number"><field name="NUM">8</field></block></value>
-                                    <value name="ADD9"><block type="math_number"><field name="NUM">9</field></block></value>
-                                  </block>
-                                </value>
-                              </block>
-                            </next>
                           </block>
                         </next>
                       </block>
@@ -139,7 +119,7 @@
               <block type="digit_frequency">
                 <field name="RANK">MOST</field>
                 <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">60</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD2"><block type="text"><field name="TEXT"> 👉 </field></block></value>
@@ -147,7 +127,7 @@
               <block type="digit_frequency">
                 <field name="RANK">MOST</field>
                 <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">60</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD4"><block type="text"><field name="TEXT">% || 2nd Most Appearing 🔵&gt;&gt;&gt; </field></block></value>
@@ -155,7 +135,7 @@
               <block type="digit_frequency">
                 <field name="RANK">SECOND_MOST</field>
                 <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">60</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD6"><block type="text"><field name="TEXT"> 👉 </field></block></value>
@@ -163,7 +143,7 @@
               <block type="digit_frequency">
                 <field name="RANK">SECOND_MOST</field>
                 <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">60</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD8"><block type="text"><field name="TEXT">% || Least Appearing 🔴&gt;&gt;&gt; </field></block></value>
@@ -171,7 +151,7 @@
               <block type="digit_frequency">
                 <field name="RANK">LEAST</field>
                 <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">60</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD10"><block type="text"><field name="TEXT"> 👉 </field></block></value>
@@ -179,7 +159,7 @@
               <block type="digit_frequency">
                 <field name="RANK">LEAST</field>
                 <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">60</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD12"><block type="text"><field name="TEXT">% 2nd Least Appearing 🟠&gt;&gt;&gt; </field></block></value>
@@ -187,7 +167,7 @@
               <block type="digit_frequency">
                 <field name="RANK">SECOND_LEAST</field>
                 <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">60</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD14"><block type="text"><field name="TEXT"> 👉 </field></block></value>
@@ -195,27 +175,9 @@
               <block type="digit_frequency">
                 <field name="RANK">SECOND_LEAST</field>
                 <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">60</field>
+                <field name="N">120</field>
               </block>
             </value>
-          </block>
-        </value>
-        <next>
-          <block type="variables_set" id="update_ranks">
-        <field name="VAR" id="ranks_var">ranks</field>
-        <value name="VALUE">
-          <block type="lists_create_with">
-            <mutation items="10"></mutation>
-            <value name="ADD0"><block type="math_number"><field name="NUM">0</field></block></value>
-            <value name="ADD1"><block type="math_number"><field name="NUM">1</field></block></value>
-            <value name="ADD2"><block type="math_number"><field name="NUM">2</field></block></value>
-            <value name="ADD3"><block type="math_number"><field name="NUM">3</field></block></value>
-            <value name="ADD4"><block type="math_number"><field name="NUM">4</field></block></value>
-            <value name="ADD5"><block type="math_number"><field name="NUM">5</field></block></value>
-            <value name="ADD6"><block type="math_number"><field name="NUM">6</field></block></value>
-            <value name="ADD7"><block type="math_number"><field name="NUM">7</field></block></value>
-            <value name="ADD8"><block type="math_number"><field name="NUM">8</field></block></value>
-            <value name="ADD9"><block type="math_number"><field name="NUM">9</field></block></value>
           </block>
         </value>
         <next>
@@ -236,7 +198,7 @@
                             <value name="A">
                               <block type="digit_frequency">
                                 <field name="RANK">MOST</field>
-                                <field name="N">60</field>
+                                <field name="N">120</field>
                               </block>
                             </value>
                             <value name="B">
@@ -250,7 +212,7 @@
                             <value name="A">
                               <block type="digit_frequency">
                                 <field name="RANK">SECOND_MOST</field>
-                                <field name="N">60</field>
+                                <field name="N">120</field>
                               </block>
                             </value>
                             <value name="B">
@@ -269,7 +231,7 @@
                             <value name="A">
                               <block type="digit_frequency">
                                 <field name="RANK">SECOND_LEAST</field>
-                                <field name="N">60</field>
+                                <field name="N">120</field>
                               </block>
                             </value>
                             <value name="B">
@@ -283,7 +245,7 @@
                             <value name="A">
                               <block type="digit_frequency">
                                 <field name="RANK">LEAST</field>
-                                <field name="N">60</field>
+                                <field name="N">120</field>
                               </block>
                             </value>
                             <value name="B">
@@ -309,7 +271,16 @@
                 <field name="VAR" id="prediction_var">prediction</field>
                 <value name="VALUE"><block type="math_number"><field name="NUM">5</field></block></value>
                 <next>
-                  <block type="purchase"><field name="PURCHASE_LIST">DIGITOVER</field></block>
+                  <block type="notify" id="loco_notify_multi_over">
+                    <field name="NOTIFICATION_TYPE">success</field>
+                    <field name="NOTIFICATION_SOUND">silent</field>
+                    <value name="MESSAGE">
+                      <block type="text"><field name="TEXT">loco the trade on it</field></block>
+                    </value>
+                    <next>
+                      <block type="purchase"><field name="PURCHASE_LIST">DIGITOVER</field></block>
+                    </next>
+                  </block>
                 </next>
               </block>
             </statement>
@@ -401,7 +372,16 @@
                 <field name="VAR" id="prediction_var">prediction</field>
                 <value name="VALUE"><block type="math_number"><field name="NUM">4</field></block></value>
                 <next>
-                  <block type="purchase"><field name="PURCHASE_LIST">DIGITUNDER</field></block>
+                  <block type="notify" id="loco_notify_multi_under">
+                    <field name="NOTIFICATION_TYPE">success</field>
+                    <field name="NOTIFICATION_SOUND">silent</field>
+                    <value name="MESSAGE">
+                      <block type="text"><field name="TEXT">loco the trade on it</field></block>
+                    </value>
+                    <next>
+                      <block type="purchase"><field name="PURCHASE_LIST">DIGITUNDER</field></block>
+                    </next>
+                  </block>
                 </next>
               </block>
             </statement>
@@ -423,7 +403,7 @@
               <block type="digit_frequency">
                 <field name="RANK">MOST</field>
                 <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">60</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD2"><block type="text"><field name="TEXT"> 👉 </field></block></value>
@@ -431,7 +411,7 @@
               <block type="digit_frequency">
                 <field name="RANK">MOST</field>
                 <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">60</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD4"><block type="text"><field name="TEXT">% || 2nd Most Appearing 🔵&gt;&gt;&gt; </field></block></value>
@@ -439,7 +419,7 @@
               <block type="digit_frequency">
                 <field name="RANK">SECOND_MOST</field>
                 <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">60</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD6"><block type="text"><field name="TEXT"> 👉 </field></block></value>
@@ -447,7 +427,7 @@
               <block type="digit_frequency">
                 <field name="RANK">SECOND_MOST</field>
                 <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">60</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD8"><block type="text"><field name="TEXT">% || Least Appearing 🔴&gt;&gt;&gt; </field></block></value>
@@ -455,7 +435,7 @@
               <block type="digit_frequency">
                 <field name="RANK">LEAST</field>
                 <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">60</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD10"><block type="text"><field name="TEXT"> 👉 </field></block></value>
@@ -463,7 +443,7 @@
               <block type="digit_frequency">
                 <field name="RANK">LEAST</field>
                 <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">60</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD12"><block type="text"><field name="TEXT">% 2nd Least Appearing 🟠&gt;&gt;&gt; </field></block></value>
@@ -471,7 +451,7 @@
               <block type="digit_frequency">
                 <field name="RANK">SECOND_LEAST</field>
                 <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">60</field>
+                <field name="N">120</field>
               </block>
             </value>
             <value name="ADD14"><block type="text"><field name="TEXT"> 👉 </field></block></value>
@@ -479,7 +459,7 @@
               <block type="digit_frequency">
                 <field name="RANK">SECOND_LEAST</field>
                 <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">60</field>
+                <field name="N">120</field>
               </block>
             </value>
           </block>
