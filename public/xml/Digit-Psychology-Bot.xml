@@ -415,6 +415,88 @@
       </block>
     </statement>
   </block>
+  <block type="during_purchase" id="during_trade" x="850" y="800">
+    <statement name="DURING_PURCHASE_STACK">
+      <block type="notify" id="during_notify">
+        <field name="NOTIFICATION_TYPE">info</field>
+        <field name="NOTIFICATION_SOUND">silent</field>
+        <value name="MESSAGE">
+          <block type="text_join" id="during_join">
+            <mutation items="15"></mutation>
+            <value name="ADD0"><block type="text"><field name="TEXT">Most Appearing 🟢&gt;&gt;&gt; </field></block></value>
+            <value name="ADD1">
+              <block type="digit_frequency">
+                <field name="RANK">MOST</field>
+                <field name="RETURN_TYPE">DIGIT</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD2"><block type="text"><field name="TEXT"> 👉 </field></block></value>
+            <value name="ADD3">
+              <block type="digit_frequency">
+                <field name="RANK">MOST</field>
+                <field name="RETURN_TYPE">PERCENTAGE</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD4"><block type="text"><field name="TEXT">% || 2nd Most Appearing 🔵&gt;&gt;&gt; </field></block></value>
+            <value name="ADD5">
+              <block type="digit_frequency">
+                <field name="RANK">SECOND_MOST</field>
+                <field name="RETURN_TYPE">DIGIT</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD6"><block type="text"><field name="TEXT"> 👉 </field></block></value>
+            <value name="ADD7">
+              <block type="digit_frequency">
+                <field name="RANK">SECOND_MOST</field>
+                <field name="RETURN_TYPE">PERCENTAGE</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD8"><block type="text"><field name="TEXT">% || Least Appearing 🔴&gt;&gt;&gt; </field></block></value>
+            <value name="ADD9">
+              <block type="digit_frequency">
+                <field name="RANK">LEAST</field>
+                <field name="RETURN_TYPE">DIGIT</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD10"><block type="text"><field name="TEXT"> 👉 </field></block></value>
+            <value name="ADD11">
+              <block type="digit_frequency">
+                <field name="RANK">LEAST</field>
+                <field name="RETURN_TYPE">PERCENTAGE</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD12"><block type="text"><field name="TEXT">% 2nd Least Appearing 🟠&gt;&gt;&gt; </field></block></value>
+            <value name="ADD13">
+              <block type="digit_frequency">
+                <field name="RANK">SECOND_LEAST</field>
+                <field name="RETURN_TYPE">DIGIT</field>
+                <field name="N">60</field>
+              </block>
+            </value>
+            <value name="ADD14">
+              <block type="text_join">
+                <mutation items="2"></mutation>
+                <value name="ADD0"><block type="text"><field name="TEXT"> 👉 </field></block></value>
+                <value name="ADD1">
+                  <block type="digit_frequency">
+                    <field name="RANK">SECOND_LEAST</field>
+                    <field name="RETURN_TYPE">PERCENTAGE</field>
+                    <field name="N">60</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+          </block>
+        </value>
+      </block>
+    </statement>
+  </block>
   <block type="after_purchase" id="after_buy" x="800" y="0">
     <statement name="AFTERPURCHASE_STACK">
       <block type="controls_if" id="result_check">
