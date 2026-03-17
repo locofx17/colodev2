@@ -104,9 +104,11 @@ export default Engine =>
             return lastN.every(cmp);
         }
 
-        async getDigitFrequency({ rank = 'MOST', n = 1000 } = {}) {
+        async getDigitFrequency({ rank = 'MOST', n = 1000, return_type = 'DIGIT' } = {}) {
             const list = await this.getLastDigitList();
             const lastN = list.slice(-Number(n || 0));
+            if (lastN.length === 0) return 0;
+
             const freq = Array(10).fill(0);
             lastN.forEach(val => {
                 const i = Number(val);
@@ -115,17 +117,27 @@ export default Engine =>
             const entries = freq.map((c, i) => ({ d: i, c }));
             entries.sort((a, b) => b.c - a.c);
 
+            let result;
             switch (rank) {
                 case 'SECOND_MOST':
-                    return entries[1].d;
+                    result = entries[1];
+                    break;
                 case 'SECOND_LEAST':
-                    return entries[8].d;
+                    result = entries[8];
+                    break;
                 case 'LEAST':
-                    return entries[9].d;
+                    result = entries[9];
+                    break;
                 case 'MOST':
                 default:
-                    return entries[0].d;
+                    result = entries[0];
+                    break;
             }
+
+            if (return_type === 'PERCENTAGE') {
+                return parseFloat(((result.c / lastN.length) * 100).toFixed(2));
+            }
+            return result.d;
         }
 
         async getEvenOddPercent({ type = 'EVEN', n = 1000 } = {}) {

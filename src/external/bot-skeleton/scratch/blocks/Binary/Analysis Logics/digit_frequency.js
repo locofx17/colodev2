@@ -7,7 +7,7 @@ Blockly.Blocks.digit_frequency = {
     },
     definition() {
         return {
-            message0: localize('Most %1 frequent digit from last %2 digits'),
+            message0: localize('%1 frequency %2 from last %3 digits'),
             args0: [
                 {
                     type: 'field_dropdown',
@@ -17,6 +17,14 @@ Blockly.Blocks.digit_frequency = {
                         [localize('Second Most'), 'SECOND_MOST'],
                         [localize('Second Least'), 'SECOND_LEAST'],
                         [localize('Least'), 'LEAST'],
+                    ],
+                },
+                {
+                    type: 'field_dropdown',
+                    name: 'RETURN_TYPE',
+                    options: [
+                        [localize('Digit'), 'DIGIT'],
+                        [localize('Percentage'), 'PERCENTAGE'],
                     ],
                 },
                 {
@@ -32,7 +40,7 @@ Blockly.Blocks.digit_frequency = {
             colour: Blockly.Colours.Base.colour,
             colourSecondary: Blockly.Colours.Base.colourSecondary,
             colourTertiary: Blockly.Colours.Base.colourTertiary,
-            tooltip: localize('Finds most/least frequent digit in last N digits and returns the digit'),
+            tooltip: localize('Finds most/least frequent digit in last N digits and returns the digit or percentage'),
             category: Blockly.Categories.Tick_Analysis,
         };
     },
@@ -49,8 +57,9 @@ Blockly.Blocks.digit_frequency = {
 
 Blockly.JavaScript.javascriptGenerator.forBlock.digit_frequency = block => {
     const rank = block.getFieldValue('RANK');
+    const return_type = block.getFieldValue('RETURN_TYPE');
     const n = Number(block.getFieldValue('N')) || 1000;
-    const code = `Bot.getDigitFrequency({ rank: '${rank}', n: ${n} })`;
+    const code = `Bot.getDigitFrequency({ rank: '${rank}', n: ${n}, return_type: '${return_type}' })`;
     return [code, Blockly.JavaScript.javascriptGenerator.ORDER_ATOMIC];
 };
 
