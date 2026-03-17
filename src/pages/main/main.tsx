@@ -36,11 +36,8 @@ import './main.scss';
 
 const ChartWrapper = lazy(() => import('../chart/chart-wrapper'));
 
-const TradingView = lazy(() => import('../tradingview'));
-const AnalysisTool = lazy(() => import('../analysis-tool'));
-const Signals = lazy(() => import('../signals'));
+const SmartAnalysis = lazy(() => import('../smart-analysis'));
 const CopyTrading = lazy(() => import('../copy-trading'));
-const SmartTrader = lazy(() => import('../smart-trader'));
 const TradingPlans = lazy(() => import('../trading-plans'));
 
 
@@ -80,7 +77,7 @@ const AppWrapper = observer(() => {
     const { clear } = summary_card;
     const { DASHBOARD, BOT_BUILDER } = DBOT_TABS;
     const init_render = React.useRef(true);
-    const hash = ['dashboard', 'bot_builder', 'chart', 'free_bots', 'dcircle', 'copy_trading', 'smart_trader', 'dtrader', 'auto_trades', 'tradingview', 'analysis-tool', 'signals', 'trading-plans'];
+    const hash = ['dashboard', 'bot_builder', 'chart', 'free_bots', 'dcircle', 'copy_trading', 'smart_analysis', 'dtrader', 'auto_trades', 'trading-plans'];
 
     const { isDesktop } = useDevice();
     const location = useLocation();
@@ -360,15 +357,15 @@ const AppWrapper = observer(() => {
                                             width='24px'
                                             fill='var(--text-general)'
                                         />
-                                        <Localize i18n_default_text='Smart Trader' />
+                                        <Localize i18n_default_text='Smart Analysis' />
                                     </>
                                 }
-                                id='id-smart-trader'
+                                id='id-smart-analysis'
                             >
                                 <Suspense
-                                    fallback={<ChunkLoader message={localize('Please wait, loading Smart Trader...')} />}
+                                    fallback={<ChunkLoader message={localize('Please wait, loading Smart Analysis...')} />}
                                 >
-                                    <SmartTrader />
+                                    <SmartAnalysis />
                                 </Suspense>
                             </div>
 
@@ -412,57 +409,7 @@ const AppWrapper = observer(() => {
                                     <AutoTrades />
                                 </Suspense>
                             </div>
-                            <div
-                                label={
-                                    <>
-                                        <LegacyChartsIcon height='16px' width='16px' fill='var(--text-general)' />
-                                        <Localize i18n_default_text='TradingView' />
-                                    </>
-                                }
-                                id='id-tradingview'
-                            >
-                                <Suspense
-                                    fallback={<ChunkLoader message={localize('Please wait, loading TradingView...')} />}
-                                >
-                                    <TradingView />
-                                </Suspense>
-                            </div>
-                            <div
-                                label={
-                                    <>
-                                        <LegacyIndicatorsIcon height='16px' width='16px' fill='var(--text-general)' />
-                                        <Localize i18n_default_text='Analysis Tool' />
-                                    </>
-                                }
-                                id='id-analysis-tool'
-                            >
-                                <Suspense
-                                    fallback={
-                                        <ChunkLoader message={localize('Please wait, loading Analysis Tool...')} />
-                                    }
-                                >
-                                    <AnalysisTool />
-                                </Suspense>
-                            </div>
-                            <div
-                                label={
-                                    <>
-                                        <LabelPairedSignalCaptionRegularIcon
-                                            height='16px'
-                                            width='16px'
-                                            fill='var(--text-general)'
-                                        />
-                                        <Localize i18n_default_text='Signals' />
-                                    </>
-                                }
-                                id='id-signals'
-                            >
-                                <Suspense
-                                    fallback={<ChunkLoader message={localize('Please wait, loading Signals...')} />}
-                                >
-                                    <Signals />
-                                </Suspense>
-                            </div>
+
                             <div
                                 label={
                                     <>

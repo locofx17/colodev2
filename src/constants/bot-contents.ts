@@ -18,10 +18,10 @@ export const DBOT_TABS: TDashboardTabIndex = Object.freeze({
     FREE_BOTS: 3,
     DCIRCLE: 4,
     COPY_TRADING: 5,
-    SMART_TRADER: 6,
+    SMART_ANALYSIS: 6,
     DTRADER: 7,
     AUTO_TRADES: 8,
-    TRADING_PLANS: 12,
+    TRADING_PLANS: 9,
     // Keep TUTORIAL as a non-active sentinel to avoid index mismatches in legacy checks
     TUTORIAL: 999,
 });
@@ -36,12 +36,9 @@ export const TAB_IDS = [
     'id-free-bots',
     'id-dcircle',
     'id-copy-trading',
-    'id-smart-trader',
+    'id-smart-analysis',
     'id-dtrader',
     'id-auto-trades',
-    'id-tradingview',
-    'id-analysis-tool',
-    'id-signals',
     'id-trading-plans',
 ];
 
