@@ -23,7 +23,7 @@
                 <field name="TYPE_LIST">DIGITUNDER</field>
                 <next>
                   <block type="trade_definition_candleinterval" id="interval_def" deletable="false" movable="false">
-                    <field name="CANDLEINTERVAL_LIST">60</field>
+                    <field name="CANDLEINTERVAL_LIST">120</field>
                     <next>
                       <block type="trade_definition_restartbuysell" id="restart_def" deletable="false" movable="false">
                         <field name="TIME_MACHINE_ENABLED">FALSE</field>
@@ -197,6 +197,7 @@
                             <value name="A">
                               <block type="digit_frequency">
                                 <field name="RANK">MOST</field>
+                                <field name="RETURN_TYPE">DIGIT</field>
                                 <field name="N">120</field>
                               </block>
                             </value>
@@ -211,6 +212,7 @@
                             <value name="A">
                               <block type="digit_frequency">
                                 <field name="RANK">SECOND_MOST</field>
+                                <field name="RETURN_TYPE">DIGIT</field>
                                 <field name="N">120</field>
                               </block>
                             </value>
@@ -230,6 +232,7 @@
                             <value name="A">
                               <block type="digit_frequency">
                                 <field name="RANK">SECOND_LEAST</field>
+                                <field name="RETURN_TYPE">DIGIT</field>
                                 <field name="N">120</field>
                               </block>
                             </value>
@@ -244,6 +247,7 @@
                             <value name="A">
                               <block type="digit_frequency">
                                 <field name="RANK">LEAST</field>
+                                <field name="RETURN_TYPE">DIGIT</field>
                                 <field name="N">120</field>
                               </block>
                             </value>
@@ -267,10 +271,10 @@
             </value>
             <statement name="DO0">
               <block type="notify" id="loco_notify_under">
-                <field name="NOTIFICATION_TYPE">success</field>
+                <field name="NOTIFICATION_TYPE">info</field>
                 <field name="NOTIFICATION_SOUND">silent</field>
                 <value name="MESSAGE">
-                  <block type="text"><field name="TEXT">loco the trade on it</field></block>
+                  <block type="text"><field name="TEXT">loco the trader</field></block>
                 </value>
                 <next>
                   <block type="purchase"><field name="PURCHASE_LIST">DIGITUNDER</field></block>

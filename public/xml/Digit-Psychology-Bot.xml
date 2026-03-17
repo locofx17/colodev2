@@ -23,7 +23,7 @@
                 <field name="TYPE_LIST">both</field>
                 <next>
                   <block type="trade_definition_candleinterval" id="interval_def" deletable="false" movable="false">
-                    <field name="CANDLEINTERVAL_LIST">60</field>
+                    <field name="CANDLEINTERVAL_LIST">120</field>
                     <next>
                       <block type="trade_definition_restartbuysell" id="restart_def" deletable="false" movable="false">
                         <field name="TIME_MACHINE_ENABLED">FALSE</field>
@@ -108,77 +108,11 @@
   </block>
   <block type="before_purchase" id="before_buy" deletable="false" x="0" y="800">
     <statement name="BEFOREPURCHASE_STACK">
-      <block type="notify" id="journal_notify">
+      <block type="notify" id="loco_start_notify">
         <field name="NOTIFICATION_TYPE">info</field>
         <field name="NOTIFICATION_SOUND">silent</field>
         <value name="MESSAGE">
-          <block type="text_join" id="journal_join">
-            <mutation items="16"></mutation>
-            <value name="ADD0"><block type="text"><field name="TEXT">Most Appearing 🟢&gt;&gt;&gt; </field></block></value>
-            <value name="ADD1">
-              <block type="digit_frequency">
-                <field name="RANK">MOST</field>
-                <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">120</field>
-              </block>
-            </value>
-            <value name="ADD2"><block type="text"><field name="TEXT"> 👉 </field></block></value>
-            <value name="ADD3">
-              <block type="digit_frequency">
-                <field name="RANK">MOST</field>
-                <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">120</field>
-              </block>
-            </value>
-            <value name="ADD4"><block type="text"><field name="TEXT">% || 2nd Most Appearing 🔵&gt;&gt;&gt; </field></block></value>
-            <value name="ADD5">
-              <block type="digit_frequency">
-                <field name="RANK">SECOND_MOST</field>
-                <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">120</field>
-              </block>
-            </value>
-            <value name="ADD6"><block type="text"><field name="TEXT"> 👉 </field></block></value>
-            <value name="ADD7">
-              <block type="digit_frequency">
-                <field name="RANK">SECOND_MOST</field>
-                <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">120</field>
-              </block>
-            </value>
-            <value name="ADD8"><block type="text"><field name="TEXT">% || Least Appearing 🔴&gt;&gt;&gt; </field></block></value>
-            <value name="ADD9">
-              <block type="digit_frequency">
-                <field name="RANK">LEAST</field>
-                <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">120</field>
-              </block>
-            </value>
-            <value name="ADD10"><block type="text"><field name="TEXT"> 👉 </field></block></value>
-            <value name="ADD11">
-              <block type="digit_frequency">
-                <field name="RANK">LEAST</field>
-                <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">120</field>
-              </block>
-            </value>
-            <value name="ADD12"><block type="text"><field name="TEXT">% 2nd Least Appearing 🟠&gt;&gt;&gt; </field></block></value>
-            <value name="ADD13">
-              <block type="digit_frequency">
-                <field name="RANK">SECOND_LEAST</field>
-                <field name="RETURN_TYPE">DIGIT</field>
-                <field name="N">120</field>
-              </block>
-            </value>
-            <value name="ADD14"><block type="text"><field name="TEXT"> 👉 </field></block></value>
-            <value name="ADD15">
-              <block type="digit_frequency">
-                <field name="RANK">SECOND_LEAST</field>
-                <field name="RETURN_TYPE">PERCENTAGE</field>
-                <field name="N">120</field>
-              </block>
-            </value>
-          </block>
+          <block type="text"><field name="TEXT">loco the trader</field></block>
         </value>
         <next>
           <block type="controls_if" id="check_logic">
@@ -198,6 +132,7 @@
                             <value name="A">
                               <block type="digit_frequency">
                                 <field name="RANK">MOST</field>
+                                <field name="RETURN_TYPE">DIGIT</field>
                                 <field name="N">120</field>
                               </block>
                             </value>
@@ -212,6 +147,7 @@
                             <value name="A">
                               <block type="digit_frequency">
                                 <field name="RANK">SECOND_MOST</field>
+                                <field name="RETURN_TYPE">DIGIT</field>
                                 <field name="N">120</field>
                               </block>
                             </value>
@@ -231,6 +167,7 @@
                             <value name="A">
                               <block type="digit_frequency">
                                 <field name="RANK">SECOND_LEAST</field>
+                                <field name="RETURN_TYPE">DIGIT</field>
                                 <field name="N">120</field>
                               </block>
                             </value>
@@ -245,6 +182,7 @@
                             <value name="A">
                               <block type="digit_frequency">
                                 <field name="RANK">LEAST</field>
+                                <field name="RETURN_TYPE">DIGIT</field>
                                 <field name="N">120</field>
                               </block>
                             </value>
@@ -272,10 +210,10 @@
                 <value name="VALUE"><block type="math_number"><field name="NUM">5</field></block></value>
                 <next>
                   <block type="notify" id="loco_notify_multi_over">
-                    <field name="NOTIFICATION_TYPE">success</field>
+                    <field name="NOTIFICATION_TYPE">info</field>
                     <field name="NOTIFICATION_SOUND">silent</field>
                     <value name="MESSAGE">
-                      <block type="text"><field name="TEXT">loco the trade on it</field></block>
+                      <block type="text"><field name="TEXT">loco the trader</field></block>
                     </value>
                     <next>
                       <block type="purchase"><field name="PURCHASE_LIST">DIGITOVER</field></block>
@@ -299,6 +237,7 @@
                             <value name="A">
                               <block type="digit_frequency">
                                 <field name="RANK">MOST</field>
+                                <field name="RETURN_TYPE">DIGIT</field>
                                 <field name="N">120</field>
                               </block>
                             </value>
@@ -313,6 +252,7 @@
                             <value name="A">
                               <block type="digit_frequency">
                                 <field name="RANK">SECOND_MOST</field>
+                                <field name="RETURN_TYPE">DIGIT</field>
                                 <field name="N">120</field>
                               </block>
                             </value>
@@ -332,6 +272,7 @@
                             <value name="A">
                               <block type="digit_frequency">
                                 <field name="RANK">SECOND_LEAST</field>
+                                <field name="RETURN_TYPE">DIGIT</field>
                                 <field name="N">120</field>
                               </block>
                             </value>
@@ -346,6 +287,7 @@
                             <value name="A">
                               <block type="digit_frequency">
                                 <field name="RANK">LEAST</field>
+                                <field name="RETURN_TYPE">DIGIT</field>
                                 <field name="N">120</field>
                               </block>
                             </value>
@@ -373,10 +315,10 @@
                 <value name="VALUE"><block type="math_number"><field name="NUM">4</field></block></value>
                 <next>
                   <block type="notify" id="loco_notify_multi_under">
-                    <field name="NOTIFICATION_TYPE">success</field>
+                    <field name="NOTIFICATION_TYPE">info</field>
                     <field name="NOTIFICATION_SOUND">silent</field>
                     <value name="MESSAGE">
-                      <block type="text"><field name="TEXT">loco the trade on it</field></block>
+                      <block type="text"><field name="TEXT">loco the trader</field></block>
                     </value>
                     <next>
                       <block type="purchase"><field name="PURCHASE_LIST">DIGITUNDER</field></block>
