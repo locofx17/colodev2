@@ -277,16 +277,18 @@ const DCircle = observer(() => {
                                 max="1000"
                             />
                         </div>
-                        <div>
-                            <div className="card-title">Prediction</div>
-                            <input 
-                                type="number" 
-                                value={barrier} 
-                                onChange={(e) => setBarrier(parseInt(e.target.value))}
-                                min="0" 
-                                max="9"
-                            />
-                        </div>
+                        {(tradeType === 'Over/Under' || tradeType === 'Matches/Differs') && (
+                            <div>
+                                <div className="card-title">Prediction</div>
+                                <input 
+                                    type="number" 
+                                    value={barrier} 
+                                    onChange={(e) => setBarrier(parseInt(e.target.value))}
+                                    min="0" 
+                                    max="9"
+                                />
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -383,6 +385,7 @@ const DCircle = observer(() => {
                             {last120.map((h, i) => {
                                 const isNewest = i === last120.length - 1;
                                 let bg = '#8b949e';
+                                let displayVal: string | number = h.digit;
                                 
                                 if (tradeType === 'Over/Under') {
                                     if (h.digit > barrier) bg = '#238636';
@@ -392,13 +395,22 @@ const DCircle = observer(() => {
                                 } else if (tradeType === 'Rise/Fall') {
                                     const prev = last120[i-1] || (history[history.length - last120.length + i - 1]);
                                     if (prev) {
-                                        bg = h.quote > prev.quote ? '#238636' : '#da3633';
+                                        const isRise = h.quote > prev.quote;
+                                        bg = isRise ? '#238636' : '#da3633';
+                                        displayVal = isRise ? 'R' : 'F';
+                                    }
+                                } else if (tradeType === 'Matches/Differs') {
+                                    if (tradeType === 'Matches/Differs') {
+                                        // Since we don't know if the user intended "Match" or "Differ" specifically, 
+                                        // and the trade type name is "Matches/Differs", we'll check the digit vs barrier.
+                                        // Usually "Match" means digit == barrier.
+                                        bg = (h.digit === barrier) ? '#238636' : '#da3633';
                                     }
                                 }
 
                                 return (
                                     <div key={i} className={`h-dot ${isNewest ? 'h-newest' : ''}`} style={{ background: bg }}>
-                                        {h.digit}
+                                        {displayVal}
                                     </div>
                                 );
                             })}
