@@ -93,7 +93,7 @@ export const prefetchAllXmlInBackground = async (files: string[]) => {
 export const getBotsManifest = async (): Promise<TBotsManifestItem[] | null> => {
     try {
         // Fallback to generic manifest
-        const res = await fetch('/xml/bots.json', { cache: 'force-cache' });
+        const res = await fetch('/xml/bots.json', { cache: 'no-cache' });
         
         if (!res.ok) return null;
 

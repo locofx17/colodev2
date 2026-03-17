@@ -1,5 +1,5 @@
 /* Simple Service Worker to pre-cache Free Bots XMLs for instant repeat visits */
-const CACHE_NAME = 'freebots-cache-v1';
+const CACHE_NAME = 'freebots-cache-v2';
 const getManifestURL = () => {
   try {
     const url = new URL(self.location);
