@@ -15,6 +15,7 @@ const DCircle = observer(() => {
     const [price, setPrice] = useState('0.0000');
     const [activeDigit, setActiveDigit] = useState<number | undefined>(undefined);
     const [isConnected, setIsConnected] = useState(false);
+    const [showExtendedHistory, setShowExtendedHistory] = useState(false);
 
     const ws = useRef<WebSocket | null>(null);
     const currentSubscription = useRef<string | null>(null);
@@ -389,48 +390,20 @@ const DCircle = observer(() => {
                 </div>
 
                 <div className="card">
-                    <div className="card-title">History (Last {last60.length} Ticks)</div>
-                    <div className="history-scroll-container" style={{ maxHeight: '150px' }}>
-                        <div className="history-grid">
-                            {last60.map((h, i) => {
-                                const isNewest = i === last60.length - 1;
-                                let bg = '#8b949e';
-                                let displayVal: string | number = h.digit;
-                                
-                                if (tradeType === 'Over/Under') {
-                                    if (h.digit > barrier) bg = '#238636';
-                                    else if (h.digit < barrier) bg = '#da3633';
-                                } else if (tradeType === 'Even/Odd') {
-                                    bg = (h.digit % 2 === 0) ? '#238636' : '#da3633';
-                                } else if (tradeType === 'Rise/Fall') {
-                                    const slice60 = last60;
-                                    const actualIndex = history.length - slice60.length + i;
-                                    const prev = history[actualIndex - 1];
-                                    if (prev) {
-                                        const isRise = h.quote > prev.quote;
-                                        bg = isRise ? '#238636' : '#da3633';
-                                        displayVal = isRise ? 'R' : 'F';
-                                    }
-                                } else if (tradeType === 'Matches/Differs') {
-                                    bg = (h.digit === barrier) ? '#238636' : '#da3633';
-                                }
-
-                                return (
-                                    <div key={i} className={`h-dot ${isNewest ? 'h-newest' : ''}`} style={{ background: bg }}>
-                                        {displayVal}
-                                    </div>
-                                );
-                            })}
-                        </div>
+                    <div className="card-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                        <span>History (Last {showExtendedHistory ? last120.length : last60.length} Ticks)</span>
+                        <button 
+                            className="history-toggle-btn"
+                            onClick={() => setShowExtendedHistory(!showExtendedHistory)}
+                        >
+                            {showExtendedHistory ? 'Show Less' : 'Show More'}
+                        </button>
                     </div>
-                </div>
-
-                <div className="card">
-                    <div className="card-title">History (Last {last120.length} Ticks)</div>
-                    <div className="history-scroll-container">
+                    <div className="history-scroll-container" style={{ maxHeight: showExtendedHistory ? '400px' : '200px' }}>
                         <div className="history-grid">
-                            {last120.map((h, i) => {
-                                const isNewest = i === last120.length - 1;
+                            {(showExtendedHistory ? last120 : last60).map((h, i) => {
+                                const currentList = showExtendedHistory ? last120 : last60;
+                                const isNewest = i === currentList.length - 1;
                                 let bg = '#8b949e';
                                 let displayVal: string | number = h.digit;
                                 
@@ -440,8 +413,7 @@ const DCircle = observer(() => {
                                 } else if (tradeType === 'Even/Odd') {
                                     bg = (h.digit % 2 === 0) ? '#238636' : '#da3633';
                                 } else if (tradeType === 'Rise/Fall') {
-                                    const slice120 = last120;
-                                    const actualIndex = history.length - slice120.length + i;
+                                    const actualIndex = history.length - currentList.length + i;
                                     const prev = history[actualIndex - 1];
                                     if (prev) {
                                         const isRise = h.quote > prev.quote;
