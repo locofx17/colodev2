@@ -63,6 +63,8 @@ export interface IDashboardStore {
     setPreviewOnPopup: (is_preview_on_popup: boolean) => void;
     // Free Bots handoff
     pending_free_bot: { name: string; xml: string } | null;
+    is_digit_dist_modal_visible: boolean;
+    setDigitDistModalVisibility: (is_digit_dist_modal_visible: boolean) => void;
     setPendingFreeBot: (bot: { name: string; xml: string }) => void;
     clearPendingFreeBot: () => void;
 }
@@ -127,6 +129,8 @@ export default class DashboardStore implements IDashboardStore {
             bot_builder_symbol: observable,
             // Free Bots handoff
             pending_free_bot: observable,
+            is_digit_dist_modal_visible: observable,
+            setDigitDistModalVisibility: action.bound,
             setPendingFreeBot: action.bound,
             clearPendingFreeBot: action.bound,
         });
@@ -209,6 +213,11 @@ export default class DashboardStore implements IDashboardStore {
 
     // Free Bots handoff state
     pending_free_bot: { name: string; xml: string } | null = null;
+    is_digit_dist_modal_visible = false;
+
+    setDigitDistModalVisibility = (is_digit_dist_modal_visible: boolean) => {
+        this.is_digit_dist_modal_visible = is_digit_dist_modal_visible;
+    };
 
     setPendingFreeBot = (bot: { name: string; xml: string }) => {
         this.pending_free_bot = bot;

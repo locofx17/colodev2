@@ -182,6 +182,48 @@
             width: 50px;
             text-align: center;
         }
+        /* Digit Dist Modal */
+        .dcircle {
+            position: relative;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            background: #30363d;
+        }
+        .dcircle-inner {
+            position: absolute;
+            inset: 3px;
+            background: #0d1117;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .dist-statbox {
+            background: rgba(13,17,23,0.9);
+            border: 1px solid #30363d;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            text-align: center;
+        }
+        .dcircle-active {
+            background: #1e3a8a !important; /* dark blue for last digit */
+            box-shadow: 0 0 10px rgba(30,58,138,0.5);
+        }
+        .dcircle-active span {
+            color: white !important;
+        }
+        .price-last-digit {
+            font-size: 1.5em;
+            text-decoration: underline;
+            padding-left: 2px;
+        }
     </style>
 </head>
 <body class="p-4 max-w-lg mx-auto pb-24 text-gray-200">
@@ -192,6 +234,14 @@
             <p class="text-[8px] text-slate-500 font-mono font-bold tracking-widest">APP 120181 • FLEX ENGINE</p>
         </div>
         <div class="flex items-center gap-2">
+            <button id="open-dist-btn" class="p-2 transition active:scale-95" title="Digit Distribution">
+                <div class="grid grid-cols-2 gap-1 w-5 h-5">
+                    <div class="w-2 h-2 rounded-full border border-green-500 bg-green-500/20"></div>
+                    <div class="w-2 h-2 rounded-full border border-lime-400 bg-lime-400/20"></div>
+                    <div class="w-2 h-2 rounded-full border border-orange-500 bg-orange-500/20"></div>
+                    <div class="w-2 h-2 rounded-full border border-red-500 bg-red-500/20"></div>
+                </div>
+            </button>
             <input type="text" id="token" placeholder="API token (live)" class="small-input w-28 md:w-36" value="">
         </div>
     </div>
@@ -246,34 +296,7 @@
     </div>
 
     <div class="panel p-6 space-y-4 shadow-2xl border-slate-700">
-        <!-- AI Stats Display (Hidden by default) -->
-        <div id="ai-stats-panel" class="hidden bg-slate-800/80 border border-slate-600 rounded-xl p-3 mb-2 animate-pulse">
-            <div class="flex justify-between items-center mb-1.5">
-                <h3 class="text-[9px] text-blue-400 font-bold uppercase tracking-widest flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping"></span> Live AI Scan
-                </h3>
-                <select id="ai-market-focus" class="bg-slate-900 border border-slate-700 rounded text-[8px] p-0.5 outline-none text-slate-300">
-                    <option value="all" selected>Auto (Latest)</option>
-                </select>
-            </div>
-            <div class="grid grid-cols-2 gap-2 text-[10px] font-mono">
-                <div class="bg-slate-900/50 p-1.5 rounded border border-slate-700">
-                    <span class="text-green-400">Most 🟢:</span> <span id="stat-most" class="text-white font-bold ml-1">-</span>
-                </div>
-                <div class="bg-slate-900/50 p-1.5 rounded border border-slate-700">
-                    <span class="text-blue-400">2nd Most 🔵:</span> <span id="stat-second-most" class="text-white font-bold ml-1">-</span>
-                </div>
-                <div class="bg-slate-900/50 p-1.5 rounded border border-slate-700">
-                    <span class="text-red-400">Least 🔴:</span> <span id="stat-least" class="text-white font-bold ml-1">-</span>
-                </div>
-                <div class="bg-slate-900/50 p-1.5 rounded border border-slate-700">
-                    <span class="text-orange-400">2nd Least 🟠:</span> <span id="stat-second-least" class="text-white font-bold ml-1">-</span>
-                </div>
-            </div>
-            <div class="mt-1 text-right">
-                <span id="stat-symbol" class="text-[8px] text-slate-500 font-bold tracking-wider">awaiting ticks...</span>
-            </div>
-        </div>
+
 
         <div class="grid grid-cols-2 gap-3">
             <div>
@@ -288,8 +311,6 @@
                     <option value="under7_7_ge6">Under 7 (last 7 digits ≥6)</option>
                     <option value="over3_7_le3">Over 3 (last 7 digits ≤3)</option>
                     <option value="under6_7_ge6">Under 6 (last 7 digits ≥6)</option>
-                    <option value="digit_psych_over">Digit Psychology AI - Over</option>
-                    <option value="digit_psych_under">Digit Psychology AI - Under</option>
                 </select>
             </div>
             <!-- RECOVERY (no max attempts field) -->
@@ -432,6 +453,60 @@
         </div>
     </div>
 
+    <!-- Digit Distribution Modal -->
+    <div id="dist-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="panel w-full max-w-md p-5 relative main-glow">
+            <button id="close-dist-btn" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">✕</button>
+            <h2 class="text-lg font-bold mb-1">Digit Distribution</h2>
+            
+            <div class="flex justify-between items-end border-b border-slate-700 pb-3 mb-4 mt-4">
+                <div>
+                    <select id="dist-market-select" class="bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-sm text-white outline-none">
+                        <!-- populated via js -->
+                    </select>
+                    <p class="text-[9px] text-slate-500 font-bold tracking-widest mt-1">LAST 100 TICKS</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-[8px] text-slate-400 font-bold uppercase mb-0.5">Current Price</p>
+                    <p id="dist-current-price" class="text-xl font-bold mono text-white">0.00</p>
+                </div>
+            </div>
+
+            <!-- D-Circles (0-9) -->
+            <div id="dist-circles-container" class="grid grid-cols-5 gap-3 mb-5">
+                <!-- Javascript will generate 10 circles -->
+            </div>
+
+            <!-- Stats Boxes -->
+            <div class="grid grid-cols-2 gap-3 mt-4">
+                <div class="dist-statbox border" id="box-even">
+                    <p class="text-[9px] font-bold uppercase mb-1 text-slate-400">Even</p>
+                    <p id="dist-even" class="text-xs font-bold">0%</p>
+                </div>
+                <div class="dist-statbox border" id="box-odd">
+                    <p class="text-[9px] font-bold uppercase mb-1 text-slate-400">Odd</p>
+                    <p id="dist-odd" class="text-xs font-bold">0%</p>
+                </div>
+                <div class="dist-statbox border" id="box-rise">
+                    <p class="text-[9px] font-bold uppercase mb-1 text-slate-400">Rise</p>
+                    <p id="dist-rise" class="text-xs font-bold">0%</p>
+                </div>
+                <div class="dist-statbox border" id="box-fall">
+                    <p class="text-[9px] font-bold uppercase mb-1 text-slate-400">Fall</p>
+                    <p id="dist-fall" class="text-xs font-bold">0%</p>
+                </div>
+                <div class="dist-statbox border" id="box-over">
+                    <p class="text-[9px] font-bold uppercase mb-1 text-slate-400">Over 4</p>
+                    <p id="dist-over" class="text-xs font-bold">0%</p>
+                </div>
+                <div class="dist-statbox border" id="box-under">
+                    <p class="text-[9px] font-bold uppercase mb-1 text-slate-400">Under 5</p>
+                    <p id="dist-under" class="text-xs font-bold">0%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         (function() {
             // ========== CONFIG ==========
@@ -484,13 +559,6 @@
                 logicTitle: document.getElementById('logic-title'),
                 logicDesc: document.getElementById('logic-desc'),
                 recoveryAlert: document.getElementById('recovery-alert'),
-                aiStatsPanel: document.getElementById('ai-stats-panel'),
-                statMost: document.getElementById('stat-most'),
-                statSecondMost: document.getElementById('stat-second-most'),
-                statLeast: document.getElementById('stat-least'),
-                statSecondLeast: document.getElementById('stat-second-least'),
-                statSymbol: document.getElementById('stat-symbol'),
-                aiMarketFocus: document.getElementById('ai-market-focus'),
                 tokenInput: document.getElementById('token'),
                 baseStakeInput: document.getElementById('base-stake'),
                 multiplierInput: document.getElementById('multiplier'),
@@ -512,6 +580,19 @@
                 recoveryConditionBarrier: document.getElementById('recovery-condition-barrier'),
                 recoveryTradeType: document.getElementById('recovery-trade-type'),
                 recoveryTradeBarrier: document.getElementById('recovery-trade-barrier'),
+                // Dist Modal
+                distModal: document.getElementById('dist-modal'),
+                openDistBtn: document.getElementById('open-dist-btn'),
+                closeDistBtn: document.getElementById('close-dist-btn'),
+                distMarketSelect: document.getElementById('dist-market-select'),
+                distCurrentPrice: document.getElementById('dist-current-price'),
+                distCirclesContainer: document.getElementById('dist-circles-container'),
+                distEven: document.getElementById('dist-even'),
+                distOdd: document.getElementById('dist-odd'),
+                distRise: document.getElementById('dist-rise'),
+                distFall: document.getElementById('dist-fall'),
+                distOver: document.getElementById('dist-over'),
+                distUnder: document.getElementById('dist-under'),
             };
 
             const state = {
@@ -553,6 +634,8 @@
 
                 selectedCategory: 'all',
                 mockTimeouts: [],
+                isDistModalOpen: false,
+                distUpdateInterval: null,
             };
 
             // ==================== UTILITIES ====================
@@ -674,7 +757,7 @@
                 if (!state.priceHistory.has(symbol)) state.priceHistory.set(symbol, []);
                 const priceHist = state.priceHistory.get(symbol);
                 priceHist.push(quote);
-                if (priceHist.length > 20) priceHist.shift();
+                if (priceHist.length > 120) priceHist.shift();
 
                 const lastDigit = getLastDigit(quote, symbol);
                 const formattedPrice = formatPrice(quote, symbol);
@@ -772,46 +855,6 @@
                         if (last7.every(d => d >= 6)) {
                             state.pendingProposalSymbol = symbol;
                             requestProposal(symbol, 'DIGITUNDER', '6');
-                        }
-                    }
-                    else if (mainType === 'digit_psych_over') {
-                        if (hist.length < 120) return;
-                        const ranks = getDigitRanks(hist.slice(-120));
-                        
-                        // Update UI only if 'all' or specifically selected
-                        const focus = dom.aiMarketFocus.value;
-                        if (focus === 'all' || focus === symbol) {
-                            dom.statMost.innerText = `${ranks[0].digit} (${((ranks[0].count/120)*100).toFixed(1)}%)`;
-                            dom.statSecondMost.innerText = `${ranks[1].digit} (${((ranks[1].count/120)*100).toFixed(1)}%)`;
-                            dom.statLeast.innerText = `${ranks[9].digit} (${((ranks[9].count/120)*100).toFixed(1)}%)`;
-                            dom.statSecondLeast.innerText = `${ranks[8].digit} (${((ranks[8].count/120)*100).toFixed(1)}%)`;
-                            dom.statSymbol.innerText = symbol;
-                        }
-
-                        const last3 = hist.slice(-3);
-                        if (ranks[0].digit >= 6 && ranks[1].digit >= 5 && ranks[9].digit <= 4 && last3.every(d => d <= 4)) {
-                            state.pendingProposalSymbol = symbol;
-                            requestProposal(symbol, 'DIGITOVER', '5');
-                        }
-                    }
-                    else if (mainType === 'digit_psych_under') {
-                        if (hist.length < 120) return;
-                        const ranks = getDigitRanks(hist.slice(-120));
-
-                        // Update UI only if 'all' or specifically selected
-                        const focus = dom.aiMarketFocus.value;
-                        if (focus === 'all' || focus === symbol) {
-                            dom.statMost.innerText = `${ranks[0].digit} (${((ranks[0].count/120)*100).toFixed(1)}%)`;
-                            dom.statSecondMost.innerText = `${ranks[1].digit} (${((ranks[1].count/120)*100).toFixed(1)}%)`;
-                            dom.statLeast.innerText = `${ranks[9].digit} (${((ranks[9].count/120)*100).toFixed(1)}%)`;
-                            dom.statSecondLeast.innerText = `${ranks[8].digit} (${((ranks[8].count/120)*100).toFixed(1)}%)`;
-                            dom.statSymbol.innerText = symbol;
-                        }
-
-                        const last3 = hist.slice(-3);
-                        if (ranks[0].digit <= 3 && ranks[1].digit <= 4 && ranks[9].digit >= 5 && last3.every(d => d >= 5)) {
-                            state.pendingProposalSymbol = symbol;
-                            requestProposal(symbol, 'DIGITUNDER', '4');
                         }
                     }
                 } else {
@@ -1105,6 +1148,142 @@
                 if (digit > 2 && digit < 8) container.classList.add('digit-tile-active');
                 else container.classList.remove('digit-tile-active');
             }
+
+            // ==================== DIGIT DIST MODAL LOGIC ====================
+            function initDistCircles() {
+                dom.distCirclesContainer.innerHTML = '';
+                for (let i = 0; i < 10; i++) {
+                    const el = document.createElement('div');
+                    el.className = 'dcircle';
+                    el.id = `dcircle-${i}`;
+                    el.innerHTML = `
+                        <div class="dcircle-inner">
+                            <span class="text-base font-bold text-white">${i}</span>
+                            <span class="text-[8px] font-bold text-slate-400 tracking-tighter" id="dcircle-pct-${i}">0%</span>
+                        </div>
+                    `;
+                    dom.distCirclesContainer.appendChild(el);
+                }
+            }
+            initDistCircles();
+
+            function populateDistSelect() {
+                const prevSelection = dom.distMarketSelect.value;
+                dom.distMarketSelect.innerHTML = '';
+                const activeSymbols = CATEGORIES[state.selectedCategory];
+                activeSymbols.forEach(sym => {
+                    const opt = document.createElement('option');
+                    opt.value = sym;
+                    opt.innerText = sym.replace('1HZ','⚡').replace('R_','V').replace('J','Jump');
+                    if (sym === prevSelection) opt.selected = true;
+                    dom.distMarketSelect.appendChild(opt);
+                });
+            }
+
+            function updateDistStats() {
+                if (!state.isDistModalOpen) return;
+                const sym = dom.distMarketSelect.value;
+                if (!sym) return;
+
+                const hist = state.tickHistory.get(sym) || [];
+                const pHist = state.priceHistory.get(sym) || [];
+                
+                if (state.lastPrice.has(sym)) {
+                    const price = formatPrice(state.lastPrice.get(sym), sym);
+                    const lastChar = price.slice(-1);
+                    const prefix = price.slice(0, -1);
+                    dom.distCurrentPrice.innerHTML = `${prefix}<span class="price-last-digit underline decoration-blue-500">${lastChar}</span>`;
+                } else {
+                    dom.distCurrentPrice.innerText = '0.00';
+                }
+
+                // We want LAST 100 Ticks
+                const sliceTicks = hist.slice(-100);
+                const totalTicks = sliceTicks.length || 1; // avoid division by 0
+                const lastDigit = sliceTicks.length > 0 ? sliceTicks[sliceTicks.length - 1] : null;
+
+                let even = 0, odd = 0, over4 = 0, under5 = 0;
+                let counts = Array(10).fill(0);
+
+                sliceTicks.forEach(d => {
+                    counts[d]++;
+                    if (d % 2 === 0) even++; else odd++;
+                    if (d > 4) over4++; else under5++;
+                });
+
+                // Get min/max for coloring
+                let maxCount = Math.max(...counts);
+                let minCount = Math.min(...counts);
+
+                for (let i = 0; i < 10; i++) {
+                    let pct = ((counts[i] / totalTicks) * 100).toFixed(1);
+                    document.getElementById(`dcircle-pct-${i}`).innerText = pct + '%';
+                    
+                    const circle = document.getElementById(`dcircle-${i}`);
+                    let ringCol = '#30363d'; // neutral
+                    if (maxCount > 0 && counts[i] === maxCount) ringCol = '#2ea043'; // green highest (per pic)
+                    else if (counts[i] === minCount) ringCol = '#f85149'; // red lowest (per pic)
+                    
+                    circle.style.background = `conic-gradient(from 0deg, ${ringCol} 0% ${pct}%, #30363d ${pct}% 100%)`;
+                    circle.classList.toggle('dcircle-active', i === lastDigit);
+                }
+
+                // Rise/Fall (Needs prices)
+                const slicePrices = pHist.slice(-100);
+                let rise = 0, fall = 0;
+                let pricePairs = 0;
+                for (let i = 1; i < slicePrices.length; i++) {
+                    pricePairs++;
+                    if (slicePrices[i] > slicePrices[i-1]) rise++;
+                    else if (slicePrices[i] < slicePrices[i-1]) fall++;
+                }
+
+                const oddPct = parseFloat(((odd / totalTicks) * 100).toFixed(1));
+                const evenPct = parseFloat(((even / totalTicks) * 100).toFixed(1));
+                const overPct = parseFloat(((over4 / totalTicks) * 100).toFixed(1));
+                const underPct = parseFloat(((under5 / totalTicks) * 100).toFixed(1));
+                const risePct = pricePairs ? parseFloat(((rise / pricePairs) * 100).toFixed(1)) : 0;
+                const fallPct = pricePairs ? parseFloat(((fall / pricePairs) * 100).toFixed(1)) : 0;
+
+                dom.distOdd.innerText = oddPct + '%';
+                dom.distEven.innerText = evenPct + '%';
+                dom.distOver.innerText = overPct + '%';
+                dom.distUnder.innerText = underPct + '%';
+                dom.distRise.innerText = risePct + '%';
+                dom.distFall.innerText = fallPct + '%';
+
+                // Box colors
+                const setBoxStyle = (id, pct1, pct2) => {
+                    const el = document.getElementById(id);
+                    const isGreen = pct1 >= pct2;
+                    el.style.borderColor = isGreen ? '#2ea043' : '#f85149';
+                    el.style.background = isGreen ? 'rgba(46,160,67,0.05)' : 'rgba(248,81,73,0.05)';
+                    el.querySelector('p:last-child').style.color = isGreen ? '#2ea043' : '#f85149';
+                };
+
+                setBoxStyle('box-even', evenPct, oddPct);
+                setBoxStyle('box-odd', oddPct, evenPct);
+                setBoxStyle('box-rise', risePct, fallPct);
+                setBoxStyle('box-fall', fallPct, risePct);
+                setBoxStyle('box-over', overPct, underPct);
+                setBoxStyle('box-under', underPct, overPct);
+            }
+
+            dom.openDistBtn.addEventListener('click', () => {
+                populateDistSelect();
+                state.isDistModalOpen = true;
+                dom.distModal.classList.remove('hidden');
+                updateDistStats();
+                state.distUpdateInterval = setInterval(updateDistStats, 1000);
+            });
+
+            dom.closeDistBtn.addEventListener('click', () => {
+                state.isDistModalOpen = false;
+                dom.distModal.classList.add('hidden');
+                clearInterval(state.distUpdateInterval);
+            });
+
+            dom.distMarketSelect.addEventListener('change', updateDistStats);
 
             // ==================== CONDITIONAL VISIBILITY ====================
             function updateVisibility() {

@@ -12,6 +12,7 @@ import LoadModal from '../../components/load-modal';
 import SaveModal from '../dashboard/bot-list/save-modal';
 import BotBuilderTourHandler from '../tutorials/dbot-tours/bot-builder-tour';
 import QuickStrategy1 from './quick-strategy';
+import DigitDistributionModal from './digit-distribution-modal/digit-distribution-modal';
 import WorkspaceWrapper from './workspace-wrapper';
 
 const BotBuilder = observer(() => {
@@ -128,6 +129,7 @@ const BotBuilder = observer(() => {
             <LoadModal />
             <SaveModal />
             {is_open && <QuickStrategy1 />}
+            <DigitDistributionModal />
         </>
     );
 });

@@ -21,7 +21,12 @@ import ToolbarIcon from './toolbar-icon';
 
 const WorkspaceGroup = observer(() => {
     const { dashboard, toolbar, load_modal, save_modal } = useStore();
-    const { setPreviewOnPopup, setChartModalVisibility, setTradingViewModalVisibility } = dashboard;
+    const {
+        setPreviewOnPopup,
+        setChartModalVisibility,
+        setTradingViewModalVisibility,
+        setDigitDistModalVisibility,
+    } = dashboard;
     const { has_redo_stack, has_undo_stack, onResetClick, onSortClick, onUndoClick, onZoomInOutClick } = toolbar;
     const { toggleSaveModal } = save_modal;
     const { toggleLoadModal } = load_modal;
@@ -62,6 +67,23 @@ const WorkspaceGroup = observer(() => {
                             }}
                         >
                             <LabelPairedFolderOpenMdRegularIcon />
+                        </span>
+                    }
+                />
+                <ToolbarIcon
+                    popover_message={localize('Digit Distributor')}
+                    icon={
+                        <span
+                            className='toolbar__icon'
+                            id='db-toolbar__digit-dist-button'
+                            onClick={() => setDigitDistModalVisibility(true)}
+                        >
+                            <div className='digit-dist-icon'>
+                                <div className='digit-dist-icon__dot' style={{ background: '#2ea043' }} />
+                                <div className='digit-dist-icon__dot' style={{ background: '#d2f100' }} />
+                                <div className='digit-dist-icon__dot' style={{ background: '#f5a623' }} />
+                                <div className='digit-dist-icon__dot' style={{ background: '#f85149' }} />
+                            </div>
                         </span>
                     }
                 />
