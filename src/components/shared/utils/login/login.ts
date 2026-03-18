@@ -17,7 +17,7 @@ export const redirectToLogin = (is_logged_in: boolean, language: string, has_par
 };
 
 export const redirectToSignUp = () => {
-    window.open(getStaticUrl('/signup/'));
+    window.open('https://track.deriv.com/_kpv4D_CsW1VB4VdSfJsOp2Nd7ZgqdRLk/1/');
 };
 
 type TLoginUrl = {
