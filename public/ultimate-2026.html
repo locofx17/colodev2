@@ -248,9 +248,14 @@
     <div class="panel p-6 space-y-4 shadow-2xl border-slate-700">
         <!-- AI Stats Display (Hidden by default) -->
         <div id="ai-stats-panel" class="hidden bg-slate-800/80 border border-slate-600 rounded-xl p-3 mb-2 animate-pulse">
-            <h3 class="text-[9px] text-blue-400 font-bold uppercase tracking-widest mb-1.5 flex items-center gap-1">
-                <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping"></span> Live AI Psychology Scan
-            </h3>
+            <div class="flex justify-between items-center mb-1.5">
+                <h3 class="text-[9px] text-blue-400 font-bold uppercase tracking-widest flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping"></span> Live AI Scan
+                </h3>
+                <select id="ai-market-focus" class="bg-slate-900 border border-slate-700 rounded text-[8px] p-0.5 outline-none text-slate-300">
+                    <option value="all" selected>Auto (Latest)</option>
+                </select>
+            </div>
             <div class="grid grid-cols-2 gap-2 text-[10px] font-mono">
                 <div class="bg-slate-900/50 p-1.5 rounded border border-slate-700">
                     <span class="text-green-400">Most 🟢:</span> <span id="stat-most" class="text-white font-bold ml-1">-</span>
@@ -485,6 +490,7 @@
                 statLeast: document.getElementById('stat-least'),
                 statSecondLeast: document.getElementById('stat-second-least'),
                 statSymbol: document.getElementById('stat-symbol'),
+                aiMarketFocus: document.getElementById('ai-market-focus'),
                 tokenInput: document.getElementById('token'),
                 baseStakeInput: document.getElementById('base-stake'),
                 multiplierInput: document.getElementById('multiplier'),
@@ -772,12 +778,15 @@
                         if (hist.length < 120) return;
                         const ranks = getDigitRanks(hist.slice(-120));
                         
-                        // Update UI
-                        dom.statMost.innerText = `${ranks[0].digit} (${((ranks[0].count/120)*100).toFixed(1)}%)`;
-                        dom.statSecondMost.innerText = `${ranks[1].digit} (${((ranks[1].count/120)*100).toFixed(1)}%)`;
-                        dom.statLeast.innerText = `${ranks[9].digit} (${((ranks[9].count/120)*100).toFixed(1)}%)`;
-                        dom.statSecondLeast.innerText = `${ranks[8].digit} (${((ranks[8].count/120)*100).toFixed(1)}%)`;
-                        dom.statSymbol.innerText = symbol;
+                        // Update UI only if 'all' or specifically selected
+                        const focus = dom.aiMarketFocus.value;
+                        if (focus === 'all' || focus === symbol) {
+                            dom.statMost.innerText = `${ranks[0].digit} (${((ranks[0].count/120)*100).toFixed(1)}%)`;
+                            dom.statSecondMost.innerText = `${ranks[1].digit} (${((ranks[1].count/120)*100).toFixed(1)}%)`;
+                            dom.statLeast.innerText = `${ranks[9].digit} (${((ranks[9].count/120)*100).toFixed(1)}%)`;
+                            dom.statSecondLeast.innerText = `${ranks[8].digit} (${((ranks[8].count/120)*100).toFixed(1)}%)`;
+                            dom.statSymbol.innerText = symbol;
+                        }
 
                         const last3 = hist.slice(-3);
                         if (ranks[0].digit >= 6 && ranks[1].digit >= 5 && ranks[9].digit <= 4 && last3.every(d => d <= 4)) {
@@ -789,12 +798,15 @@
                         if (hist.length < 120) return;
                         const ranks = getDigitRanks(hist.slice(-120));
 
-                        // Update UI
-                        dom.statMost.innerText = `${ranks[0].digit} (${((ranks[0].count/120)*100).toFixed(1)}%)`;
-                        dom.statSecondMost.innerText = `${ranks[1].digit} (${((ranks[1].count/120)*100).toFixed(1)}%)`;
-                        dom.statLeast.innerText = `${ranks[9].digit} (${((ranks[9].count/120)*100).toFixed(1)}%)`;
-                        dom.statSecondLeast.innerText = `${ranks[8].digit} (${((ranks[8].count/120)*100).toFixed(1)}%)`;
-                        dom.statSymbol.innerText = symbol;
+                        // Update UI only if 'all' or specifically selected
+                        const focus = dom.aiMarketFocus.value;
+                        if (focus === 'all' || focus === symbol) {
+                            dom.statMost.innerText = `${ranks[0].digit} (${((ranks[0].count/120)*100).toFixed(1)}%)`;
+                            dom.statSecondMost.innerText = `${ranks[1].digit} (${((ranks[1].count/120)*100).toFixed(1)}%)`;
+                            dom.statLeast.innerText = `${ranks[9].digit} (${((ranks[9].count/120)*100).toFixed(1)}%)`;
+                            dom.statSecondLeast.innerText = `${ranks[8].digit} (${((ranks[8].count/120)*100).toFixed(1)}%)`;
+                            dom.statSymbol.innerText = symbol;
+                        }
 
                         const last3 = hist.slice(-3);
                         if (ranks[0].digit <= 3 && ranks[1].digit <= 4 && ranks[9].digit >= 5 && last3.every(d => d >= 5)) {
@@ -1062,6 +1074,17 @@
                         </div>
                     `;
                     dom.marketGrid.appendChild(el);
+                });
+
+                // Build AI Focus dropdown
+                const selectedFocus = dom.aiMarketFocus.value;
+                dom.aiMarketFocus.innerHTML = '<option value="all">Auto (Latest)</option>';
+                symbols.forEach(sym => {
+                    const opt = document.createElement('option');
+                    opt.value = sym;
+                    opt.innerText = sym.replace('1HZ','⚡');
+                    if (sym === selectedFocus) opt.selected = true;
+                    dom.aiMarketFocus.appendChild(opt);
                 });
             }
 
