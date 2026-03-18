@@ -9,19 +9,11 @@
     display: flex;
     flex-direction: column;
 
-    @media (max-width: 600px) {
-        // Full-width on mobile, ignore the JS-set inline width/height
-        width: calc(100vw - 16px) !important;
-        left: 8px !important;
-        right: 8px !important;
-        top: 60px !important;
-        height: auto !important;
-    }
-
     .draggable-content {
         height: 100% !important;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
     }
 
     .draggable-content__header {
@@ -29,7 +21,10 @@
         border-bottom: 1px solid var(--border-subtle);
         padding: 8px 16px;
         flex-shrink: 0;
-        
+        cursor: grab;
+
+        &:active { cursor: grabbing; }
+
         &__title {
             color: var(--text-prominent);
             font-weight: 600;
@@ -46,9 +41,12 @@
     .draggable-content__body {
         flex-grow: 1;
         overflow-y: auto;
+        overflow-x: hidden;
         padding-bottom: 16px;
+        -webkit-overflow-scrolling: touch;
     }
 }
+
 
 .digit-dist-modal {
     &__content {
