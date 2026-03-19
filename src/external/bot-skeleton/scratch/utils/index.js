@@ -145,6 +145,7 @@ export const load = async ({
     workspace,
     showIncompatibleStrategyDialog,
     show_snackbar = true,
+    is_free_bot = false,
 }) => {
     if (!DBotStore?.instance || !workspace) return;
     const { setLoading, load_modal } = DBotStore.instance;
@@ -154,7 +155,7 @@ export const load = async ({
 
     // Reset free bot flag for any new load
     if (workspace) {
-        workspace.is_free_bot = false;
+        workspace.is_free_bot = is_free_bot;
     }
 
     // Delay execution to allow fully previewing previous strategy if users quickly switch between strategies.
