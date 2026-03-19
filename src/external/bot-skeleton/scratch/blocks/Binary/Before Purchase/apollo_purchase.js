@@ -60,6 +60,12 @@ window.Blockly.Blocks.apollo_purchase = {
     enforceLimitations: window.Blockly.Blocks.purchase.enforceLimitations,
     customContextMenu(menu) {
         const menu_items = [localize('Enable Block'), localize('Disable Block')];
+
+        if (this.workspace.is_free_bot) {
+            menu_items.push(localize('Expand Block'));
+            menu_items.push(localize('Collapse Block'));
+        }
+
         excludeOptionFromContextMenu(menu, menu_items);
         modifyContextMenu(menu);
     },
@@ -123,6 +129,12 @@ window.Blockly.Blocks.apollo_purchase2 = {
     enforceLimitations: window.Blockly.Blocks.purchase.enforceLimitations,
     customContextMenu(menu) {
         const menu_items = [localize('Enable Block'), localize('Disable Block')];
+
+        if (this.workspace.is_free_bot) {
+            menu_items.push(localize('Expand Block'));
+            menu_items.push(localize('Collapse Block'));
+        }
+
         excludeOptionFromContextMenu(menu, menu_items);
         modifyContextMenu(menu);
     },

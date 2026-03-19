@@ -77,6 +77,12 @@ window.Blockly.Blocks.purchase = {
     },
     customContextMenu(menu) {
         const menu_items = [localize('Enable Block'), localize('Disable Block')];
+
+        if (this.workspace.is_free_bot) {
+            menu_items.push(localize('Expand Block'));
+            menu_items.push(localize('Collapse Block'));
+        }
+
         excludeOptionFromContextMenu(menu, menu_items);
         modifyContextMenu(menu);
     },

@@ -59,6 +59,12 @@ const WorkspaceWrapper = observer(() => {
                     });
                     // Show import notification and clear handoff
                     setOpenSettings?.(NOTIFICATION_TYPE.BOT_IMPORT);
+                    
+                    // Mark workspace as free bot for restricted UI
+                    if (window.Blockly?.derivWorkspace) {
+                        (window.Blockly.derivWorkspace as any).is_free_bot = true;
+                    }
+
                     clearPendingFreeBot();
 
                     // Reset the processed bot ref after successful load

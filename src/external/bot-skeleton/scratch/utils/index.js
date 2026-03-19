@@ -151,6 +151,12 @@ export const load = async ({
     const { setOpenButtonDisabled, setLoadedLocalFile } = load_modal;
 
     setLoading(true);
+
+    // Reset free bot flag for any new load
+    if (workspace) {
+        workspace.is_free_bot = false;
+    }
+
     // Delay execution to allow fully previewing previous strategy if users quickly switch between strategies.
     await delayExecution(100);
     const showInvalidStrategyError = () => {
