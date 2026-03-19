@@ -1,5 +1,5 @@
 import { localize } from '@deriv-com/translations';
-import { appendCollapsedMainBlocksFields, modifyContextMenu } from '../../../utils';
+import { appendCollapsedMainBlocksFields, excludeOptionFromContextMenu, modifyContextMenu } from '../../../utils';
 import { sellContract } from '../../images';
 
 window.Blockly.Blocks.during_purchase = {
@@ -63,12 +63,15 @@ window.Blockly.Blocks.during_purchase = {
             event.type === window.Blockly.Events.BLOCK_CHANGE ||
             (event.type === window.Blockly.Events.BLOCK_DRAG && !event.isStart)
         ) {
-            if (this.isCollapsed()) {
-                appendCollapsedMainBlocksFields(this);
+            if (!this.isCollapsed()) {
+                this.setCollapsed(true);
             }
+            appendCollapsedMainBlocksFields(this, true);
         }
     },
     customContextMenu(menu) {
+        const menu_items = [localize('Expand Block'), localize('Collapse Block')];
+        excludeOptionFromContextMenu(menu, menu_items);
         modifyContextMenu(menu);
     },
 };
