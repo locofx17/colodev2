@@ -87,19 +87,7 @@ const WorkspaceGroup = observer(() => {
                         </span>
                     }
                 />
-                <ToolbarIcon
-                    popover_message={localize('Save')}
-                    icon={
-                        <span
-                            className='toolbar__icon'
-                            id='db-toolbar__save-button'
-                            data-testid='dt_toolbar_save_button'
-                            onClick={toggleSaveModal}
-                        >
-                            <LabelPairedFloppyDiskMdRegularIcon />
-                        </span>
-                    }
-                />
+
                 <ToolbarIcon
                     popover_message={localize('Sort blocks')}
                     icon={

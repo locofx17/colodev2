@@ -677,7 +677,7 @@ const deleteBlocksLocaleText = () => localize('Delete Block');
 const deleteAllBlocksLocaleText = () => localize('Delete All Blocks');
 
 export const modifyContextMenu = (menu, add_new_items = []) => {
-    const common_included_items = [download_option()];
+    const common_included_items = [];
     const include_items = [...common_included_items, ...add_new_items];
     include_items.forEach(item => {
         menu.push({
