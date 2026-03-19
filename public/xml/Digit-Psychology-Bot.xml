@@ -7,6 +7,7 @@
     <variable id="*B4$qjUXe]2:[wde-ErD">martingale</variable>
     <variable id="ranks_var">ranks</variable>
     <variable id="prediction_var">prediction</variable>
+    <variable id="loss_count_var">loss count</variable>
   </variables>
   <block type="trade_definition" id="trade_def" deletable="false" x="0" y="0">
     <statement name="TRADE_OPTIONS">
@@ -78,6 +79,14 @@
                             <value name="VALUE">
                               <block type="math_number"><field name="NUM">5</field></block>
                             </value>
+                            <next>
+                              <block type="variables_set" id="init_loss_count">
+                                <field name="VAR" id="loss_count_var">loss count</field>
+                                <value name="VALUE">
+                                  <block type="math_number"><field name="NUM">0</field></block>
+                                </value>
+                              </block>
+                            </next>
                           </block>
                         </next>
                       </block>
@@ -378,20 +387,51 @@
         </value>
         <statement name="DO0">
           <block type="variables_set">
-            <field name="VAR" id="ZxJ:K%g5L@:*25Yr0L5.">stake</field>
-            <value name="VALUE"><block type="variables_get"><field name="VAR" id="d:VVgYYt{akr{=,ig2BO">initial stake</field></block></value>
+            <field name="VAR" id="loss_count_var">loss count</field>
+            <value name="VALUE">
+              <block type="math_number"><field name="NUM">0</field></block>
+            </value>
+            <next>
+              <block type="variables_set">
+                <field name="VAR" id="ZxJ:K%g5L@:*25Yr0L5.">stake</field>
+                <value name="VALUE"><block type="variables_get"><field name="VAR" id="d:VVgYYt{akr{=,ig2BO">initial stake</field></block></value>
+              </block>
+            </next>
           </block>
         </statement>
         <statement name="ELSE">
           <block type="variables_set">
-            <field name="VAR" id="ZxJ:K%g5L@:*25Yr0L5.">stake</field>
+            <field name="VAR" id="loss_count_var">loss count</field>
             <value name="VALUE">
               <block type="math_arithmetic">
-                <field name="OP">MULTIPLY</field>
-                <value name="A"><block type="variables_get"><field name="VAR" id="ZxJ:K%g5L@:*25Yr0L5.">stake</field></block></value>
-                <value name="B"><block type="variables_get"><field name="VAR" id="*B4$qjUXe]2:[wde-ErD">martingale</field></block></value>
+                <field name="OP">ADD</field>
+                <value name="A"><block type="variables_get"><field name="VAR" id="loss_count_var">loss count</field></block></value>
+                <value name="B"><block type="math_number"><field name="NUM">1</field></block></value>
               </block>
             </value>
+            <next>
+              <block type="controls_if">
+                <value name="IF0">
+                  <block type="logic_compare">
+                    <field name="OP">GT</field>
+                    <value name="A"><block type="variables_get"><field name="VAR" id="loss_count_var">loss count</field></block></value>
+                    <value name="B"><block type="math_number"><field name="NUM">1</field></block></value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="variables_set">
+                    <field name="VAR" id="ZxJ:K%g5L@:*25Yr0L5.">stake</field>
+                    <value name="VALUE">
+                      <block type="math_arithmetic">
+                        <field name="OP">MULTIPLY</field>
+                        <value name="A"><block type="variables_get"><field name="VAR" id="ZxJ:K%g5L@:*25Yr0L5.">stake</field></block></value>
+                        <value name="B"><block type="variables_get"><field name="VAR" id="*B4$qjUXe]2:[wde-ErD">martingale</field></block></value>
+                      </block>
+                    </value>
+                  </block>
+                </statement>
+              </block>
+            </next>
           </block>
         </statement>
         <next>
