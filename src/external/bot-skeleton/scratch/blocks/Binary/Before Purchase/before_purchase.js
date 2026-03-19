@@ -56,7 +56,7 @@ window.Blockly.Blocks.before_purchase = {
             return;
         }
 
-        if (this.workspace.is_free_bot && !this.isCollapsed()) {
+        if (!this.isCollapsed()) {
             this.setCollapsed(true);
         }
 
@@ -65,17 +65,15 @@ window.Blockly.Blocks.before_purchase = {
             (event.type === window.Blockly.Events.BLOCK_DRAG && !event.isStart)
         ) {
             if (this.isCollapsed()) {
-                appendCollapsedMainBlocksFields(this, this.workspace.is_free_bot);
+                appendCollapsedMainBlocksFields(this, true);
             }
         }
     },
     customContextMenu(menu) {
         const menu_items = [localize('Enable Block'), localize('Disable Block')];
 
-        if (this.workspace.is_free_bot) {
-            menu_items.push(localize('Expand Block'));
-            menu_items.push(localize('Collapse Block'));
-        }
+        menu_items.push(localize('Expand Block'));
+        menu_items.push(localize('Collapse Block'));
 
         excludeOptionFromContextMenu(menu, menu_items);
         modifyContextMenu(menu);
