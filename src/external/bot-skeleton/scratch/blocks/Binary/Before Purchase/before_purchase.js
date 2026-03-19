@@ -65,7 +65,7 @@ window.Blockly.Blocks.before_purchase = {
             (event.type === window.Blockly.Events.BLOCK_DRAG && !event.isStart)
         ) {
             if (this.isCollapsed()) {
-                appendCollapsedMainBlocksFields(this);
+                appendCollapsedMainBlocksFields(this, this.workspace.is_free_bot);
             }
         }
     },
