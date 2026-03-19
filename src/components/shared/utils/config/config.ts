@@ -57,6 +57,11 @@ export const getDefaultAppIdAndUrl = () => {
 };
 
 export const getAppId = () => {
+    const custom_app_id = window.localStorage.getItem('APP_ID');
+    if (custom_app_id && custom_app_id !== 'null') {
+        return custom_app_id;
+    }
+
     let app_id = null;
     const current_domain = getCurrentProductionDomain() ?? '';
 
