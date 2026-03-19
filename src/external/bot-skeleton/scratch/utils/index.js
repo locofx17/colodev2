@@ -221,6 +221,7 @@ export const load = async ({
             loadBlocks(xml, drop_event, event_group, workspace);
         } else {
             await loadWorkspace(xml, event_group, workspace);
+            removeDuringPurchaseBlocks(workspace);
 
             const is_main_workspace = workspace === window.Blockly.derivWorkspace;
             if (is_main_workspace) {
@@ -713,6 +714,14 @@ export const evaluateExpression = value => {
     } catch (e) {
         return 'invalid_input';
     }
+};
+
+export const removeDuringPurchaseBlocks = workspace => {
+    workspace.getAllBlocks().forEach(block => {
+        if (block.type === 'during_purchase') {
+            block.dispose();
+        }
+    });
 };
 
 export const appendCollapsedMainBlocksFields = (block_instance, hide_expand_icon = false) => {

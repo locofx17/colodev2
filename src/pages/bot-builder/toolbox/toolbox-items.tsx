@@ -170,10 +170,7 @@ export const ToolboxItems = () =>
                 <Block type='before_purchase' />
                 <Block type='purchase' />
             </Category>
-            <Category id='sell_conditions' name={localize('Sell conditions (optional)')}>
-                <Block type='during_purchase' />
-                <Block type='sell_at_market' />
-            </Category>
+
             <Category id='trade_results' name={localize('Restart trading conditions')}>
                 <Block type='after_purchase' />
                 <Block type='trade_again' />
