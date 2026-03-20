@@ -175,6 +175,13 @@ export default Engine =>
             return Math.round(pct);
         }
 
+        async getLastDigitsEvenOdd({ n = 3, type = 'even' } = {}) {
+            const list = await this.getLastDigitList();
+            const lastN = list.slice(-Number(n || 0));
+            const isTarget = x => (Number(x) % 2 === 0) === (type === 'even');
+            return lastN.length > 0 && lastN.every(isTarget);
+        }
+
         checkDirection(dir) {
             return new Promise(resolve =>
                 this.$scope.ticksService

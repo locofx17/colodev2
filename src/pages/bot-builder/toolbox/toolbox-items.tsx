@@ -54,6 +54,7 @@ export const ToolboxItems = () =>
     ReactDomServer.renderToStaticMarkup(
         <Xml xmlns='http://www.w3.org/1999/xhtml' id='toolbox'>
             <Category id='analysis_logics' name={localize('Analysis Logics 🔥')}>
+                <Block type='last_digits_even_odd' />
                 <Block type='last_digits_condition' />
                 <Block type='digit_frequency' />
                 <Block type='even_odd_percent' />

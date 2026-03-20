@@ -17,6 +17,7 @@ const getTicksInterface = tradeEngine => {
         getOverUnderPercent: (...args) => tradeEngine.getOverUnderPercent(...args),
         getMatchDiffPercent: (...args) => tradeEngine.getMatchDiffPercent(...args),
         getRiseFallPercent: (...args) => tradeEngine.getRiseFallPercent(...args),
+        getLastDigitsEvenOdd: (...args) => tradeEngine.getLastDigitsEvenOdd(...args),
     };
 };
 
