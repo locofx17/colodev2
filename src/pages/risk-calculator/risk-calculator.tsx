@@ -178,6 +178,7 @@ const RiskCalculator: React.FC = () => {
     const effectivePayoutMultiplier = applyFee ? currentPayoutPerDollar * 0.97 : currentPayoutPerDollar;
     const profitFirst = baseStake * (effectivePayoutMultiplier - 1);
     const runsToTP = profitFirst > 0 ? Math.ceil(takeProfit / profitFirst) : 0;
+    const runsToSL = totalRisk > 0 ? Math.floor(stopLoss / totalRisk) : 0;
 
     let probWin = 0.5;
     if (contractType === 'DIGITMATCH') probWin = 0.1;
@@ -279,13 +280,24 @@ const RiskCalculator: React.FC = () => {
 
                     <div className='payout-display'>
                         <span>
-                            <Localize i18n_default_text='📊 Live payout for $1 stake:' />
+                            <Localize i18n_default_text='📊 Live payout for ${{stake}} stake:' values={{ stake: baseStake.toFixed(2) }} />
                         </span>
                         <span>
                             <span className='payout-amount'>
-                                {currentPayoutPerDollar > 0 ? `$${currentPayoutPerDollar.toFixed(2)}` : '...'}
+                                {currentPayoutPerDollar > 0 ? `$${(currentPayoutPerDollar * baseStake).toFixed(2)}` : '...'}
                             </span>{' '}
                             <span className='payout-note'>(+{payoutPercent}%)</span>
+                        </span>
+                    </div>
+
+                    <div className='payout-display' style={{ borderTop: 'none', paddingTop: 0 }}>
+                        <span>
+                            <Localize i18n_default_text='💰 Net payout (after 3% markup):' />
+                        </span>
+                        <span>
+                            <span className='payout-amount' style={{ color: '#ff4444' }}>
+                                {currentPayoutPerDollar > 0 ? `$${(effectivePayoutMultiplier * baseStake).toFixed(2)}` : '...'}
+                            </span>
                         </span>
                     </div>
 
@@ -466,6 +478,13 @@ const RiskCalculator: React.FC = () => {
                                 {runsToTP} <small>{localize('wins')}</small>
                             </div>
                             <small>{localize('at ${{profit}} profit/win', { profit: profitFirst.toFixed(2) })}</small>
+                        </div>
+                        <div className='metric'>
+                            <div className='metric-label'>{localize('runs to hit sl')}</div>
+                            <div className='metric-value'>
+                                {runsToSL} <small>{localize('failed streaks')}</small>
+                            </div>
+                            <small>{localize('at ${{loss}} loss/streak', { loss: totalRisk.toFixed(2) })}</small>
                         </div>
                     </div>
                     <div className='warning'>

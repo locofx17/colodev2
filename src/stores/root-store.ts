@@ -19,6 +19,8 @@ import ToolbarStore from './toolbar-store';
 import ToolboxStore from './toolbox-store';
 import TransactionsStore from './transactions-store';
 import UiStore from './ui-store';
+import copyTradingManager, { CopyTradingManager } from '@/pages/copy-trading/copy-trading-manager';
+import { initReplicator } from '@/pages/copy-trading/replicator';
 
 // TODO: need to write types for the individual classes and convert them to ts
 export default class RootStore {
@@ -38,6 +40,7 @@ export default class RootStore {
     public quick_strategy: QuickStrategyStore;
     public self_exclusion: SelfExclusionStore;
     public dashboard: DashboardStore;
+    public copy_trading: CopyTradingManager;
 
     public chart_store: ChartStore;
     public blockly_store: BlocklyStore;
@@ -84,5 +87,8 @@ export default class RootStore {
         this.chart_store = new ChartStore(this);
         this.blockly_store = new BlocklyStore(this);
         this.data_collection_store = new DataCollectionStore(this, this.core);
+
+        this.copy_trading = copyTradingManager;
+        initReplicator(this.copy_trading);
     }
 }

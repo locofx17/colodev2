@@ -406,11 +406,10 @@ const Plan: React.FC = () => {
                 {/* ===== EXPORT & PROFIT ===== */}
                 <div className="export-controls">
                     <div className="export-section pdf" onClick={exportToPDF}>
-                        <h2><i className="fas fa-file-pdf"></i> <Localize i18n_default_text="Export to PDF" /></h2>
-                        <div className="pdf-badge"><Localize i18n_default_text="PRINT" /></div>
+                        <h2><i className="fas fa-file-pdf"></i> <Localize i18n_default_text="Download to PDF" /></h2>
                     </div>
                     <div className="export-section word" onClick={exportToWord}>
-                        <h2><i className="fas fa-file-word"></i> <Localize i18n_default_text="Export to Word" /></h2>
+                        <h2><i className="fas fa-file-word"></i> <Localize i18n_default_text="Download to Word" /></h2>
                         <div className="pdf-badge"><Localize i18n_default_text="DOWNLOAD" /></div>
                     </div>
                 </div>

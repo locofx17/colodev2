@@ -1,3 +1,4 @@
+import { makeAutoObservable, runInAction } from 'mobx';
 import { generateDerivApiInstance } from '@/external/bot-skeleton/services/api/appId';
 
 export type TConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
@@ -7,6 +8,7 @@ export type TCopier = {
   token: string;
   loginId?: string;
   balance?: number;
+  currency?: string;
   status: TConnectionStatus;
   addedAt: number;
   enabled?: boolean;
@@ -18,6 +20,7 @@ export type TMasterState = {
   token: string;
   loginId?: string;
   balance?: number;
+  currency?: string;
   status: TConnectionStatus;
 };
 
@@ -33,10 +36,23 @@ class DerivClient {
   status: TConnectionStatus = 'disconnected';
   loginId?: string;
   balance?: number;
+  currency?: string;
   private balanceSub: any | null = null;
 
+  constructor() {
+    makeAutoObservable(this, {
+      // @ts-ignore
+      api: false,
+      // @ts-ignore
+      balanceSub: false,
+    });
+  }
+
   async connectAndAuthorize(token: string) {
-    this.status = 'connecting';
+    runInAction(() => {
+        this.status = 'connecting';
+    });
+    
     this.api = generateDerivApiInstance();
     // wait for socket open
     await new Promise<void>((resolve, reject) => {
@@ -51,29 +67,50 @@ class DerivClient {
       this.api?.connection?.addEventListener?.('open', onOpen);
       this.api?.connection?.addEventListener?.('error', onErr);
       // fallback timeout
-      setTimeout(() => resolve(), 1000);
+      setTimeout(() => resolve(), 3000); // Increased timeout for stability
     });
 
-    const { authorize, error } = await this.api.authorize(token);
-    if (error) {
-      this.status = 'error';
-      throw error;
-    }
-    this.status = 'connected';
-    this.loginId = authorize?.loginid;
-    // subscribe to balance
-    const res = await this.api.send({ balance: 1, account: 'all', subscribe: 1 });
-    this.balance = res?.balance?.balance;
-    if (res?.subscription?.id) {
-      this.balanceSub = this.api
-        .onMessage()
-        ?.subscribe(({ data }: any) => {
-          if (data?.msg_type === 'balance') {
-            this.balance = data?.balance?.balance;
-          }
+    try {
+        const { authorize, error } = await this.api.authorize(token);
+        if (error) {
+          runInAction(() => {
+            this.status = 'error';
+          });
+          throw error;
+        }
+        
+        runInAction(() => {
+            this.status = 'connected';
+            this.loginId = authorize?.loginid;
+            this.currency = authorize?.currency;
         });
+
+        // subscribe to balance
+        const res = await this.api.send({ balance: 1, account: 'all', subscribe: 1 });
+        runInAction(() => {
+            this.balance = res?.balance?.balance;
+            this.currency = res?.balance?.currency || this.currency;
+        });
+
+        if (res?.subscription?.id) {
+          this.balanceSub = this.api
+            .onMessage()
+            ?.subscribe(({ data }: any) => {
+              if (data?.msg_type === 'balance') {
+                runInAction(() => {
+                    this.balance = data?.balance?.balance;
+                    this.currency = data?.balance?.currency || this.currency;
+                });
+              }
+            });
+        }
+        return authorize;
+    } catch (e) {
+        runInAction(() => {
+            this.status = 'error';
+        });
+        throw e;
     }
-    return authorize;
   }
 
   disconnect() {
@@ -83,7 +120,11 @@ class DerivClient {
     try {
       this.api?.disconnect?.();
     } catch {}
-    this.status = 'disconnected';
+    runInAction(() => {
+        this.status = 'disconnected';
+        this.api = null;
+        this.balanceSub = null;
+    });
   }
 }
 
@@ -95,12 +136,18 @@ export class CopyTradingManager {
   private copierClients: Map<string, DerivClient> = new Map();
 
   // replication controls
-  private replicationEnabled = false;
-  private stakeCap: number | null = null;
-  private stakeMultiplier: number = 1;
+  replicationEnabled = false;
+  stakeCap: number | null = null;
+  stakeMultiplier: number = 1;
 
   constructor() {
-    // Initialize from encrypted storage if available
+    makeAutoObservable(this, {
+        // @ts-ignore
+        masterClient: false,
+        // @ts-ignore
+        copierClients: false,
+    });
+
     this.master = { token: '', status: 'disconnected' };
     this.copiers = [];
     void this.restoreState();
@@ -108,32 +155,48 @@ export class CopyTradingManager {
 
   async restoreState() {
     try {
-      const { decryptText } = await import('./crypto');
       const encMaster = localStorage.getItem(LS_KEYS.MASTER_TOKEN) || '';
       const encCopiers = localStorage.getItem(LS_KEYS.COPIERS) || '';
       const encSettings = localStorage.getItem(LS_KEYS.SETTINGS) || '';
-      this.master.token = encMaster ? await decryptText(encMaster) : '';
-      this.copiers = encCopiers ? (JSON.parse(await decryptText(encCopiers)) as TCopier[]) : [];
-      if (encSettings) {
-        const s = JSON.parse(await decryptText(encSettings));
-        this.replicationEnabled = !!s.replicationEnabled;
-        this.stakeCap = s.stakeCap ?? null;
-        this.stakeMultiplier = s.stakeMultiplier ?? 1;
-      }
-    } catch {
-      const plainMaster = localStorage.getItem(LS_KEYS.MASTER_TOKEN) || '';
-      const plainCopiers = localStorage.getItem(LS_KEYS.COPIERS) || '';
-      const plainSettings = localStorage.getItem(LS_KEYS.SETTINGS) || '';
-      this.master.token = plainMaster;
-      try { this.copiers = plainCopiers ? (JSON.parse(plainCopiers) as TCopier[]) : []; } catch { this.copiers = []; }
+      
+      // Attempt to import crypto lazily
+      let master = encMaster;
+      let copiersRaw = encCopiers;
+      let settingsRaw = encSettings;
+
       try {
-        if (plainSettings) {
-          const s = JSON.parse(plainSettings);
-          this.replicationEnabled = !!s.replicationEnabled;
-          this.stakeCap = s.stakeCap ?? null;
-          this.stakeMultiplier = s.stakeMultiplier ?? 1;
-        }
-      } catch {}
+        const { decryptText } = await import('./crypto');
+        if (encMaster) master = await decryptText(encMaster);
+        if (encCopiers) copiersRaw = await decryptText(encCopiers);
+        if (encSettings) settingsRaw = await decryptText(encSettings);
+      } catch (e) {
+        // Fallback to plain text if crypto fails
+      }
+
+      runInAction(() => {
+          this.master.token = master;
+          try { 
+              this.copiers = copiersRaw ? JSON.parse(copiersRaw) : []; 
+              // Reset status on restore to trigger reconnect
+              this.copiers.forEach(c => c.status = 'disconnected');
+          } catch { 
+              this.copiers = []; 
+          }
+          
+          if (settingsRaw) {
+            try {
+                const s = JSON.parse(settingsRaw);
+                this.replicationEnabled = !!s.replicationEnabled;
+                this.stakeCap = s.stakeCap ?? null;
+                this.stakeMultiplier = s.stakeMultiplier ?? 1;
+            } catch {}
+          }
+      });
+      
+      // Auto reconnect all enabled copiers
+      this.refreshAll();
+    } catch (e) {
+        console.error('Failed to restore CopyTradingManager state', e);
     }
   }
 
@@ -162,7 +225,9 @@ export class CopyTradingManager {
   }
 
   setMasterToken(token: string) {
-    this.master.token = token.trim();
+    runInAction(() => {
+        this.master.token = token.trim();
+    });
     void this.saveState();
   }
 
@@ -172,24 +237,32 @@ export class CopyTradingManager {
     this.masterClient = new DerivClient();
     try {
       await this.masterClient.connectAndAuthorize(this.master.token);
-      this.master.status = 'connected';
-      this.master.loginId = this.masterClient.loginId;
-      this.master.balance = this.masterClient.balance;
+      runInAction(() => {
+          this.master.status = 'connected';
+          this.master.loginId = this.masterClient?.loginId;
+          this.master.balance = this.masterClient?.balance;
+          this.master.currency = this.masterClient?.currency;
+      });
     } catch (e) {
-      this.master.status = 'error';
+      runInAction(() => {
+          this.master.status = 'error';
+      });
       throw e;
     }
   }
 
   disconnectMaster() {
     this.masterClient?.disconnect();
-    this.master.status = 'disconnected';
+    runInAction(() => {
+        this.master.status = 'disconnected';
+    });
   }
 
   addCopier(token: string) {
     const trimmed = token.trim();
     if (!trimmed) throw new Error('Token required');
     if (this.copiers.some(c => c.token === trimmed)) throw new Error('Token already added');
+    
     const copier: TCopier = {
       id: `${Date.now()}`,
       token: trimmed,
@@ -197,8 +270,13 @@ export class CopyTradingManager {
       addedAt: Date.now(),
       enabled: true,
     };
-    this.copiers.push(copier);
+    
+    runInAction(() => {
+        this.copiers.push(copier);
+    });
+    
     void this.saveState();
+    void this.connectCopier(copier.id);
     return copier;
   }
 
@@ -207,7 +285,9 @@ export class CopyTradingManager {
     if (copier) {
       this.copierClients.get(id)?.disconnect();
       this.copierClients.delete(id);
-      this.copiers = this.copiers.filter(c => c.id !== id);
+      runInAction(() => {
+          this.copiers = this.copiers.filter(c => c.id !== id);
+      });
       void this.saveState();
     }
   }
@@ -215,20 +295,40 @@ export class CopyTradingManager {
   async connectCopier(id: string) {
     const copier = this.copiers.find(c => c.id === id);
     if (!copier) throw new Error('Copier not found');
-    const client = new DerivClient();
+    
+    let client = this.copierClients.get(id);
+    if (client) client.disconnect();
+    
+    client = new DerivClient();
+    this.copierClients.set(id, client);
+
     try {
+      runInAction(() => {
+          copier.status = 'connecting';
+      });
+      
       await client.connectAndAuthorize(copier.token);
-      copier.status = 'connected';
-      copier.loginId = client.loginId;
-      copier.balance = client.balance;
-      copier.lastErrorCode = undefined;
-      copier.lastErrorMsg = undefined;
-      this.copierClients.set(id, client);
+      
+      runInAction(() => {
+          copier.status = 'connected';
+          copier.loginId = client?.loginId;
+          copier.balance = client?.balance;
+          copier.currency = client?.currency;
+          copier.lastErrorCode = undefined;
+          copier.lastErrorMsg = undefined;
+      });
+      
+      // Update balance when client balance changes
+      // Since DerivClient is observable, we could also just use its properties in the UI directly.
+      // But we maintain them in the copier object for persistence and easy listing.
+      
       void this.saveState();
     } catch (e: any) {
-      copier.status = 'error';
-      copier.lastErrorCode = e?.code || e?.error?.code || 'Error';
-      copier.lastErrorMsg = e?.message || e?.error?.message || 'Authorization failed';
+      runInAction(() => {
+          copier.status = 'error';
+          copier.lastErrorCode = e?.code || e?.error?.code || 'Error';
+          copier.lastErrorMsg = e?.message || e?.error?.message || 'Authorization failed';
+      });
       void this.saveState();
       throw e;
     }
@@ -236,33 +336,55 @@ export class CopyTradingManager {
 
   disconnectCopier(id: string) {
     this.copierClients.get(id)?.disconnect();
+    // we keep the client in the map but disconnected? No, let's remove it
     this.copierClients.delete(id);
     const copier = this.copiers.find(c => c.id === id);
     if (copier) {
-      copier.status = 'disconnected';
-      this.saveState();
+      runInAction(() => {
+          copier.status = 'disconnected';
+      });
+      void this.saveState();
     }
   }
 
+  refreshAll() {
+      this.copiers.forEach(c => {
+          if (c.enabled && c.status !== 'connected') {
+              void this.connectCopier(c.id);
+          }
+      });
+  }
+
   enableReplication(enable: boolean) {
-    this.replicationEnabled = enable;
+    runInAction(() => {
+        this.replicationEnabled = enable;
+    });
     void this.saveState();
   }
-  setStakeCap(cap: number | null) { this.stakeCap = cap; void this.saveState(); }
-  setStakeMultiplier(mult: number) { this.stakeMultiplier = Math.max(0.01, mult); void this.saveState(); }
-
-  getClients() {
-    return { master: this.masterClient, copiers: this.copierClients };
+  
+  setStakeCap(cap: number | null) { 
+    runInAction(() => {
+        this.stakeCap = cap; 
+    });
+    void this.saveState(); 
   }
+  
+  setStakeMultiplier(mult: number) { 
+    runInAction(() => {
+        this.stakeMultiplier = Math.max(0.01, mult); 
+    });
+    void this.saveState(); 
+  }
+
   getSettings() {
-    return { replicationEnabled: this.replicationEnabled, stakeCap: this.stakeCap, stakeMultiplier: this.stakeMultiplier };
-  }
-
-  // Placeholder: replicate a trade to all connected copiers and/or master real account.
-  async replicateTrade(_contractParams: Record<string, any>) {
-    // Left intentionally: replication is driven by initReplicator via observer events
+    return { 
+        replicationEnabled: this.replicationEnabled, 
+        stakeCap: this.stakeCap, 
+        stakeMultiplier: this.stakeMultiplier 
+    };
   }
 }
 
-export default CopyTradingManager;
+const copyTradingManager = new CopyTradingManager();
+export default copyTradingManager;
 
