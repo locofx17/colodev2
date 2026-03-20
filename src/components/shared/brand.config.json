@@ -16,7 +16,7 @@
             "icon": "IcRebrandingDerivTrader"
         },
         "dbot": {
-            "name": "Deriv Bot",
+            "name": "loco the trader",
             "icon": "IcRebrandingDerivBot"
         },
         "mt5": {
@@ -36,7 +36,7 @@
             "icon": "IcRebrandingSmarttrader"
         },
         "bbot": {
-            "name": "Binary Bot",
+            "name": "loco the trader",
             "icon": "IcRebrandingBinaryBot"
         },
         "go": {
@@ -51,7 +51,7 @@
             "availability": "All"
         },
         "dbot": {
-            "name": "Deriv Bot",
+            "name": "loco the trader",
             "icon": "DBot",
             "availability": "Non-EU"
         },
@@ -61,7 +61,7 @@
             "availability": "Non-EU"
         },
         "bbot": {
-            "name": "Binary Bot",
+            "name": "loco the trader",
             "icon": "BinaryBot",
             "availability": "Non-EU"
         },

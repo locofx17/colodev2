@@ -25,7 +25,7 @@ const Interface = $scope => {
             getTicksInterface: getTicksInterface(tradeEngine),
             watch: (...args) => tradeEngine.watch(...args),
             sleep: (...args) => sleep(observer, ...args),
-            alert: (...args) => alert(...args), // eslint-disable-line no-alert
+            alert: (...args) => observer.emit('ui.log.alert', ...args),
             prompt: (...args) => prompt(...args), // eslint-disable-line no-alert
             console: {
                 log(...args) {

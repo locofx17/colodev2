@@ -81,6 +81,7 @@ export default class RunPanelStore {
             onBotContractEvent: action,
             onError: action,
             showErrorMessage: action,
+            onBotAlert: action,
             switchToJournal: action,
             unregisterBotListeners: action,
             handleInvalidToken: action,
@@ -665,6 +666,20 @@ export default class RunPanelStore {
         this.showErrorMessage(error_message);
     };
 
+    onBotAlert = (message: string) => {
+        const { transactions } = this.root_store;
+        let final_message = message;
+        if (message.toLowerCase().includes('tp hit') || message.toLowerCase().includes('sl hit')) {
+            const { total_profit } = transactions.statistics;
+            final_message = `${message}. Total Profit/Loss: ${total_profit}`;
+        }
+        this.dialog_options = {
+            title: localize('loco the trader'),
+            message: final_message,
+        };
+        this.is_dialog_open = true;
+    };
+
     showErrorMessage = (data: string | Error) => {
         const { journal } = this.root_store;
         const { ui } = this.core;
@@ -718,6 +733,7 @@ export default class RunPanelStore {
         observer.register('ui.log.error', this.showErrorMessage);
         observer.register('ui.log.notify', journal.onNotify);
         observer.register('ui.log.success', journal.onLogSuccess);
+        observer.register('ui.log.alert', this.onBotAlert);
         observer.register('client.invalid_token', this.handleInvalidToken);
     };
 
@@ -735,6 +751,7 @@ export default class RunPanelStore {
         observer.unregisterAll('ui.log.error');
         observer.unregisterAll('ui.log.notify');
         observer.unregisterAll('ui.log.success');
+        observer.unregisterAll('ui.log.alert');
         observer.unregisterAll('client.invalid_token');
     };
 
