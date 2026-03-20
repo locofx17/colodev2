@@ -10,17 +10,76 @@ const isMobile = () => window.innerWidth <= 600;
 
 const DigitDistributionModal = observer(() => {
     const { dashboard } = useStore();
-    const { is_digit_dist_modal_visible, setDigitDistModalVisibility, bot_builder_symbol } = dashboard;
+    const { is_digit_dist_modal_visible, setDigitDistModalVisibility, bot_builder_symbol, digit_stats_settings, setDigitStatsSettings } = dashboard;
 
     const [symbol, setSymbol] = useState(bot_builder_symbol || '1HZ10V');
     const [ticks, setTicks] = useState(() => parseInt(localStorage.getItem('dcircle_ticks') || '1000'));
 
-    // Sync with Bot Builder symbol
+    // Sync bot settings (trade type, prediction, symbol) from workspace
+    const syncBotSettings = useCallback(() => {
+        if (!window.Blockly?.derivWorkspace) return;
+        const workspace = window.Blockly.derivWorkspace;
+        const allBlocks = workspace.getAllBlocks();
+        
+        const tradeOptionsBlock = allBlocks.find(b => b.type === 'trade_definition_tradeoptions');
+        const tradeTypeBlock = allBlocks.find(b => b.type === 'trade_definition_tradetype');
+        const marketBlock = allBlocks.find(b => b.type === 'trade_definition_market');
+        
+        if (tradeOptionsBlock && tradeTypeBlock) {
+            const tradeType = tradeTypeBlock.getFieldValue('TRADETYPE_LIST') || 'evenodd';
+            let prediction = 0;
+            
+            const predictionInput = tradeOptionsBlock.getInput('PREDICTION');
+            if (predictionInput && predictionInput.connection && predictionInput.connection.targetBlock()) {
+                const targetBlock = predictionInput.connection.targetBlock();
+                if (targetBlock.type === 'math_number' || targetBlock.type === 'math_number_positive') {
+                    prediction = parseInt(targetBlock.getFieldValue('NUM')) || 0;
+                } else if (targetBlock.type === 'variables_get') {
+                    const varName = targetBlock.getFieldValue('VAR');
+                    // Find the last 'set' block for this variable in the workspace
+                    const setBlock = allBlocks.find(b => 
+                        b.type === 'variables_set' && 
+                        b.getFieldValue('VAR') === varName
+                    );
+                    if (setBlock) {
+                        const valInput = setBlock.getInput('VALUE');
+                        const valBlock = valInput?.connection?.targetBlock();
+                        if (valBlock && (valBlock.type === 'math_number' || valBlock.type === 'math_number_positive')) {
+                            prediction = parseInt(valBlock.getFieldValue('NUM')) || 0;
+                        }
+                    }
+                }
+            }
+            
+            const currentSymbol = marketBlock?.getFieldValue('SYMBOL_LIST') || digit_stats_settings.symbol;
+            
+            if (
+                tradeType !== digit_stats_settings.trade_type || 
+                prediction !== digit_stats_settings.prediction ||
+                currentSymbol !== digit_stats_settings.symbol
+            ) {
+                setDigitStatsSettings({ trade_type: tradeType, prediction, symbol: currentSymbol });
+                if (currentSymbol !== symbol) {
+                    setSymbol(currentSymbol);
+                }
+            }
+        }
+    }, [digit_stats_settings, setDigitStatsSettings, symbol]);
+
     useEffect(() => {
-        if (bot_builder_symbol) {
+        if (is_digit_dist_modal_visible) {
+            syncBotSettings();
+            const interval = setInterval(syncBotSettings, 2000);
+            return () => clearInterval(interval);
+        }
+    }, [is_digit_dist_modal_visible, syncBotSettings]);
+
+    // Sync with Bot Builder symbol change from dashboard or workspace sync
+    useEffect(() => {
+        if (bot_builder_symbol && bot_builder_symbol !== symbol) {
             setSymbol(bot_builder_symbol);
         }
-    }, [bot_builder_symbol]);
+    }, [bot_builder_symbol, symbol]);
 
     // Sync ticks with localStorage (shared with DCircle)
     useEffect(() => {
@@ -273,9 +332,51 @@ const DigitDistributionModal = observer(() => {
                     </div>
                 </div>
 
+                <div className='digit-dist-modal__recent-ticks'>
+                    {history.slice(-10).map((h, i) => {
+                        const isLatest = i === 9;
+                        const { trade_type, prediction } = digit_stats_settings;
+                        let highlightClass = '';
+
+                        if (trade_type === 'evenodd') {
+                            if (h.digit % 2 === 0) highlightClass = 'is-even'; // Green for even, Blue for odd? User specified "focus with that"
+                            else highlightClass = 'is-odd';
+                        } else if (trade_type === 'overunder') {
+                            if (h.digit > prediction) highlightClass = 'is-over';
+                            else highlightClass = 'is-under';
+                        } else if (trade_type === 'matchdiff') {
+                            if (h.digit === prediction) highlightClass = 'is-match';
+                            else highlightClass = 'is-diff';
+                        } else if (trade_type === 'risefall') {
+                            const prevQuote = history[history.length - 10 + i - 1]?.quote;
+                            if (prevQuote) {
+                                if (h.quote > prevQuote) highlightClass = 'is-rise';
+                                else if (h.quote < prevQuote) highlightClass = 'is-fall';
+                            }
+                        }
+
+                        return (
+                            <div key={i} className={`digit-dist-modal__tick ${isLatest ? 'latest' : ''} ${highlightClass}`}>
+                                {h.digit}
+                            </div>
+                        );
+                    })}
+                </div>
+
                 <div className='digit-dist-modal__circles'>
                     {digitFreq.map((f, i) => {
                         const pctStr = formatPercent(f, total);
+                        const { trade_type, prediction } = digit_stats_settings;
+                        let isHighlighted = false;
+
+                        if (trade_type === 'evenodd') {
+                            isHighlighted = i % 2 === 0; // Highlight even by default if even/odd
+                        } else if (trade_type === 'overunder') {
+                            isHighlighted = i > prediction;
+                        } else if (trade_type === 'matchdiff') {
+                            isHighlighted = i === prediction;
+                        }
+
                         let ringCol = 'var(--border-normal)';
                         if (f === maxCount && f > 0) ringCol = '#2ea043';
                         else if (f === minCount && f > 0) ringCol = '#f85149';
@@ -283,7 +384,7 @@ const DigitDistributionModal = observer(() => {
                         return (
                             <div
                                 key={i}
-                                className={`digit-dist-modal__circle ${i === lastDigit ? 'active' : ''}`}
+                                className={`digit-dist-modal__circle ${i === lastDigit ? 'active' : ''} ${isHighlighted ? 'highlighted' : ''}`}
                                 style={{
                                     background: `conic-gradient(from 0deg, ${ringCol} 0% ${parseFloat(pctStr)}%, var(--fill-normal) ${parseFloat(pctStr)}% 100%)`,
                                 }}

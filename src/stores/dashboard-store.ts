@@ -67,6 +67,12 @@ export interface IDashboardStore {
     setDigitDistModalVisibility: (is_digit_dist_modal_visible: boolean) => void;
     setPendingFreeBot: (bot: { name: string; xml: string }) => void;
     clearPendingFreeBot: () => void;
+    digit_stats_settings: {
+        trade_type: string;
+        prediction: number;
+        symbol: string;
+    };
+    setDigitStatsSettings: (settings: { trade_type: string; prediction: number; symbol: string }) => void;
 }
 
 export default class DashboardStore implements IDashboardStore {
@@ -133,6 +139,8 @@ export default class DashboardStore implements IDashboardStore {
             setDigitDistModalVisibility: action.bound,
             setPendingFreeBot: action.bound,
             clearPendingFreeBot: action.bound,
+            digit_stats_settings: observable,
+            setDigitStatsSettings: action.bound,
         });
         this.root_store = root_store;
         this.core = core;
@@ -214,6 +222,15 @@ export default class DashboardStore implements IDashboardStore {
     // Free Bots handoff state
     pending_free_bot: { name: string; xml: string } | null = null;
     is_digit_dist_modal_visible = false;
+    digit_stats_settings = {
+        trade_type: 'evenodd',
+        prediction: 0,
+        symbol: '1HZ10V',
+    };
+
+    setDigitStatsSettings = (settings: { trade_type: string; prediction: number; symbol: string }) => {
+        this.digit_stats_settings = settings;
+    };
 
     setDigitDistModalVisibility = (is_digit_dist_modal_visible: boolean) => {
         this.is_digit_dist_modal_visible = is_digit_dist_modal_visible;

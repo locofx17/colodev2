@@ -147,6 +147,58 @@
         }
     }
 
+    &__recent-ticks {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        
+        @media (max-width: 600px) {
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+    }
+
+    &__tick {
+        font-size: 16px;
+        font-weight: 700;
+        min-width: 24px;
+        text-align: center;
+        color: var(--text-general);
+        transition: all 0.2s ease;
+        padding: 2px 4px;
+        border-radius: 4px;
+
+        &.rise, &.is-rise { color: #4cd964; }
+        &.fall, &.is-fall { color: #ff3b30; }
+
+        &.is-even, &.is-over, &.is-diff { 
+            color: #4cd964; 
+            background: rgba(76, 217, 100, 0.1);
+        }
+        &.is-odd, &.is-under, &.is-match { 
+            color: #ff3b30; 
+            background: rgba(255, 59, 48, 0.1);
+        }
+
+        &.latest {
+            font-size: 20px;
+            font-weight: 900;
+            border-bottom: 3px solid var(--text-prominent);
+            margin-top: -4px;
+        }
+
+        @media (max-width: 600px) {
+            font-size: 14px;
+            min-width: 20px;
+            
+            &.latest {
+                font-size: 18px;
+            }
+        }
+    }
+
     &__circles {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
@@ -171,7 +223,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: transform 0.2s ease;
+        transition: all 0.2s ease;
 
         @media (max-width: 600px) {
             max-width: 56px;
@@ -182,6 +234,16 @@
             transform: scale(1.05);
             box-shadow: 0 0 15px var(--button-primary-default);
             z-index: 1;
+        }
+
+        &.highlighted {
+            background: var(--button-primary-default) !important;
+            .digit-dist-modal__circle-inner {
+                background: var(--button-primary-default);
+                .digit-dist-modal__digit, .digit-dist-modal__pct {
+                    color: white;
+                }
+            }
         }
 
         &-inner {
