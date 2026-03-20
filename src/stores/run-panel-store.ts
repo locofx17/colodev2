@@ -668,11 +668,20 @@ export default class RunPanelStore {
 
     onBotAlert = (message: string) => {
         const { transactions } = this.root_store;
+        const { client } = this.core;
+        const currency = client?.currency || 'USD';
         const alert_message = String(message || '');
         let final_message = alert_message;
-        if (alert_message.toLowerCase().includes('tp hit') || alert_message.toLowerCase().includes('sl hit')) {
+        const lower_message = alert_message.toLowerCase();
+        const is_tp = lower_message.includes('tp hit') || lower_message.includes('take profit reached');
+        const is_sl = lower_message.includes('sl hit') || lower_message.includes('stop loss reached') || lower_message.includes('maximum loss amount reached');
+
+        if (is_tp || is_sl) {
             const { total_profit } = transactions.statistics;
-            final_message = `${alert_message}. Total Profit/Loss: ${total_profit}`;
+            const sign = total_profit >= 0 ? '+' : '';
+            const formatted_profit = `${sign}${total_profit.toFixed(2)}`;
+            const label = is_tp ? localize('Total Profit') : localize('Total Loss');
+            final_message = `${alert_message}. ${label}: ${formatted_profit} ${currency}`;
         }
         this.dialog_options = {
             title: localize('loco the trader'),
@@ -682,17 +691,35 @@ export default class RunPanelStore {
     };
 
     showErrorMessage = (data: string | Error) => {
-        const { journal } = this.root_store;
-        const { ui } = this.core;
+        const { journal, transactions } = this.root_store;
+        const { ui, client } = this.core;
+        const currency = client?.currency || 'USD';
         journal.onError(data);
+
+        const error_message = typeof data === 'string' ? data : data.message;
+        const lower_message = error_message.toLowerCase();
+
+        const is_tp = lower_message.includes('take profit reached');
+        const is_sl =
+            lower_message.includes('maximum loss amount reached') || lower_message.includes('stop loss reached');
+
+        if (is_tp || is_sl) {
+            const { total_profit } = transactions.statistics;
+            const sign = total_profit >= 0 ? '+' : '';
+            const formatted_profit = `${sign}${total_profit.toFixed(2)}`;
+            const label = is_tp ? localize('Total Profit') : localize('Total Loss');
+
+            this.dialog_options = {
+                title: localize('loco the trader'),
+                message: `${error_message}. ${label}: ${formatted_profit} ${currency}`,
+            };
+            this.is_dialog_open = true;
+        }
+
         if (journal.journal_filters.some(filter => filter === MessageTypes.ERROR)) {
             this.toggleDrawer(true);
             this.setActiveTabIndex(run_panel.JOURNAL);
             ui.setPromptHandler(false);
-        } else {
-            // TODO: fix notifications
-            // notifications.addNotificationMessage(journalError(this.switchToJournal));
-            // notifications.removeNotificationMessage({ key: 'bot_error' });
         }
     };
 
