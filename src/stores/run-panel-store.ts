@@ -323,6 +323,8 @@ export default class RunPanelStore {
 
     onCloseDialog = () => {
         this.is_dialog_open = false;
+        this.onOkButtonClick = null;
+        this.onCancelButtonClick = null;
     };
 
     stopMyBot = () => {
@@ -673,8 +675,21 @@ export default class RunPanelStore {
         const alert_message = String(message || '');
         let final_message = alert_message;
         const lower_message = alert_message.toLowerCase();
-        const is_tp = lower_message.includes('tp hit') || lower_message.includes('take profit reached');
-        const is_sl = lower_message.includes('sl hit') || lower_message.includes('stop loss reached') || lower_message.includes('maximum loss amount reached');
+
+        const take_profit_msg = localize('Take profit reached').toLowerCase();
+        const stop_loss_msg = localize('Stop loss reached').toLowerCase();
+        const max_loss_msg = localize('Maximum loss amount reached').toLowerCase();
+
+        const is_tp =
+            lower_message.includes('tp hit') ||
+            lower_message.includes('take profit reached') ||
+            lower_message.includes(take_profit_msg);
+        const is_sl =
+            lower_message.includes('sl hit') ||
+            lower_message.includes('stop loss reached') ||
+            lower_message.includes('maximum loss amount reached') ||
+            lower_message.includes(stop_loss_msg) ||
+            lower_message.includes(max_loss_msg);
 
         if (is_tp || is_sl) {
             const { total_profit } = transactions.statistics;
@@ -683,6 +698,8 @@ export default class RunPanelStore {
             const label = is_tp ? localize('Total Profit') : localize('Total Loss');
             final_message = `${alert_message}. ${label}: ${formatted_profit} ${currency}`;
         }
+        this.onOkButtonClick = this.onCloseDialog;
+        this.onCancelButtonClick = null;
         this.dialog_options = {
             title: localize('loco the trader'),
             message: final_message,
@@ -699,9 +716,17 @@ export default class RunPanelStore {
         const error_message = typeof data === 'string' ? data : data.message;
         const lower_message = error_message.toLowerCase();
 
-        const is_tp = lower_message.includes('take profit reached');
+        const take_profit_msg = localize('Take profit reached').toLowerCase();
+        const stop_loss_msg = localize('Stop loss reached').toLowerCase();
+        const max_loss_msg = localize('Maximum loss amount reached').toLowerCase();
+
+        const is_tp =
+            lower_message.includes('take profit reached') || lower_message.includes(take_profit_msg);
         const is_sl =
-            lower_message.includes('maximum loss amount reached') || lower_message.includes('stop loss reached');
+            lower_message.includes('maximum loss amount reached') ||
+            lower_message.includes(max_loss_msg) ||
+            lower_message.includes('stop loss reached') ||
+            lower_message.includes(stop_loss_msg);
 
         if (is_tp || is_sl) {
             const { total_profit } = transactions.statistics;
@@ -709,6 +734,8 @@ export default class RunPanelStore {
             const formatted_profit = `${sign}${total_profit.toFixed(2)}`;
             const label = is_tp ? localize('Total Profit') : localize('Total Loss');
 
+            this.onOkButtonClick = this.onCloseDialog;
+            this.onCancelButtonClick = null;
             this.dialog_options = {
                 title: localize('loco the trader'),
                 message: `${error_message}. ${label}: ${formatted_profit} ${currency}`,
