@@ -668,10 +668,11 @@ export default class RunPanelStore {
 
     onBotAlert = (message: string) => {
         const { transactions } = this.root_store;
-        let final_message = message;
-        if (message.toLowerCase().includes('tp hit') || message.toLowerCase().includes('sl hit')) {
+        const alert_message = String(message || '');
+        let final_message = alert_message;
+        if (alert_message.toLowerCase().includes('tp hit') || alert_message.toLowerCase().includes('sl hit')) {
             const { total_profit } = transactions.statistics;
-            final_message = `${message}. Total Profit/Loss: ${total_profit}`;
+            final_message = `${alert_message}. Total Profit/Loss: ${total_profit}`;
         }
         this.dialog_options = {
             title: localize('loco the trader'),
