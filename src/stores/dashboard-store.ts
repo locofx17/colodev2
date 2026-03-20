@@ -62,10 +62,10 @@ export interface IDashboardStore {
     is_trading_view_modal_visible: boolean;
     setPreviewOnPopup: (is_preview_on_popup: boolean) => void;
     // Free Bots handoff
-    pending_free_bot: { name: string; xml: string } | null;
+    pending_free_bot: { name: string; xml: string; should_auto_run?: boolean } | null;
     is_digit_dist_modal_visible: boolean;
     setDigitDistModalVisibility: (is_digit_dist_modal_visible: boolean) => void;
-    setPendingFreeBot: (bot: { name: string; xml: string }) => void;
+    setPendingFreeBot: (bot: { name: string; xml: string; should_auto_run?: boolean }) => void;
     clearPendingFreeBot: () => void;
     digit_stats_settings: {
         trade_type: string;
@@ -220,7 +220,7 @@ export default class DashboardStore implements IDashboardStore {
     search_param = '';
 
     // Free Bots handoff state
-    pending_free_bot: { name: string; xml: string } | null = null;
+    pending_free_bot: { name: string; xml: string; should_auto_run?: boolean } | null = null;
     is_digit_dist_modal_visible = false;
     digit_stats_settings = {
         trade_type: 'evenodd',
@@ -236,7 +236,7 @@ export default class DashboardStore implements IDashboardStore {
         this.is_digit_dist_modal_visible = is_digit_dist_modal_visible;
     };
 
-    setPendingFreeBot = (bot: { name: string; xml: string }) => {
+    setPendingFreeBot = (bot: { name: string; xml: string; should_auto_run?: boolean }) => {
         this.pending_free_bot = bot;
     };
 

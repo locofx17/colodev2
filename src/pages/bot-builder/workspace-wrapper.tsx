@@ -11,9 +11,10 @@ import Toolbox from './toolbox';
 import './workspace.scss';
 
 const WorkspaceWrapper = observer(() => {
-    const { blockly_store, dashboard } = useStore();
+    const { blockly_store, dashboard, run_panel } = useStore();
     const { onMount, onUnmount, is_loading } = blockly_store;
     const { pending_free_bot, clearPendingFreeBot, setOpenSettings } = dashboard;
+    const { onRunButtonClick } = run_panel;
 
     // Track if we've already processed a pending bot to prevent duplicates
     const processedBotRef = React.useRef<string | null>(null);
@@ -48,6 +49,7 @@ const WorkspaceWrapper = observer(() => {
                 processedBotRef.current = pending_free_bot.name;
 
                 try {
+                    const { should_auto_run } = pending_free_bot;
                     await load({
                         block_string: pending_free_bot.xml,
                         file_name: pending_free_bot.name,
@@ -61,6 +63,9 @@ const WorkspaceWrapper = observer(() => {
                     // Show import notification and clear handoff
                     setOpenSettings?.(NOTIFICATION_TYPE.BOT_IMPORT);
                     
+                    if (should_auto_run) {
+                        onRunButtonClick();
+                    }
                     
                     clearPendingFreeBot();
 

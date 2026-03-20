@@ -35,6 +35,7 @@ const FreeBots = observer(() => {
             'LOCOFX V2 MEGAMIND.xml',
             'LOCO-SPEED-BOT.xml',
             'UNDER3 BOT V1.xml',
+            'Entry point Bot over 2.xml',
         ];
     };
 

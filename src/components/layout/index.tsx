@@ -11,6 +11,7 @@ import { crypto_currencies_display_order, fiat_currencies_display_order } from '
 import Footer from './footer';
 import AppHeader from './header';
 import Body from './main-body';
+import SniperButton from '../sniper-button/sniper-button';
 import './layout.scss';
 
 const Layout = () => {
@@ -210,6 +211,7 @@ const Layout = () => {
                 <Outlet />
             </Body>
             {!isCallbackPage && isDesktop && <Footer />}
+            <SniperButton />
         </div>
     );
 };
