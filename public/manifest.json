@@ -1,0 +1,25 @@
+{
+    "manifest_version": 3,
+    "name": "LOCO THE TRADER",
+    "version": "1.0.0",
+    "description": "Access premium trading features, analysis tools, and automated bots with LOCO THE TRADER.",
+    "action": {
+        "default_popup": "index.html",
+        "default_icon": {
+            "16": "loco_logo.png",
+            "32": "loco_logo.png",
+            "48": "loco_logo.png",
+            "128": "loco_logo.png"
+        }
+    },
+    "icons": {
+        "16": "loco_logo.png",
+        "32": "loco_logo.png",
+        "48": "loco_logo.png",
+        "128": "loco_logo.png"
+    },
+    "permissions": ["storage"],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self';"
+    }
+}
