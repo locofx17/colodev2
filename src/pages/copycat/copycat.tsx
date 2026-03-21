@@ -202,19 +202,19 @@ const Copycat = observer(() => {
               <tbody>
                 {accounts.filter(a => a.type === 'copier').map(acc => (
                   <tr key={acc.id}>
-                    <td className="token-cell">
+                    <td className="token-cell" data-label="Token">
                       <div style={{width: '6px', height: '6px', borderRadius: '50%', backgroundColor: getConnectionColor(acc), flexShrink: 0}} />
                       {acc.token.substring(0, 8)}...
                     </td>
-                    <td className="login-cell">{acc.loginId || '---'}</td>
-                    <td className="balance-cell">
+                    <td className="login-cell" data-label="Login ID">{acc.loginId || '---'}</td>
+                    <td className="balance-cell" data-label="Balance">
                       <span className="val">{acc.balance.toFixed(2)} {acc.currency}</span>
                       <span className="type">{acc.accountType}</span>
                     </td>
-                    <td className={clsx("pl-cell", (acc.totalProfit || 0) >= 0 ? "pos" : "neg")}>
+                    <td className={clsx("pl-cell", (acc.totalProfit || 0) >= 0 ? "pos" : "neg")} data-label="P/L">
                       {(acc.totalProfit || 0) >= 0 ? '+' : ''}{(acc.totalProfit || 0).toFixed(2)} {acc.currency}
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <button 
                         onClick={() => toggleAccount(acc.id)}
                         className={clsx("badge", acc.isActive ? "badge-active" : "badge-paused")}
@@ -223,7 +223,7 @@ const Copycat = observer(() => {
                         {acc.isActive ? <><Play size={10} /> Active</> : <><Pause size={10} /> Paused</>}
                       </button>
                     </td>
-                    <td>
+                    <td data-label="Connection">
                       {acc.error ? (
                         <div style={{display:'flex', flexDirection:'column', gap:'4px'}}>
                           <div style={{display:'flex', alignItems:'center', gap:'4px', color:'#ef4444'}}>
@@ -249,7 +249,7 @@ const Copycat = observer(() => {
                         </div>
                       )}
                     </td>
-                    <td style={{textAlign:'right'}}>
+                    <td style={{textAlign:'right'}} data-label="Action">
                       <button 
                         onClick={() => removeAccount(acc.id)}
                         style={{padding:'0.5rem', color:'#6b7280', background:'transparent', border:'none', cursor:'pointer', borderRadius:'0.5rem'}}
@@ -287,7 +287,7 @@ const Copycat = observer(() => {
                 Live Monitoring
               </div>
               {logs.length > 0 && (
-                <button onClick={() => setLogs([])} style={{fontSize:'9px', color:'#6b7280', background:'transparent', border:'none', cursor:'pointer', textTransform:'uppercase', fontWeight:'bold'}}>
+                <button onClick={clearLogs} style={{fontSize:'9px', color:'#6b7280', background:'transparent', border:'none', cursor:'pointer', textTransform:'uppercase', fontWeight:'bold'}}>
                   Clear
                 </button>
               )}
@@ -308,22 +308,22 @@ const Copycat = observer(() => {
               <tbody>
                 {logs.map(log => (
                   <tr key={log.id}>
-                    <td className="token-cell text-muted">{new Date(log.timestamp).toLocaleTimeString()}</td>
-                    <td className="login-cell">{log.symbol}</td>
-                    <td>
+                    <td className="token-cell text-muted" data-label="Time">{new Date(log.timestamp).toLocaleTimeString()}</td>
+                    <td className="login-cell" data-label="Symbol">{log.symbol}</td>
+                    <td data-label="Action">
                       <span className={clsx("badge", log.action === 'BUY' ? "badge-success" : "badge-danger")}>
                         {log.action}
                       </span>
                     </td>
-                    <td style={{fontFamily:'monospace', fontWeight:'bold'}}>${log.amount.toFixed(2)}</td>
-                    <td>
+                    <td style={{fontFamily:'monospace', fontWeight:'bold'}} data-label="Amount">${log.amount.toFixed(2)}</td>
+                    <td data-label="Profit">
                       {log.profit !== undefined ? (
                         <span className={clsx("pl-cell", log.profit >= 0 ? "pos" : "neg")}>
                           {log.profit >= 0 ? '+' : ''}{log.profit.toFixed(2)}
                         </span>
                       ) : <span className="text-muted">---</span>}
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <div style={{display:'flex', alignItems:'center', gap:'0.5rem'}}>
                         {log.status === 'SUCCESS' || log.status === 'WON' ? (
                           <CheckCircle2 size={12} className="text-success" />
