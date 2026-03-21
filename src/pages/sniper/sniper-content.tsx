@@ -105,6 +105,7 @@ const SniperContent = () => {
   const [activeSignals, setActiveSignals] = useState<Signal[]>([]);
   const [executionTimer, setExecutionTimer] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
+  const [showSetup, setShowSetup] = useState(true);
 
   // --- Refs ---
   const ws = useRef<WebSocket | null>(null);
@@ -343,6 +344,41 @@ const SniperContent = () => {
   useEffect(() => { selectedStrategyRef.current = selectedStrategy; }, [selectedStrategy]);
   useEffect(() => { isConnectedRef.current = isConnected; }, [isConnected]);
 
+  const triggerAnalysis = useCallback(() => {
+    if (!isScanningRef.current) return;
+
+    const marketsToAnalyze = selectedMarketRef.current === 'AUTO' 
+      ? VOLATILITY_MARKETS.map(m => m.id)
+      : [selectedMarketRef.current];
+
+    let currentSignals: Signal[] = [];
+
+    marketsToAnalyze.forEach(mId => {
+      const marketTicks = ticksRef.current[mId] || [];
+      const result = analyzeMarket(mId, marketTicks);
+      if (result) {
+        const lastDigit = marketTicks.length > 0 ? marketTicks[0].digit : 0;
+        const lastPrice = marketTicks.length > 0 ? marketTicks[0].quote : 0;
+        currentSignals.push({
+          marketId: mId,
+          strategyId: result.strategyId,
+          entry: result.entry,
+          confidence: result.confidence,
+          price: lastPrice,
+          timestamp: Date.now(),
+          entryDigit: result.entryDigit,
+          currentDigit: lastDigit,
+          digitDistribution: result.digitDistribution
+        });
+      }
+    });
+
+    const sortedSignals = currentSignals
+      .sort((a, b) => b.confidence - a.confidence)
+      .slice(0, 2);
+    setActiveSignals(sortedSignals);
+  }, [analyzeMarket]);
+
   // --- WebSocket Logic ---
   const connect = useCallback(() => {
     if (ws.current) {
@@ -398,6 +434,9 @@ const SniperContent = () => {
 
           setAllMarketTicks({ ...ticksRef.current });
           addLog(`Received ${historyTicks.length} past ticks for ${symbol}`, 'info');
+
+          // Trigger immediate analysis after history to provide instant signals
+          triggerAnalysis();
         }
 
         if (data.msg_type === 'tick') {
@@ -430,38 +469,7 @@ const SniperContent = () => {
           setProgress(progressValue);
 
           // Analyze if scanning
-          if (isScanningRef.current) {
-            const marketsToAnalyze = selectedMarketRef.current === 'AUTO' 
-              ? VOLATILITY_MARKETS.map(m => m.id)
-              : [selectedMarketRef.current];
-
-            let currentSignals: Signal[] = [];
-
-            marketsToAnalyze.forEach(mId => {
-              const marketTicks = ticksRef.current[mId] || [];
-              const result = analyzeMarket(mId, marketTicks);
-              if (result) {
-                const lastDigit = marketTicks.length > 0 ? marketTicks[0].digit : 0;
-                const lastPrice = marketTicks.length > 0 ? marketTicks[0].quote : 0;
-                currentSignals.push({
-                  marketId: mId,
-                  strategyId: result.strategyId,
-                  entry: result.entry,
-                  confidence: result.confidence,
-                  price: lastPrice,
-                  timestamp: Date.now(),
-                  entryDigit: result.entryDigit,
-                  currentDigit: lastDigit,
-                  digitDistribution: result.digitDistribution
-                });
-              }
-            });
-
-            const sortedSignals = currentSignals
-              .sort((a, b) => b.confidence - a.confidence)
-              .slice(0, 5);
-            setActiveSignals(sortedSignals);
-          }
+          triggerAnalysis();
         }
 
         if (data.error) {
@@ -519,6 +527,7 @@ const SniperContent = () => {
       return;
     }
     setIsScanning(true);
+    setShowSetup(false);
     setActiveSignals([]);
     ticksRef.current = {};
     setAllMarketTicks({});
@@ -683,329 +692,287 @@ const SniperContent = () => {
   const getMarketDecimals = (id: string) => VOLATILITY_MARKETS.find(m => m.id === id)?.decimals || 2;
   const getStrategyName = (id: string) => STRATEGIES.find(s => s.id === id)?.name || id;
 
+  const renderSetupView = () => (
+    <div className="sniper-setup">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="sniper-setup__container"
+      >
+        <div className="sniper-setup__hero">
+          <div className="sniper-setup__hero-icon">
+            <Cpu size={42} />
+          </div>
+          <h2 className="sniper-setup__hero-title">INTELLIGENCE ENGINE</h2>
+          <p className="sniper-setup__hero-subtitle">Volatility Scanner Parameters • v3.0</p>
+        </div>
+
+        <div className="sniper-setup__row">
+          <div className="sniper-setup__field">
+            <label>MARKET SELECTION</label>
+            <select 
+              value={selectedMarket}
+              onChange={(e) => setSelectedMarket(e.target.value)}
+            >
+              <option value="AUTO">AUTO (All Markets)</option>
+              {VOLATILITY_MARKETS.map(m => (
+                <option key={m.id} value={m.id}>{m.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="sniper-setup__field">
+            <label>STRATEGY LOCK</label>
+            <select 
+              value={selectedStrategy}
+              onChange={(e) => setSelectedStrategy(e.target.value)}
+            >
+              <option value="AUTO">AUTO (Best Match)</option>
+              {STRATEGIES.map(s => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="sniper-setup__autopilot">
+          <div className="sniper-setup__autopilot-info">
+            <Shield size={28} />
+            <div>
+              <div className="title">AUTO-PILOT MODE</div>
+              <div className="desc">Automated continuous scanning</div>
+            </div>
+          </div>
+          <button 
+            onClick={() => setAutoPilot(!autoPilot)}
+            className={`sniper-setup__toggle ${autoPilot ? 'on' : 'off'}`}
+          >
+            <motion.div 
+                animate={{ x: autoPilot ? 24 : 2 }} 
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                className="knob" 
+            />
+          </button>
+        </div>
+
+        <button onClick={startScan} className="sniper-setup__start-btn">
+          <Play size={20} fill="currentColor" />
+          START SMART SCAN
+        </button>
+      </motion.div>
+    </div>
+  );
+
   return (
     <div className="sniper-content">
-      {/* Header */}
-      <header className="sniper-content__header">
-        <div className="sniper-content__header-info">
-          <div className="sniper-content__header-icon">
-            <Cpu size={24} />
+      {!showSetup && (
+        <header className="sniper-content__header">
+          <div className="sniper-content__header-info">
+            <div className="sniper-content__header-icon">
+              <Cpu size={24} />
+            </div>
+            <div>
+              <h1 className="sniper-content__title">Sniper AI Intelligence</h1>
+              <p className="sniper-content__subtitle">Volatility Scanner • v3.0</p>
+            </div>
           </div>
-          <div>
-            <h1 className="sniper-content__title">Sniper AI Intelligence</h1>
-            <p className="sniper-content__subtitle">Volatility Scanner • v3.0</p>
-          </div>
-        </div>
-        
-        <div className="sniper-content__header-actions">
-          <button 
-            onClick={connect}
-            className="sniper-content__connect-btn"
-            title="Manual Reconnect"
-          >
-            {isConnected ? (
-              <><Wifi size={16} className="text-green" /> <span className="status-live">LIVE</span></>
-            ) : (
-              <><WifiOff size={16} className="text-red" /> <span className="status-offline">OFFLINE</span></>
+          
+          <div className="sniper-content__header-actions">
+            {isScanning && (
+              <button 
+                onClick={cancelScan} 
+                className="sniper-content__header-stop-btn"
+                title="Stop Scan"
+              >
+                <Square size={14} fill="currentColor" />
+                <span>STOP SCAN</span>
+              </button>
             )}
-            <RefreshCw size={12} className={`refresh-icon ${!isConnected ? 'anim-spin' : ''}`} />
-          </button>
-          
-          <div className="sniper-content__token-input">
-            <Settings size={20} className="settings-icon" />
-            <input 
-              type="password" 
-              placeholder="API Token (Optional)" 
-              value={apiToken}
-              onChange={(e) => setApiToken(e.target.value)}
-            />
-          </div>
+            
+            <div className="sniper-content__header-status-group">
+              <button 
+                onClick={connect}
+                className="sniper-content__connect-btn"
+                title="Manual Reconnect"
+              >
+                {isConnected ? (
+                  <><Wifi size={14} className="text-green" /> <span className="status-live">LIVE</span></>
+                ) : (
+                  <><WifiOff size={14} className="text-red" /> <span className="status-offline">OFFLINE</span></>
+                )}
+                <RefreshCw size={10} className={`refresh-icon ${!isConnected ? 'anim-spin' : ''}`} />
+              </button>
 
-          <button 
-            onClick={async () => {
-                try {
-                    const response = await fetch('/xml/Entry point Bot over 2.xml');
-                    const xml = await response.text();
-                    setPendingFreeBot({ name: 'Entry Point Bot', xml });
-                    setActiveTab(DBOT_TABS.BOT_BUILDER);
-                } catch (error) {
-                    console.error('Failed to load bot template:', error);
-                }
-            }}
-            className="sniper-content__load-bot-btn"
-            title="Load Bot Template"
-          >
-            <ExternalLink size={16} />
-            <span>Load Bot</span>
-          </button>
-        </div>
-      </header>
-
-      {/* Main Dashboard */}
-      <main className="sniper-content__dashboard">
-        
-        {/* Left Column: Logs & Market Grid */}
-        <div className="sniper-content__main-content">
-          
-          {/* Progress Bar - Dev Only */}
-          {is_dev && (
-            <div className="sniper-content__progress-container">
-              <div className="sniper-content__progress-header">
-                <span className="label">Data Collection Progress</span>
-                <span className="value">{Math.round(progress)}%</span>
-              </div>
-              <div className="sniper-content__progress-bar">
-                <motion.div 
-                  className="sniper-content__progress-fill"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ type: 'spring', bounce: 0, duration: 0.5 }}
-                />
+              <div className="sniper-content__header-progress">
+                <div className="progress-info">
+                  <span className="label">Collecting Data</span>
+                  <span className="value">{Math.round(progress)}%</span>
+                </div>
+                <div className="progress-bar">
+                  <motion.div 
+                    className="progress-fill"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ type: 'spring', bounce: 0, duration: 0.5 }}
+                  />
+                </div>
               </div>
             </div>
-          )}
+            
+            <div className="sniper-content__token-input">
+              <Settings size={20} className="settings-icon" />
+              <input 
+                type="password" 
+                placeholder="API Token (Optional)" 
+                value={apiToken}
+                onChange={(e) => setApiToken(e.target.value)}
+              />
+            </div>
 
-          {/* Market Grid */}
-          <div className="sniper-content__market-grid">
-            {VOLATILITY_MARKETS.map(market => {
-              const ticks = allMarketTicks[market.id] || [];
-              const lastTick = ticks[0];
-              const isTarget = selectedMarket === 'AUTO' || selectedMarket === market.id;
-              
-              return (
-                <div 
-                  key={market.id}
-                  className={`market-card ${isTarget ? 'active' : 'inactive'} ${activeSignals.some(s => s.marketId === market.id) ? 'pulse-match' : ''}`}
-                >
-                  <div className="market-name">{market.name}</div>
-                  <div className="market-data">
-                    <div className="price">
-                      {lastTick ? lastTick.quote.toFixed(market.decimals) : '---'}
-                    </div>
-                    <div className={`digit digit-${lastTick ? (lastTick.digit >= 7 ? 'red' : lastTick.digit <= 2 ? 'green' : 'blue') : 'muted'}`}>
-                      {lastTick ? lastTick.digit : '-'}
-                    </div>
-                  </div>
-                  <div className="market-history">
-                    {ticks.slice(0, 15).reverse().map((t, i) => (
-                      <div 
-                        key={i} 
-                        className={`history-dot ${t.digit % 2 === 0 ? 'even' : 'odd'}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+            <button 
+              onClick={async () => {
+                  try {
+                      const response = await fetch('/xml/Entry point Bot over 2.xml');
+                      const xml = await response.text();
+                      setPendingFreeBot({ name: 'Entry Point Bot', xml });
+                      setActiveTab(DBOT_TABS.BOT_BUILDER);
+                  } catch (error) {
+                      console.error('Failed to load bot template:', error);
+                  }
+              }}
+              className="sniper-content__load-bot-btn"
+              title="Load Bot Template"
+            >
+              <ExternalLink size={16} />
+              <span>Load Bot</span>
+            </button>
           </div>
+        </header>
+      )}
 
-          {/* Logs - Dev Only */}
-          {is_dev && (
-            <div className="sniper-content__logs-container">
-              <div className="sniper-content__logs-header">
-                <div className="label">
-                  <Terminal size={16} />
-                  <span>System Intelligence Log</span>
-                </div>
-                <button onClick={() => setLogs([])} className="clear-btn">Clear Log</button>
-              </div>
-              <div className="sniper-content__logs-content custom-scrollbar">
-                <AnimatePresence exitBeforeEnter={false}>
-                  {logs.map(log => (
-                    <motion.div 
-                      key={log.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="log-entry"
-                    >
-                      <span className="timestamp">[{log.timestamp.toLocaleTimeString()}]</span>
-                      <span className={`message type-${log.type}`}>
-                        {log.message}
-                      </span>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-                {logs.length === 0 && (
-                  <div className="empty-logs">
-                    System idle. Waiting for scan...
-                  </div>
+      {showSetup ? renderSetupView() : (
+        /* Main Dashboard */
+        <main className="sniper-content__dashboard">
+          
+          {/* Left Column: Focused Progress Tracking */}
+          <div className="sniper-content__main-content">
+            {/* Progress Bar moved to header per user request */}
+
+            <div className="sniper-content__minimal-status">
+              <Activity size={48} className={`status-icon ${isScanning ? 'anim-pulse highlight' : ''}`} />
+              <div className="status-text">
+                {isScanning ? (
+                  <>
+                    <p className="main">INTELLIGENCE SCAN ACTIVE</p>
+                    <p className="sub">Analyzing 18 markets for high-probability signals...</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="main">SYSTEM IDLE</p>
+                    <p className="sub">Ready for next intelligent scanning session.</p>
+                  </>
                 )}
               </div>
             </div>
-          )}
-        </div>
-
-        {/* Right Column: Controls & Signal */}
-        <div className="sniper-content__sidebar">
-          
-          {/* Signals */}
-          <div className="sniper-content__signals-section">
-            <div className="section-header">
-              <span className="label">Top Intelligence Signals</span>
-              {activeSignals.length > 0 && (
-                <span className="signal-count">{activeSignals.length} SIGNALS</span>
-              )}
-            </div>
-
-            <AnimatePresence exitBeforeEnter>
-              {activeSignals.length > 0 ? (
-                activeSignals.map((signal, index) => (
-                  <motion.div 
-                    key={`${signal.marketId}-${signal.strategyId}`}
-                    layout
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className={`signal-card ${index === 0 ? 'top-signal' : ''}`}
-                  >
-                    {index === 0 && <Zap className="bg-icon" />}
-
-                    <div className="signal-main">
-                      <div className="entry-digit-container">
-                        <div className="label">Entry Digit</div>
-                        <div className="value">{signal.entryDigit}</div>
-                      </div>
-                      <div className="signal-info">
-                        <div className="entry-type">
-                          {signal.entry}
-                          {index === 0 && <span className="badge">TOP</span>}
-                        </div>
-                        <div className="market-strategy">
-                          {getMarketName(signal.marketId)} • {getStrategyName(signal.strategyId)}
-                        </div>
-                        
-                        <div className="distribution-chart">
-                          {signal.digitDistribution.map((freq, i) => (
-                            <div 
-                              key={i}
-                              className={`bar ${i === signal.entryDigit ? 'active' : ''}`}
-                              style={{ height: `${Math.max(10, freq * 100)}%` }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <div className="confidence-container">
-                        <div className="value">{Math.round(signal.confidence * 100)}%</div>
-                        <div className="label">Confidence</div>
-                      </div>
-                    </div>
-
-                    <div className="signal-footer">
-                      <div className="price-info">
-                        <div className="label">Signal Price</div>
-                        <div className="value">{signal.price.toFixed(getMarketDecimals(signal.marketId))}</div>
-                      </div>
-                      <button 
-                        onClick={() => executeTrade(signal)}
-                        disabled={!!executionTimer}
-                        className="execute-btn"
-                      >
-                        <Zap size={14} />
-                        Execute
-                      </button>
-                    </div>
-                  </motion.div>
-                ))
-              ) : (
-                <div className="no-signals">
-                  <Activity size={32} className="anim-pulse" />
-                  <div className="text">Scanning Universe...</div>
-                  <p>Waiting for market conditions to align.</p>
-                </div>
-              )}
-            </AnimatePresence>
           </div>
 
-          {/* Controls */}
-          <div className="sniper-content__controls">
-            {/* Manual controls hidden as per user request (moved to background logic) */}
-            {is_dev && (
-              <>
-                <div className="control-group">
-                  <div className="field">
-                    <label>Market Selection</label>
-                    <select 
-                      value={selectedMarket}
-                      onChange={(e) => setSelectedMarket(e.target.value)}
-                    >
-                      <option value="AUTO">AUTO (All Markets)</option>
-                      {VOLATILITY_MARKETS.map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="field">
-                    <label>Strategy Lock</label>
-                    <select 
-                      value={selectedStrategy}
-                      onChange={(e) => setSelectedStrategy(e.target.value)}
-                    >
-                      <option value="AUTO">AUTO (Best Match)</option>
-                      {STRATEGIES.map(s => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
+          {/* Right Column: Controls & Signal */}
+          <div className="sniper-content__sidebar">
+            
+            {/* Signals */}
+            <div className="sniper-content__signals-section">
+              <div className="section-header">
+                <span className="label">Top Intelligence Signals</span>
+                {activeSignals.length > 0 && (
+                  <span className="signal-count">{activeSignals.length} SIGNALS</span>
+                )}
+              </div>
 
-                <div className="autopilot-toggle">
-                  <div className="info">
-                    <Shield size={20} className={autoPilot ? 'active' : ''} />
-                    <div>
-                      <div className="title">Auto-Pilot Mode</div>
-                      <div className="desc">Automated continuous scanning</div>
-                    </div>
+              <AnimatePresence exitBeforeEnter>
+                {activeSignals.length > 0 ? (
+                  activeSignals.map((signal, index) => (
+                    <motion.div 
+                      key={`${signal.marketId}-${signal.strategyId}`}
+                      layout
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                      className={`signal-card ${index === 0 ? 'top-signal' : ''}`}
+                    >
+                      {index === 0 && <Zap className="bg-icon" />}
+
+                      <div className="signal-main">
+                        <div className="entry-digit-container">
+                          <div className="label">Entry Digit</div>
+                          <div className="value">{signal.entryDigit}</div>
+                        </div>
+                        <div className="signal-info">
+                          <div className="entry-type">
+                            {signal.entry}
+                            {index === 0 && <span className="badge">TOP</span>}
+                          </div>
+                          <div className="market-strategy">
+                            {getMarketName(signal.marketId)} • {getStrategyName(signal.strategyId)}
+                          </div>
+                          
+                          <div className="distribution-chart">
+                            {signal.digitDistribution.map((freq, i) => (
+                              <div 
+                                key={i}
+                                className={`bar ${i === signal.entryDigit ? 'active' : ''}`}
+                                style={{ height: `${Math.max(10, freq * 100)}%` }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        <div className="confidence-container">
+                          <div className="value">{Math.round(signal.confidence * 100)}%</div>
+                          <div className="label">Confidence</div>
+                        </div>
+                      </div>
+
+                      <div className="signal-footer">
+                        <div className="price-info">
+                          <div className="label">Signal Price</div>
+                          <div className="value">{signal.price.toFixed(getMarketDecimals(signal.marketId))}</div>
+                        </div>
+                        <button 
+                          onClick={() => executeTrade(signal)}
+                          disabled={!!executionTimer}
+                          className="execute-btn"
+                        >
+                          <Zap size={14} />
+                          Execute
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <div className="no-signals">
+                    <Activity size={32} className="anim-pulse" />
+                    <div className="text">Scanning Universe...</div>
+                    <p>Waiting for market conditions to align.</p>
                   </div>
-                  <button 
-                    onClick={() => setAutoPilot(!autoPilot)}
-                    className={`toggle-btn ${autoPilot ? 'on' : 'off'}`}
-                  >
-                    <motion.div animate={{ x: autoPilot ? 22 : 2 }} className="knob" />
-                  </button>
-                </div>
-              </>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Controls - Only show in setup or if explicitly needed, hidden on mobile dashboard per user request */}
+            {showSetup && (
+              <div className="sniper-content__controls">
+                {/* ... (existing controls) ... */}
+              </div>
             )}
+          </div>
+        </main>
+      )}
 
-            <div className="action-btns">
-              {!isScanning ? (
-                <button onClick={startScan} className="start-btn">
-                  <Play size={16} fill="currentColor" />
-                  Start Smart Scan
-                </button>
-              ) : (
-                <div className="scanning-actions">
-                  <button onClick={cancelScan} className="cancel-btn">
-                    <Square size={16} fill="currentColor" />
-                    Cancel
-                  </button>
-                  <button onClick={reScan} className="rescan-btn">
-                    <RefreshCw size={16} />
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="sniper-content__footer">
-        <div className="footer-left">
-          <div className="status-item">
-            <div className={`dot ${isConnected ? 'green' : 'red'}`} />
-            <span>Connection: {isConnected ? 'Stable' : 'Disconnected'}</span>
-          </div>
-          <div className="status-item">
-            <BarChart3 size={14} />
-            <span>Markets: {VOLATILITY_MARKETS.length} Active</span>
-          </div>
-        </div>
-        <div className="footer-right">
-          <span>Slippage Protection: 0.1% Max</span>
-          <span className="accent">Simulated Execution Mode</span>
-        </div>
-      </footer>
+      {!showSetup && false && ( // Completely hidden per user request
+        <footer className="sniper-content__footer">
+          {/* ... footer content (now hidden) ... */}
+        </footer>
+      )}
     </div>
   );
 };
