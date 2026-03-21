@@ -8,10 +8,6 @@ import {
   Square, 
   RefreshCw, 
   Terminal, 
-  TrendingUp, 
-  TrendingDown,
-  AlertCircle,
-  CheckCircle2,
   Cpu,
   BarChart3,
   Wifi,
@@ -22,7 +18,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '@/hooks/useStore';
 import { DBOT_TABS } from '@/constants/bot-contents';
 import { fetchXmlWithCache } from '@/utils/freebots-cache';
-import './loco-hub-2.scss';
+import './sniper-content.scss';
 
 // --- Constants ---
 const DERIV_WS_URL = 'wss://ws.derivws.com/websockets/v3?app_id=84755';
@@ -95,8 +91,9 @@ interface LogEntry {
   timestamp: Date;
 }
 
-const LocoHub2 = () => {
+const SniperContent = () => {
   // --- State ---
+  const is_dev = process.env.NODE_ENV === 'development';
   const [isConnected, setIsConnected] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [autoPilot, setAutoPilot] = useState(false);
@@ -687,23 +684,23 @@ const LocoHub2 = () => {
   const getStrategyName = (id: string) => STRATEGIES.find(s => s.id === id)?.name || id;
 
   return (
-    <div className="loco-hub-2">
+    <div className="sniper-content">
       {/* Header */}
-      <header className="loco-hub-2__header">
-        <div className="loco-hub-2__header-info">
-          <div className="loco-hub-2__header-icon">
+      <header className="sniper-content__header">
+        <div className="sniper-content__header-info">
+          <div className="sniper-content__header-icon">
             <Cpu size={24} />
           </div>
           <div>
-            <h1 className="loco-hub-2__title">AI Intelligence Stream</h1>
-            <p className="loco-hub-2__subtitle">Volatility Scanner • v2.5</p>
+            <h1 className="sniper-content__title">Sniper AI Intelligence</h1>
+            <p className="sniper-content__subtitle">Volatility Scanner • v3.0</p>
           </div>
         </div>
         
-        <div className="loco-hub-2__header-actions">
+        <div className="sniper-content__header-actions">
           <button 
             onClick={connect}
-            className="loco-hub-2__connect-btn"
+            className="sniper-content__connect-btn"
             title="Manual Reconnect"
           >
             {isConnected ? (
@@ -714,7 +711,7 @@ const LocoHub2 = () => {
             <RefreshCw size={12} className={`refresh-icon ${!isConnected ? 'anim-spin' : ''}`} />
           </button>
           
-          <div className="loco-hub-2__token-input">
+          <div className="sniper-content__token-input">
             <Settings size={20} className="settings-icon" />
             <input 
               type="password" 
@@ -735,7 +732,7 @@ const LocoHub2 = () => {
                     console.error('Failed to load bot template:', error);
                 }
             }}
-            className="loco-hub-2__load-bot-btn"
+            className="sniper-content__load-bot-btn"
             title="Load Bot Template"
           >
             <ExternalLink size={16} />
@@ -745,29 +742,31 @@ const LocoHub2 = () => {
       </header>
 
       {/* Main Dashboard */}
-      <main className="loco-hub-2__dashboard">
+      <main className="sniper-content__dashboard">
         
         {/* Left Column: Logs & Market Grid */}
-        <div className="loco-hub-2__main-content">
+        <div className="sniper-content__main-content">
           
-          {/* Progress Bar */}
-          <div className="loco-hub-2__progress-container">
-            <div className="loco-hub-2__progress-header">
-              <span className="label">Data Collection Progress</span>
-              <span className="value">{Math.round(progress)}%</span>
+          {/* Progress Bar - Dev Only */}
+          {is_dev && (
+            <div className="sniper-content__progress-container">
+              <div className="sniper-content__progress-header">
+                <span className="label">Data Collection Progress</span>
+                <span className="value">{Math.round(progress)}%</span>
+              </div>
+              <div className="sniper-content__progress-bar">
+                <motion.div 
+                  className="sniper-content__progress-fill"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ type: 'spring', bounce: 0, duration: 0.5 }}
+                />
+              </div>
             </div>
-            <div className="loco-hub-2__progress-bar">
-              <motion.div 
-                className="loco-hub-2__progress-fill"
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ type: 'spring', bounce: 0, duration: 0.5 }}
-              />
-            </div>
-          </div>
+          )}
 
           {/* Market Grid */}
-          <div className="loco-hub-2__market-grid">
+          <div className="sniper-content__market-grid">
             {VOLATILITY_MARKETS.map(market => {
               const ticks = allMarketTicks[market.id] || [];
               const lastTick = ticks[0];
@@ -800,45 +799,47 @@ const LocoHub2 = () => {
             })}
           </div>
 
-          {/* Logs */}
-          <div className="loco-hub-2__logs-container">
-            <div className="loco-hub-2__logs-header">
-              <div className="label">
-                <Terminal size={16} />
-                <span>System Intelligence Log</span>
-              </div>
-              <button onClick={() => setLogs([])} className="clear-btn">Clear Log</button>
-            </div>
-            <div className="loco-hub-2__logs-content custom-scrollbar">
-              <AnimatePresence exitBeforeEnter={false}>
-                {logs.map(log => (
-                  <motion.div 
-                    key={log.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="log-entry"
-                  >
-                    <span className="timestamp">[{log.timestamp.toLocaleTimeString()}]</span>
-                    <span className={`message type-${log.type}`}>
-                      {log.message}
-                    </span>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-              {logs.length === 0 && (
-                <div className="empty-logs">
-                  System idle. Waiting for scan...
+          {/* Logs - Dev Only */}
+          {is_dev && (
+            <div className="sniper-content__logs-container">
+              <div className="sniper-content__logs-header">
+                <div className="label">
+                  <Terminal size={16} />
+                  <span>System Intelligence Log</span>
                 </div>
-              )}
+                <button onClick={() => setLogs([])} className="clear-btn">Clear Log</button>
+              </div>
+              <div className="sniper-content__logs-content custom-scrollbar">
+                <AnimatePresence exitBeforeEnter={false}>
+                  {logs.map(log => (
+                    <motion.div 
+                      key={log.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="log-entry"
+                    >
+                      <span className="timestamp">[{log.timestamp.toLocaleTimeString()}]</span>
+                      <span className={`message type-${log.type}`}>
+                        {log.message}
+                      </span>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+                {logs.length === 0 && (
+                  <div className="empty-logs">
+                    System idle. Waiting for scan...
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Right Column: Controls & Signal */}
-        <div className="loco-hub-2__sidebar">
+        <div className="sniper-content__sidebar">
           
           {/* Signals */}
-          <div className="loco-hub-2__signals-section">
+          <div className="sniper-content__signals-section">
             <div className="section-header">
               <span className="label">Top Intelligence Signals</span>
               {activeSignals.length > 0 && (
@@ -917,49 +918,54 @@ const LocoHub2 = () => {
           </div>
 
           {/* Controls */}
-          <div className="loco-hub-2__controls">
-            <div className="control-group">
-              <div className="field">
-                <label>Market Selection</label>
-                <select 
-                  value={selectedMarket}
-                  onChange={(e) => setSelectedMarket(e.target.value)}
-                >
-                  <option value="AUTO">AUTO (All Markets)</option>
-                  {VOLATILITY_MARKETS.map(m => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="field">
-                <label>Strategy Lock</label>
-                <select 
-                  value={selectedStrategy}
-                  onChange={(e) => setSelectedStrategy(e.target.value)}
-                >
-                  <option value="AUTO">AUTO (Best Match)</option>
-                  {STRATEGIES.map(s => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="autopilot-toggle">
-              <div className="info">
-                <Shield size={20} className={autoPilot ? 'active' : ''} />
-                <div>
-                  <div className="title">Auto-Pilot Mode</div>
-                  <div className="desc">Automated continuous scanning</div>
+          <div className="sniper-content__controls">
+            {/* Manual controls hidden as per user request (moved to background logic) */}
+            {is_dev && (
+              <>
+                <div className="control-group">
+                  <div className="field">
+                    <label>Market Selection</label>
+                    <select 
+                      value={selectedMarket}
+                      onChange={(e) => setSelectedMarket(e.target.value)}
+                    >
+                      <option value="AUTO">AUTO (All Markets)</option>
+                      {VOLATILITY_MARKETS.map(m => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label>Strategy Lock</label>
+                    <select 
+                      value={selectedStrategy}
+                      onChange={(e) => setSelectedStrategy(e.target.value)}
+                    >
+                      <option value="AUTO">AUTO (Best Match)</option>
+                      {STRATEGIES.map(s => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-              </div>
-              <button 
-                onClick={() => setAutoPilot(!autoPilot)}
-                className={`toggle-btn ${autoPilot ? 'on' : 'off'}`}
-              >
-                <motion.div animate={{ x: autoPilot ? 22 : 2 }} className="knob" />
-              </button>
-            </div>
+
+                <div className="autopilot-toggle">
+                  <div className="info">
+                    <Shield size={20} className={autoPilot ? 'active' : ''} />
+                    <div>
+                      <div className="title">Auto-Pilot Mode</div>
+                      <div className="desc">Automated continuous scanning</div>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => setAutoPilot(!autoPilot)}
+                    className={`toggle-btn ${autoPilot ? 'on' : 'off'}`}
+                  >
+                    <motion.div animate={{ x: autoPilot ? 22 : 2 }} className="knob" />
+                  </button>
+                </div>
+              </>
+            )}
 
             <div className="action-btns">
               {!isScanning ? (
@@ -984,7 +990,7 @@ const LocoHub2 = () => {
       </main>
 
       {/* Footer */}
-      <footer className="loco-hub-2__footer">
+      <footer className="sniper-content__footer">
         <div className="footer-left">
           <div className="status-item">
             <div className={`dot ${isConnected ? 'green' : 'red'}`} />
@@ -1004,4 +1010,4 @@ const LocoHub2 = () => {
   );
 };
 
-export default LocoHub2;
+export default SniperContent;

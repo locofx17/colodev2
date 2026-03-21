@@ -22,7 +22,7 @@ export const DBOT_TABS: TDashboardTabIndex = Object.freeze({
     DTRADER: 7,
     AUTO_TRADES: 8,
     TRADING_PLANS: 9,
-    LOCO_HUB_2: 10,
+    SNIPER: 10,
     // Keep TUTORIAL as a non-active sentinel to avoid index mismatches in legacy checks
     TUTORIAL: 999,
 });
@@ -41,7 +41,7 @@ export const TAB_IDS = [
     'id-dtrader',
     'id-auto-trades',
     'id-trading-plans',
-    'id-loco-hub-2',
+    'id-sniper',
 ];
 
 

@@ -6,13 +6,12 @@ import './sniper-button.scss';
 
 const SniperButton = observer(() => {
     const { dashboard } = useStore();
-    const { setActiveTab, active_tab } = dashboard;
+    const { setSniperModalVisibility, is_sniper_modal_visible } = dashboard;
 
-    // Only hide if we are already on Loco Hub 2 tab
-    if (active_tab === DBOT_TABS.LOCO_HUB_2) return null;
+    if (is_sniper_modal_visible) return null;
 
     const handleClick = () => {
-        setActiveTab(DBOT_TABS.LOCO_HUB_2);
+        setSniperModalVisibility(true);
     };
 
     return (

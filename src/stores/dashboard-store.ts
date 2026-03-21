@@ -60,6 +60,8 @@ export interface IDashboardStore {
     toast_message: string;
     is_chart_modal_visible: boolean;
     is_trading_view_modal_visible: boolean;
+    is_sniper_modal_visible: boolean;
+    setSniperModalVisibility: (is_sniper_modal_visible: boolean) => void;
     setPreviewOnPopup: (is_preview_on_popup: boolean) => void;
     // Free Bots handoff
     pending_free_bot: { name: string; xml: string; should_auto_run?: boolean } | null;
@@ -136,7 +138,9 @@ export default class DashboardStore implements IDashboardStore {
             // Free Bots handoff
             pending_free_bot: observable,
             is_digit_dist_modal_visible: observable,
+            is_sniper_modal_visible: observable,
             setDigitDistModalVisibility: action.bound,
+            setSniperModalVisibility: action.bound,
             setPendingFreeBot: action.bound,
             clearPendingFreeBot: action.bound,
             digit_stats_settings: observable,
@@ -222,6 +226,7 @@ export default class DashboardStore implements IDashboardStore {
     // Free Bots handoff state
     pending_free_bot: { name: string; xml: string; should_auto_run?: boolean } | null = null;
     is_digit_dist_modal_visible = false;
+    is_sniper_modal_visible = false;
     digit_stats_settings = {
         trade_type: 'evenodd',
         prediction: 0,
@@ -234,6 +239,10 @@ export default class DashboardStore implements IDashboardStore {
 
     setDigitDistModalVisibility = (is_digit_dist_modal_visible: boolean) => {
         this.is_digit_dist_modal_visible = is_digit_dist_modal_visible;
+    };
+
+    setSniperModalVisibility = (is_sniper_modal_visible: boolean) => {
+        this.is_sniper_modal_visible = is_sniper_modal_visible;
     };
 
     setPendingFreeBot = (bot: { name: string; xml: string; should_auto_run?: boolean }) => {
