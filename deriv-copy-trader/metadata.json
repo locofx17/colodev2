@@ -1,0 +1,5 @@
+{
+  "name": "Deriv Copy Trader",
+  "description": "A professional copy trading platform for Deriv. Copy trades from Master accounts (Demo or Real) to Copier accounts (Demo or Real) in real-time.",
+  "requestFramePermissions": []
+}

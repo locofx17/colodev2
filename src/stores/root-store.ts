@@ -20,6 +20,7 @@ import ToolbarStore from './toolbar-store';
 import ToolboxStore from './toolbox-store';
 import TransactionsStore from './transactions-store';
 import UiStore from './ui-store';
+import SniperStore from './sniper-store';
 
 
 // TODO: need to write types for the individual classes and convert them to ts
@@ -49,6 +50,7 @@ export default class RootStore {
     public ui: UiStore;
     public client: ClientStore;
     public common: CommonStore;
+    public sniper: SniperStore;
 
     core = {
         ui: {},
@@ -83,6 +85,7 @@ export default class RootStore {
         this.self_exclusion = new SelfExclusionStore(this, this.core);
         this.dashboard = new DashboardStore(this, this.core);
         this.copycat = new CopycatStore(this);
+        this.sniper = new SniperStore(this);
 
         // need to be at last for dependency
         this.chart_store = new ChartStore(this);
