@@ -1,26 +1,23 @@
 .sniper-content {
-    background: radial-gradient(circle at top right, #1a1a2e, #16213e);
-    color: #e94560;
-    --panel-dark: #151c27;
-    --accent-blue: #1a4da1;
-    --accent-green: #2ecc71;
-    --accent-red: #e74c3c;
-    --text-muted: #8e9299;
-
+    // === SCROLLING FIX: allow page to grow naturally ===
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: auto;
-    max-height: 80vh;
-    background-color: var(--bg-dark);
+    min-height: 100%; // Changed from max-height: 80vh
+    background-color: #0b0e14;
     color: #ffffff;
     font-family: 'Inter', sans-serif;
-    overflow: hidden;
-    border-radius: 8px;
+    overflow-x: hidden;
+    padding-bottom: 12rem; // Clear the fixed bottom controls bar
+
+    // White / Light theme base
+    body.theme--light & {
+        background-color: #f4f6f9;
+        color: #1a1a2e;
+    }
 
     @media (max-width: 1024px) {
-        max-height: 100vh;
-        height: 100%;
+        min-height: 100vh;
         border-radius: 0;
     }
 
@@ -29,8 +26,13 @@
         justify-content: space-between;
         align-items: center;
         padding: 0.75rem 1rem;
-        background-color: var(--panel-dark);
+        background-color: #151c27;
         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+        body.theme--light & {
+            background-color: #ffffff;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
 
         &-info {
             display: flex;
@@ -55,10 +57,14 @@
 
             .sniper-content__subtitle {
                 font-size: 0.7rem;
-                color: var(--text-muted);
+                color: #8e9299;
                 text-transform: uppercase;
                 letter-spacing: 0.1em;
                 margin: 0;
+
+                body.theme--light & {
+                    color: #4b5563;
+                }
             }
         }
 
@@ -254,6 +260,11 @@
     &__controls {
         padding: 1rem;
         border-radius: 0.75rem;
+
+        body.theme--light & {
+            background: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
     }
 
     &__footer {
@@ -271,6 +282,11 @@
         background: rgba(15, 20, 30, 0.5);
         border-radius: 0.75rem;
         border: 1px solid rgba(255, 255, 255, 0.04);
+
+        body.theme--light & {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
 
         .section-header {
             display: flex;
@@ -312,6 +328,13 @@
         position: relative;
         overflow: hidden;
         transition: all 0.2s;
+
+        body.theme--light & {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-left: 3px solid #3b82f6;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
 
         &:hover { border-left-color: rgba(59, 130, 246, 0.6); }
 
@@ -488,12 +511,18 @@
         align-items: center;
         justify-content: center;
         text-align: center;
-        color: var(--text-muted);
+        color: #8e9299;
         gap: 1rem;
         padding: 3rem;
 
-        svg { color: var(--accent-blue); opacity: 0.5; }
-        .text { font-size: 1rem; font-weight: 700; color: #ffffff; letter-spacing: 0.05em; }
+        body.theme--light & {
+            color: #4b5563;
+        }
+
+        svg { color: #1a4da1; opacity: 0.5; }
+        .text { font-size: 1rem; font-weight: 700; color: #ffffff; letter-spacing: 0.05em; 
+            body.theme--light & { color: #1a1a2e; }
+        }
         p { font-size: 0.8rem; margin: 0; }
     }
 
@@ -511,6 +540,11 @@
         padding: 0; // Remove outer padding
         min-height: 100%;
         overflow-y: auto;
+
+        body.theme--light & {
+            background-color: #f4f6f9;
+            background-image: none;
+        }
 
         &__container {
             width: 100%;
@@ -532,6 +566,12 @@
             position: relative;
             overflow: hidden;
             margin-bottom: 2rem;
+
+            body.theme--light & {
+                background: #ffffff;
+                border: 1px solid rgba(0, 0, 0, 0.05);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            }
 
             &::before {
                 content: '';
@@ -574,6 +614,13 @@
                 -webkit-background-clip: text;
                 background-clip: text;
                 -webkit-text-fill-color: transparent;
+
+                body.theme--light & {
+                    background: #1a1a2e;
+                    -webkit-background-clip: unset;
+                    background-clip: unset;
+                    -webkit-text-fill-color: initial;
+                }
             }
 
             &-subtitle {
@@ -590,6 +637,11 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 2rem;
+
+            @media (max-width: 640px) {
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+            }
         }
 
         &__field {
@@ -615,10 +667,21 @@
                 font-weight: 600;
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
+                body.theme--light & {
+                    background-color: #f9fafb;
+                    border: 1px solid #d1d5db;
+                    color: #1a1a2e;
+                }
+
                 &:hover {
                     border-color: rgba(26, 77, 161, 0.5);
                     background-color: rgba(13, 17, 23, 0.8);
                     transform: translateY(-1px);
+
+                    body.theme--light & {
+                        background-color: #ffffff;
+                        border-color: #3b82f6;
+                    }
                 }
 
                 &:focus {
@@ -649,9 +712,18 @@
             align-items: center;
             transition: all 0.3s;
 
+            body.theme--light & {
+                background-color: #f9fafb;
+                border: 1px solid #d1d5db;
+            }
+
             &:hover {
                 border-color: rgba(255, 255, 255, 0.1);
                 background-color: rgba(8, 10, 15, 0.6);
+
+                body.theme--light & {
+                    background-color: #ffffff;
+                }
             }
 
             &-info {
@@ -674,7 +746,21 @@
 
                 .desc {
                     font-size: 0.75rem;
-                    color: var(--text-muted);
+                    color: #8e9299;
+
+                    body.theme--light & {
+                        color: #4b5563;
+                    }
+                }
+            }
+
+            @media (max-width: 480px) {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+                
+                .sniper-setup__toggle {
+                    align-self: flex-end;
                 }
             }
         }
