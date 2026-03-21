@@ -4,12 +4,12 @@
   color: #f3f4f6;
   font-family: sans-serif;
   padding: 1rem;
-  padding-bottom: 3rem; /* Extra padding at bottom to ensure nothing is cut off */
+  padding-bottom: 15rem; /* Massive bottom padding for extremely comfortable mobile scrolling */
   overflow-y: auto;
   
   @media (min-width: 768px) {
     padding: 2rem;
-    padding-bottom: 4rem;
+    padding-bottom: 8rem;
   }
 
   .copycat-container {

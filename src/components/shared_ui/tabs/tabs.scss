@@ -90,6 +90,7 @@
             sans-serif !important;
         -webkit-touch-callout: none;
         -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
 
         // Theme-aware tab text
         * {

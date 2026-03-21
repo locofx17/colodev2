@@ -56,7 +56,7 @@ const Copycat = observer(() => {
             onClick={handleToggleReplication}
             className={clsx("btn", isReplicating ? "btn-stop" : "btn-start")}
           >
-            {isReplicating ? "⏹ Stop Copy Trading" : "▶ Start Demo to Real Copy Trading"}
+            {isReplicating ? "⏹ Stop Copy Trading" : masterAccount?.accountType === 'demo' ? "▶ Start Demo to Real Copy Trading" : "▶ Start Copy Trading"}
           </button>
         </div>
 
@@ -125,12 +125,6 @@ const Copycat = observer(() => {
                 </div>
               </div>
             </div>
-            {/* Master is always auto-linked from logged-in account */}
-            {masterAccount && (
-              <button onClick={() => removeAccount(masterAccount.id)} className="btn-trash" title="Unlink master">
-                <Trash2 size={16} />
-              </button>
-            )}
           </div>
         </div>
 
