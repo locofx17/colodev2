@@ -548,9 +548,10 @@ const LocoHub2 = () => {
         const xml = await response.text();
 
         // Patch XML with signal data
-        // Update entry point value
+        // Update entry point value (The trigger digit)
+        // Fixed regex to correctly match the literal ID "$?c=egHj3+^Omn8#P:L)"
         let modifiedXml = xml.replace(
-            /<block type="math_number" id="\$?c=egHj3\+^Omn8#P:L\)">\s*<field name="NUM">\d+<\/field>/g,
+            /<block type="math_number" id="\$\?c=egHj3\+\^Omn8#P:L\)">\s*<field name="NUM">\d+<\/field>/g,
             `<block type="math_number" id="$?c=egHj3+^Omn8#P:L)"><field name="NUM">${signal.entryDigit ?? 0}</field>`
         );
 
@@ -589,17 +590,23 @@ const LocoHub2 = () => {
                 `<field name="TYPE_LIST">${subTypeMap[signal.entry] || 'DIGITUNDER'}</field>`
             );
             // Ensure prediction mutation is TRUE for digit trades
+            // More robust regex to match both true/false and variations in spacing
             modifiedXml = modifiedXml.replace(
-                /<block type="trade_definition_tradeoptions" id="bTRRAtlrO1HOKPi6\/\(ac">\s*<mutation xmlns="http:\/\/www\.w3\.org\/1999\/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="false"><\/mutation>/g,
+                /<block type="trade_definition_tradeoptions" id="bTRRAtlrO1HOKPi6\/\(ac">\s*<mutation xmlns="http:\/\/www\.w3\.org\/1999\/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="(true|false)"><\/mutation>/g,
                 `<block type="trade_definition_tradeoptions" id="bTRRAtlrO1HOKPi6/(ac"><mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="true"></mutation>`
             );
-            // Update prediction value
-            if (signal.entryDigit !== undefined) {
-                modifiedXml = modifiedXml.replace(
-                    /<shadow type="math_number_positive" id="\}!H\]\{1cFD-lwfop@y\{sn">\s*<field name="NUM">\d+<\/field>/g,
-                    `<shadow type="math_number_positive" id="}!H]{1cFD-lwfop@y{sn"><field name="NUM">${signal.entryDigit}</field>`
-                );
-            }
+
+            // Determine strategy-based prediction
+            let prediction = signal.entryDigit;
+            if (signal.entry === 'UNDER 5') prediction = 5;
+            if (signal.entry === 'OVER 4') prediction = 4;
+
+            // Update prediction value in the XML
+            // Fixed regex to include potential attributes like 'inline="true"'
+            modifiedXml = modifiedXml.replace(
+                /<shadow type="math_number_positive" id="\}!H\]\{1cFD-lwfop@y\{sn"(?: inline="true")?>\s*<field name="NUM">\d+<\/field>/g,
+                `<shadow type="math_number_positive" id="}!H]{1cFD-lwfop@y{sn" inline="true"><field name="NUM">${prediction}</field>`
+            );
         } else {
             // RSI - CALL/PUT
             const contractType = signal.entry === 'RISE' ? 'CALL' : 'PUT';
