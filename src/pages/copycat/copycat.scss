@@ -1,11 +1,11 @@
 .copycat-page {
-  height: calc(100vh - 50px);
+  min-height: 100%;
+  height: auto;
   background-color: #0a0a0a;
   color: #f3f4f6;
   font-family: sans-serif;
   padding: 1rem;
   padding-bottom: 15rem; /* Massive bottom padding for extremely comfortable mobile scrolling */
-  overflow-y: auto;
   
   @media (min-width: 768px) {
     padding: 2rem;
