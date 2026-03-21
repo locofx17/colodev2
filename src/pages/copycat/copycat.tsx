@@ -52,7 +52,7 @@ const Copycat = observer(() => {
               {sessionPL >= 0 ? '+' : ''}{sessionPL.toFixed(2)} USD
             </span>
           </div>
-          <button 
+          <button
             onClick={handleToggleReplication}
             className={clsx("btn", isReplicating ? "btn-stop" : "btn-start")}
           >
@@ -94,17 +94,17 @@ const Copycat = observer(() => {
                 )}
               </div>
               <span className="account-name">
-                {masterAccount 
-                  ? masterAccount.loginId === 'Connecting...' 
+                {masterAccount
+                  ? masterAccount.loginId === 'Connecting...'
                     ? `${loginid} — Connecting...`
-                    : `${masterAccount.loginId} — ${masterAccount.accountType === 'demo' ? 'Demo' : 'Real'} Account` 
+                    : `${masterAccount.loginId} — ${masterAccount.accountType === 'demo' ? 'Demo' : 'Real'} Account`
                   : is_logged_in ? "Auto-linking..." : "Not linked — please log in"}
               </span>
             </div>
           </div>
           <div className="banner-right">
             {masterAccount?.error && (
-              <button 
+              <button
                 onClick={() => setAccounts(prev => prev.map(a => a.id === masterAccount.id ? { ...a, error: undefined, isActive: true } : a))}
                 className="btn btn-link"
               >
@@ -115,13 +115,13 @@ const Copycat = observer(() => {
               <div className="stat-item">
                 <div className="stat-label">Session P/L</div>
                 <div className={clsx("stat-value", (masterAccount?.totalProfit || 0) >= 0 ? "text-green" : "text-red")}>
-                  {masterAccount ? `${(masterAccount.totalProfit || 0).toFixed(2)} ${masterAccount.currency}` : "0.00 USD"}
+                  {masterAccount ? `${(masterAccount.totalProfit || 0).toFixed(2)} USD` : "0.00 USD"}
                 </div>
               </div>
               <div className="stat-item">
                 <div className="stat-label">Balance</div>
                 <div className="stat-value text-yellow">
-                  {masterAccount ? `${masterAccount.balance.toFixed(2)} ${masterAccount.currency}` : "0.00 USD"}
+                  {masterAccount ? `${Number(client.balance).toFixed(2)} ${client.currency || 'USD'}` : "0.00 USD"}
                 </div>
               </div>
             </div>
