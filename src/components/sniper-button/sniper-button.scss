@@ -99,16 +99,16 @@
 // Mobile overrides
 @media screen and (max-width: 768px) {
   .sniper-button {
-    bottom: 55px; // Moved down to avoid blocking profit/loss
-    right: 15px;
+    bottom: 85px; // Above bottom nav
+    right: 20px;
     
     &__circle {
-      width: 50px;
-      height: 50px;
+      width: 52px;
+      height: 52px;
     }
     
     &__text {
-      font-size: 18px;
+      font-size: 20px;
     }
     
     &__status {

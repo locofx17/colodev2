@@ -99,11 +99,10 @@ The DTrader tab appears in the main navigation bar:
 3. **Charts** (existing)
 4. **Tutorials** (existing)
 5. **Free Bots** (existing)
-6. **Copy Trading** (existing)
-7. **DTrader** ✨ **NEW**
-8. **TradingView** (existing)
-9. **Analysis Tool** (existing)
-10. **Signals** (existing)
+6. **DTrader** ✨ **NEW**
+7. **TradingView** (existing)
+8. **Analysis Tool** (existing)
+9. **Signals** (existing)
 
 ## 🎨 Color Scheme
 
@@ -163,35 +162,12 @@ When DTrader is ready for implementation:
 - **User Engagement** - Notification signup for when service returns
 - **Brand Consistency** - Maintains professional look and feel
 
-## 🎯 Key Differences from Copy Trading
-
-### Design Theme:
-
-- **Color**: Blue theme (vs Orange for Copy Trading)
-- **Status**: "Under Maintenance" (vs "Coming Soon")
-- **Progress**: 85% complete (vs 65% for Copy Trading)
-- **Icon**: Trading chart with candlesticks (vs Copy icon)
-
-### Features Focus:
-
-- **Trading Platform**: Advanced charting and execution
-- **Market Data**: Real-time data and multiple assets
-- **Customization**: Customizable trading interface
-- **Analysis**: Technical analysis tools
-
-### User Messaging:
-
-- **Maintenance**: Platform is being upgraded
-- **Notification**: Get notified when back online
-- **Completion**: Shows high completion percentage
-- **Professional**: Enterprise-grade trading platform
-
 The DTrader "Under Maintenance" page successfully communicates that the trading platform is being upgraded while maintaining the professional look and feel of the Deriv Bot application! 🎉
 
 ## 🔗 Navigation Flow
 
 Users can now navigate through:
 
-- Dashboard → Bot Builder → Charts → Tutorials → Free Bots → Copy Trading → **DTrader** → TradingView → Analysis Tool → Signals
+- Dashboard → Bot Builder → Charts → Tutorials → Free Bots → **DTrader** → TradingView → Analysis Tool → Signals
 
 The DTrader tab provides a professional maintenance experience that builds anticipation for the upgraded trading platform while keeping users informed about the progress and expected features.

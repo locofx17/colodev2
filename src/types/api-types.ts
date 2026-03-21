@@ -37,14 +37,7 @@ import {
     CashierInformationResponse,
     ContractsForSymbolRequest,
     ContractsForSymbolResponse,
-    CopyTradingListRequest,
-    CopyTradingListResponse,
-    CopyTradingStartRequest,
-    CopyTradingStartResponse,
-    CopyTradingStatisticsRequest,
-    CopyTradingStatisticsResponse,
-    CopyTradingStopRequest,
-    CopyTradingStopResponse,
+
     CountriesListRequest,
     CountriesListResponse,
     CryptocurrencyConfigurationsRequest,
@@ -360,22 +353,7 @@ type TSocketEndpoints = {
         request: ContractsForSymbolRequest;
         response: ContractsForSymbolResponse;
     };
-    copy_start: {
-        request: CopyTradingStartRequest;
-        response: CopyTradingStartResponse;
-    };
-    copy_stop: {
-        request: CopyTradingStopRequest;
-        response: CopyTradingStopResponse;
-    };
-    copytrading_list: {
-        request: CopyTradingListRequest;
-        response: CopyTradingListResponse;
-    };
-    copytrading_statistics: {
-        request: CopyTradingStatisticsRequest;
-        response: CopyTradingStatisticsResponse;
-    };
+
     crypto_config: {
         request: CryptocurrencyConfigurationsRequest;
         response: CryptocurrencyConfigurationsResponse;

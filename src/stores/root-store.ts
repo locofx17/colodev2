@@ -5,6 +5,7 @@ import ClientStore from './client-store';
 import CommonStore from './common-store';
 import DashboardStore from './dashboard-store';
 import DataCollectionStore from './data-collection-store';
+import CopycatStore from './copycat-store';
 import FlyoutHelpStore from './flyout-help-store';
 import FlyoutStore from './flyout-store';
 import GoogleDriveStore from './google-drive-store';
@@ -19,8 +20,7 @@ import ToolbarStore from './toolbar-store';
 import ToolboxStore from './toolbox-store';
 import TransactionsStore from './transactions-store';
 import UiStore from './ui-store';
-import copyTradingManager, { CopyTradingManager } from '@/pages/copy-trading/copy-trading-manager';
-import { initReplicator } from '@/pages/copy-trading/replicator';
+
 
 // TODO: need to write types for the individual classes and convert them to ts
 export default class RootStore {
@@ -40,7 +40,7 @@ export default class RootStore {
     public quick_strategy: QuickStrategyStore;
     public self_exclusion: SelfExclusionStore;
     public dashboard: DashboardStore;
-    public copy_trading: CopyTradingManager;
+    public copycat: CopycatStore;
 
     public chart_store: ChartStore;
     public blockly_store: BlocklyStore;
@@ -82,13 +82,13 @@ export default class RootStore {
         this.quick_strategy = new QuickStrategyStore(this);
         this.self_exclusion = new SelfExclusionStore(this, this.core);
         this.dashboard = new DashboardStore(this, this.core);
+        this.copycat = new CopycatStore(this);
 
         // need to be at last for dependency
         this.chart_store = new ChartStore(this);
         this.blockly_store = new BlocklyStore(this);
         this.data_collection_store = new DataCollectionStore(this, this.core);
 
-        this.copy_trading = copyTradingManager;
-        initReplicator(this.copy_trading);
+
     }
 }

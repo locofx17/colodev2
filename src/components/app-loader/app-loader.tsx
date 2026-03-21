@@ -173,7 +173,6 @@ const AppLoader: React.FC<AppLoaderProps> = ({ onLoadingComplete, duration = 600
           <ul className="feature-list">
             <li className="feature-item">Analysis Tool</li>
             <li className="feature-item">Trading Bots</li>
-            <li className="feature-item">Copy Trading</li>
           </ul>
           <div className="feature-tagline">Making trading smooth, simple, and stress-free</div>
         </div>

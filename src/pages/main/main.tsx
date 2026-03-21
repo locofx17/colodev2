@@ -37,13 +37,14 @@ import './main.scss';
 const ChartWrapper = lazy(() => import('../chart/chart-wrapper'));
 
 const SmartAnalysis = lazy(() => import('../smart-analysis'));
-const CopyTrading = lazy(() => import('../copy-trading'));
+
 const TradingPlans = lazy(() => import('../trading-plans'));
 
 
 const Dtrader = lazy(() => import('../dtrader'));
 const DCircle = lazy(() => import('../dcircle'));
 const AutoTrades = lazy(() => import('../auto-trades'));
+const Copycat = lazy(() => import('../copycat'));
 // Import SniperModal
 import SniperModal from '@/components/sniper-modal/sniper-modal';
 // Import FreeBots directly instead of lazy loading for faster access
@@ -79,7 +80,7 @@ const AppWrapper = observer(() => {
     const { clear } = summary_card;
     const { DASHBOARD, BOT_BUILDER } = DBOT_TABS;
     const init_render = React.useRef(true);
-    const hash = ['dashboard', 'bot_builder', 'chart', 'free_bots', 'dcircle', 'copy_trading', 'smart_analysis', 'dtrader', 'auto_trades', 'trading-plans', 'sniper'];
+    const hash = ['dashboard', 'bot_builder', 'chart', 'free_bots', 'dcircle', 'smart_analysis', 'dtrader', 'auto_trades', 'trading-plans', 'sniper', 'copycat'];
 
     const { isDesktop } = useDevice();
     const location = useLocation();
@@ -330,27 +331,7 @@ const AppWrapper = observer(() => {
                                     <DCircle />
                                 </Suspense>
                             </div>
-                            <div
-                                label={
-                                    <>
-                                        <LabelPairedSignalCaptionRegularIcon
-                                            height='24px'
-                                            width='24px'
-                                            fill='var(--text-general)'
-                                        />
-                                        <Localize i18n_default_text='Copy Trading' />
-                                    </>
-                                }
-                                id='id-copy-trading'
-                            >
-                                <Suspense
-                                    fallback={
-                                        <ChunkLoader message={localize('Please wait, loading Copy Trading...')} />
-                                    }
-                                >
-                                    <CopyTrading />
-                                </Suspense>
-                            </div>
+
                             <div
                                 label={
                                     <>
@@ -429,6 +410,26 @@ const AppWrapper = observer(() => {
                                     fallback={<ChunkLoader message={localize('Please wait, loading Trading Plans...')} />}
                                 >
                                     <TradingPlans />
+                                </Suspense>
+                            </div>
+
+                            <div
+                                label={
+                                    <>
+                                        <LabelPairedObjectsColumnCaptionRegularIcon
+                                            height='16px'
+                                            width='16px'
+                                            fill='var(--text-general)'
+                                        />
+                                        <Localize i18n_default_text='Copycat' />
+                                    </>
+                                }
+                                id='id-copycat'
+                            >
+                                <Suspense
+                                    fallback={<ChunkLoader message={localize('Please wait, loading Copycat...')} />}
+                                >
+                                    <Copycat />
                                 </Suspense>
                             </div>
 
