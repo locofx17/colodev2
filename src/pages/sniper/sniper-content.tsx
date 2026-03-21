@@ -98,6 +98,10 @@ const SniperContent = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [autoPilot, setAutoPilot] = useState(false);
   const [apiToken, setApiToken] = useState('');
+  const [stake, setStake] = useState<number>(5);
+  const [takeProfit, setTakeProfit] = useState<number>(100);
+  const [stopLoss, setStopLoss] = useState<number>(100);
+  const [multiplier, setMultiplier] = useState<number>(2);
   const [selectedMarket, setSelectedMarket] = useState('AUTO');
   const [selectedStrategy, setSelectedStrategy] = useState('AUTO');
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -561,10 +565,35 @@ const SniperContent = () => {
             `<block type="math_number" id="$?c=egHj3+^Omn8#P:L)"><field name="NUM">${signal.entryDigit ?? 0}</field>`
         );
 
+        // Patch User Defined Settings: Stake, Take Profit, Stop Loss, Multiplier
+        modifiedXml = modifiedXml.replace(
+            /(<field name="VAR" [^>]*>Stake<\/field>\s*<value name="VALUE">\s*<block type="math_number" [^>]*>\s*<field name="NUM">)[\d.]+(<\/field>)/,
+            `$1${stake}$2`
+        );
+        modifiedXml = modifiedXml.replace(
+            /(<field name="VAR" [^>]*>Take Profit<\/field>\s*<value name="VALUE">\s*<block type="math_number" [^>]*>\s*<field name="NUM">)[\d.]+(<\/field>)/,
+            `$1${takeProfit}$2`
+        );
+        modifiedXml = modifiedXml.replace(
+            /(<field name="VAR" [^>]*>Stop Loss<\/field>\s*<value name="VALUE">\s*<block type="math_number" [^>]*>\s*<field name="NUM">)[\d.]+(<\/field>)/,
+            `$1${stopLoss}$2`
+        );
+        modifiedXml = modifiedXml.replace(
+            /(<field name="VAR" [^>]*>Martingale<\/field>\s*<value name="VALUE">\s*<block type="math_number" [^>]*>\s*<field name="NUM">)[\d.]+(<\/field>)/,
+            `$1${multiplier}$2`
+        );
+
         // Also update the symbol if found
         modifiedXml = modifiedXml.replace(
             /<field name="SYMBOL_LIST">.*?<\/field>/g,
             `<field name="SYMBOL_LIST">${signal.marketId}</field>`
+        );
+
+        // Update submarket for Jump Indices
+        const isJumpIndex = signal.marketId.startsWith('JD');
+        modifiedXml = modifiedXml.replace(
+            /<field name="SUBMARKET_LIST">.*?<\/field>/g,
+            `<field name="SUBMARKET_LIST">${isJumpIndex ? 'jump_index' : 'random_index'}</field>`
         );
 
         // Update trade type if it's RSI (FALL/RISE) vs Digit (OVER/UNDER/EVEN/ODD)
@@ -586,20 +615,28 @@ const SniperContent = () => {
                 'EVEN': 'DIGITEVEN',
                 'ODD': 'DIGITODD',
             };
+            const selectedType = typeMap[signal.entry] || 'overunder';
+            const selectedSubType = subTypeMap[signal.entry] || 'DIGITUNDER';
+            
             modifiedXml = modifiedXml.replace(
                 /<field name="TRADETYPE_LIST">.*?<\/field>/g,
-                `<field name="TRADETYPE_LIST">${typeMap[signal.entry] || 'overunder'}</field>`
+                `<field name="TRADETYPE_LIST">${selectedType}</field>`
             );
             // Update contract type
             modifiedXml = modifiedXml.replace(
                 /<field name="TYPE_LIST">.*?<\/field>/g,
-                `<field name="TYPE_LIST">${subTypeMap[signal.entry] || 'DIGITUNDER'}</field>`
+                `<field name="TYPE_LIST">${selectedSubType}</field>`
             );
-            // Ensure prediction mutation is TRUE for digit trades
-            // More robust regex to match both true/false and variations in spacing
+            // Update purchase list
+            modifiedXml = modifiedXml.replace(
+                /<field name="PURCHASE_LIST">.*?<\/field>/g,
+                `<field name="PURCHASE_LIST">${selectedSubType}</field>`
+            );
+            // Ensure prediction mutation is TRUE for digit trades, FALSE for eventodd
+            const needsPrediction = selectedType === 'overunder';
             modifiedXml = modifiedXml.replace(
                 /<block type="trade_definition_tradeoptions" id="bTRRAtlrO1HOKPi6\/\(ac">\s*<mutation xmlns="http:\/\/www\.w3\.org\/1999\/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="(true|false)"><\/mutation>/g,
-                `<block type="trade_definition_tradeoptions" id="bTRRAtlrO1HOKPi6/(ac"><mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="true"></mutation>`
+                `<block type="trade_definition_tradeoptions" id="bTRRAtlrO1HOKPi6/(ac"><mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="${needsPrediction ? 'true' : 'false'}"></mutation>`
             );
 
             // Determine strategy-based prediction
@@ -608,17 +645,34 @@ const SniperContent = () => {
             if (signal.entry === 'OVER 4') prediction = 4;
 
             // Update prediction value in the XML
-            // Fixed regex to include potential attributes like 'inline="true"'
-            modifiedXml = modifiedXml.replace(
-                /<shadow type="math_number_positive" id="\}!H\]\{1cFD-lwfop@y\{sn"(?: inline="true")?>\s*<field name="NUM">\d+<\/field>/g,
-                `<shadow type="math_number_positive" id="}!H]{1cFD-lwfop@y{sn" inline="true"><field name="NUM">${prediction}</field>`
-            );
+            if (needsPrediction) {
+                modifiedXml = modifiedXml.replace(
+                    /<shadow type="math_number_positive" id="\}!H\]\{1cFD-lwfop@y\{sn"(?: inline="true")?>\s*<field name="NUM">\d+<\/field>/g,
+                    `<shadow type="math_number_positive" id="}!H]{1cFD-lwfop@y{sn" inline="true"><field name="NUM">${prediction}</field>`
+                );
+            }
         } else {
             // RSI - CALL/PUT
             const contractType = signal.entry === 'RISE' ? 'CALL' : 'PUT';
             modifiedXml = modifiedXml.replace(
                 /<field name="TYPE_LIST">.*?<\/field>/g,
                 `<field name="TYPE_LIST">${contractType}</field>`
+            );
+            modifiedXml = modifiedXml.replace(
+                /<field name="PURCHASE_LIST">.*?<\/field>/g,
+                `<field name="PURCHASE_LIST">${contractType}</field>`
+            );
+            modifiedXml = modifiedXml.replace(
+                /<field name="TRADETYPECAT_LIST">.*?<\/field>/g,
+                `<field name="TRADETYPECAT_LIST">callput</field>`
+            );
+            modifiedXml = modifiedXml.replace(
+                /<field name="TRADETYPE_LIST">.*?<\/field>/g,
+                `<field name="TRADETYPE_LIST">callput</field>`
+            );
+            modifiedXml = modifiedXml.replace(
+                /<block type="trade_definition_tradeoptions" id="bTRRAtlrO1HOKPi6\/\(ac">\s*<mutation xmlns="http:\/\/www\.w3\.org\/1999\/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="(true|false)"><\/mutation>/g,
+                `<block type="trade_definition_tradeoptions" id="bTRRAtlrO1HOKPi6/(ac"><mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="false"></mutation>`
             );
         }
 
@@ -628,7 +682,7 @@ const SniperContent = () => {
     } catch (err) {
         addLog('Error initializing trade: ' + err, 'error');
     }
-  }, [addLog, setActiveTab, setPendingFreeBot]);
+  }, [addLog, setActiveTab, setPendingFreeBot, stake, takeProfit, stopLoss, multiplier]);
 
   const reScan = useCallback(() => {
     cancelScan();
@@ -732,6 +786,52 @@ const SniperContent = () => {
                 <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </select>
+          </div>
+        </div>
+
+        <div className="sniper-setup__row">
+          <div className="sniper-setup__field">
+            <label>STAKE</label>
+            <input 
+              type="number" 
+              value={stake}
+              onChange={(e) => setStake(Number(e.target.value))}
+              min="0.35"
+              step="0.01"
+            />
+          </div>
+          <div className="sniper-setup__field">
+            <label>TAKE PROFIT</label>
+            <input 
+              type="number" 
+              value={takeProfit}
+              onChange={(e) => setTakeProfit(Number(e.target.value))}
+              min="0"
+              step="1"
+            />
+          </div>
+        </div>
+
+        <div className="sniper-setup__row">
+          <div className="sniper-setup__field">
+            <label>STOP LOSS</label>
+            <input 
+              type="number" 
+              value={stopLoss}
+              onChange={(e) => setStopLoss(Number(e.target.value))}
+              min="0"
+              step="1"
+            />
+          </div>
+          <div className="sniper-setup__field">
+            <label>MULTIPLIER</label>
+            <input 
+              type="number" 
+              value={multiplier}
+              onChange={(e) => setMultiplier(Number(e.target.value))}
+              min="1"
+              step="0.1"
+            />
           </div>
         </div>
 
