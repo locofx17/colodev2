@@ -40,6 +40,20 @@ export default class SniperStore {
     MAX_TICKS = 180;
     MIN_TICKS_FOR_SIGNAL = 30;
 
+    get scanningProgress() {
+        if (!this.isScanning) return 0;
+        const marketIds = Object.keys(this.subscribers);
+        if (marketIds.length === 0) return 0;
+        
+        let totalProgress = 0;
+        marketIds.forEach(mId => {
+            const currentTicks = this.ticks[mId] ? this.ticks[mId].length : 0;
+            const p = Math.min(100, (currentTicks / this.MAX_TICKS) * 100);
+            totalProgress += p;
+        });
+        return totalProgress / marketIds.length;
+    }
+
     constructor(root_store: RootStore) {
         makeObservable(this, {
             isScanning: observable,
@@ -65,6 +79,7 @@ export default class SniperStore {
             startScan: action,
             stopScan: action,
             setScannerSettings: action,
+            scanningProgress: computed,
         });
         
         this.root_store = root_store;
@@ -153,8 +168,8 @@ export default class SniperStore {
             this.signals = [result, ...this.signals];
         }
         
-        // Keep only top 15 most confident signals
-        this.signals = this.signals.sort((a,b) => b.confidence - a.confidence).slice(0, 15);
+        // Keep only top 3 most confident signals
+        this.signals = this.signals.sort((a,b) => b.confidence - a.confidence).slice(0, 3);
     };
 
     calculateRSI = (ticks: Tick[], period: number = 14): number => {
@@ -177,7 +192,7 @@ export default class SniperStore {
         return 100 - (100 / (1 + rs));
     };
 
-    findPredictiveEntryDigit = (digits: number[], winningDigits: number[], mostAppearing: number) => {
+    findPredictiveEntryDigit = (digits: number[], winningDigits: number[]): number | null => {
         const windowSize = 121; 
         const lookAhead = 25;
         const analysisDigits = digits.slice(-windowSize);
@@ -197,13 +212,14 @@ export default class SniperStore {
             counts[currentDigit]++;
         }
 
-        let bestDigit = mostAppearing; 
-        let maxAvgWins = -1;
+        let bestDigit: number | null = null; 
+        let maxAvgWins = 0;
 
         for (let d = 0; d <= 9; d++) {
             if (counts[d] > 0) {
                 const avgWins = scores[d] / counts[d];
-                if (avgWins > maxAvgWins) {
+                // Require a significance threshold (>= 55% win rate in lookahead)
+                if (avgWins > maxAvgWins && avgWins >= 13.75) {
                     maxAvgWins = avgWins;
                     bestDigit = d;
                 }
@@ -229,19 +245,13 @@ export default class SniperStore {
             .map(([digit, count]) => ({ digit: parseInt(digit), count }))
             .sort((a, b) => b.count - a.count);
         const mostAppearing = sortedDigits[0].digit;
+        const secondMostAppearing = sortedDigits[1].digit;
+        const leastCount = sortedDigits[9].count;
+        const leastAppearingDigits = sortedDigits.filter(d => d.count === leastCount).map(d => d.digit);
 
-        // === NEW RESPONSIVE LOGIC ===
-        const trendWindow = lastDigits.slice(-60); 
-        const momentumWindow = lastDigits.slice(-15);
-
-        const getWindowStats = (digits: number[]) => {
-            if (digits.length === 0) return { most: -1, pctEven: 0, pctOdd: 0, pctUnder5: 0, pctOver4: 0 };
-            const counts: Record<number, number> = {};
-            digits.forEach(d => counts[d] = (counts[d] || 0) + 1);
-            const most = Object.entries(counts).sort((a,b) => b[1] - a[1])[0];
-            
+        const getStats = (digits: number[]) => {
+            if (digits.length === 0) return { pctEven: 0, pctOdd: 0, pctUnder5: 0, pctOver4: 0 };
             return {
-                most: most ? parseInt(most[0]) : -1,
                 pctEven: digits.filter(d => d % 2 === 0).length / digits.length,
                 pctOdd: digits.filter(d => d % 2 !== 0).length / digits.length,
                 pctUnder5: digits.filter(d => d < 5).length / digits.length,
@@ -249,56 +259,72 @@ export default class SniperStore {
             };
         };
 
-        const trend = getWindowStats(trendWindow);
-        const momentum = getWindowStats(momentumWindow);
+        const stats = getStats(lastDigits);
+
+        const isOver4 = (d: number) => d >= 5;
+        const isUnder5 = (d: number) => d <= 4;
+        const isEven = (d: number) => d % 2 === 0;
+        const isOdd = (d: number) => d % 2 !== 0;
 
         // UNDER 5
-        const under5Match = (trend.pctUnder5 > 0.53 && trend.most < 5) || (momentum.pctUnder5 > 0.65);
-        results.push({
-            marketId, price,
-            strategyId: 'UNDER_5',
-            match: under5Match,
-            confidence: Math.max(trend.pctUnder5, momentum.pctUnder5),
-            entry: 'UNDER 5',
-            entryDigit: this.findPredictiveEntryDigit(lastDigits, [0,1,2,3,4], mostAppearing),
-            digitDistribution
-        });
+        const u5Digit = this.findPredictiveEntryDigit(lastDigits, [0,1,2,3,4]);
+        const under5Match = stats.pctUnder5 > 0.55 && isUnder5(mostAppearing) && isUnder5(secondMostAppearing) && leastAppearingDigits.some(isOver4) && u5Digit !== null;
+        if (under5Match) {
+            results.push({
+                marketId, price,
+                strategyId: 'UNDER_5',
+                match: true,
+                confidence: stats.pctUnder5,
+                entry: 'UNDER 5',
+                entryDigit: u5Digit!,
+                digitDistribution
+            });
+        }
 
         // OVER 4
-        const over4Match = (trend.pctOver4 > 0.53 && trend.most > 4) || (momentum.pctOver4 > 0.65);
-        results.push({
-            marketId, price,
-            strategyId: 'OVER_4',
-            match: over4Match,
-            confidence: Math.max(trend.pctOver4, momentum.pctOver4),
-            entry: 'OVER 4',
-            entryDigit: this.findPredictiveEntryDigit(lastDigits, [5,6,7,8,9], mostAppearing),
-            digitDistribution
-        });
+        const o4Digit = this.findPredictiveEntryDigit(lastDigits, [5,6,7,8,9]);
+        const over4Match = stats.pctOver4 > 0.55 && isOver4(mostAppearing) && isOver4(secondMostAppearing) && leastAppearingDigits.some(isUnder5) && o4Digit !== null;
+        if (over4Match) {
+            results.push({
+                marketId, price,
+                strategyId: 'OVER_4',
+                match: true,
+                confidence: stats.pctOver4,
+                entry: 'OVER 4',
+                entryDigit: o4Digit!,
+                digitDistribution
+            });
+        }
 
         // EVEN
-        const evenMatch = (trend.pctEven > 0.53 && trend.most % 2 === 0) || (momentum.pctEven > 0.65);
-        results.push({
-            marketId, price,
-            strategyId: 'EVEN',
-            match: evenMatch,
-            confidence: Math.max(trend.pctEven, momentum.pctEven),
-            entry: 'EVEN',
-            entryDigit: this.findPredictiveEntryDigit(lastDigits, [0,2,4,6,8], mostAppearing),
-            digitDistribution
-        });
+        const evDigit = this.findPredictiveEntryDigit(lastDigits, [0,2,4,6,8]);
+        const evenMatch = stats.pctEven > 0.55 && isEven(mostAppearing) && isEven(secondMostAppearing) && leastAppearingDigits.some(isOdd) && evDigit !== null;
+        if (evenMatch) {
+            results.push({
+                marketId, price,
+                strategyId: 'EVEN',
+                match: true,
+                confidence: stats.pctEven,
+                entry: 'EVEN',
+                entryDigit: evDigit!,
+                digitDistribution
+            });
+        }
 
         // ODD
-        const oddMatch = (trend.pctOdd > 0.53 && trend.most % 2 !== 0) || (momentum.pctOdd > 0.65);
-        results.push({
-            marketId, price,
-            strategyId: 'ODD',
-            match: oddMatch,
-            confidence: Math.max(trend.pctOdd, momentum.pctOdd),
-            entry: 'ODD',
-            entryDigit: this.findPredictiveEntryDigit(lastDigits, [1,3,5,7,9], mostAppearing),
-            digitDistribution
-        });
+        const odDigit = this.findPredictiveEntryDigit(lastDigits, [1,3,5,7,9]);
+        const oddMatch = stats.pctOdd > 0.55 && isOdd(mostAppearing) && isOdd(secondMostAppearing) && leastAppearingDigits.some(isEven) && odDigit !== null;
+        if (oddMatch) {
+            results.push({
+                marketId, price,
+                strategyId: 'ODD',
+                match: true,
+                confidence: stats.pctOdd,
+                entry: 'ODD',
+                entryDigit: odDigit!,
+                digitDistribution
+            });
+        }
 
         // RSI
         const rsi = this.calculateRSI(ticks);

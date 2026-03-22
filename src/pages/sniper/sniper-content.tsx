@@ -109,21 +109,18 @@ const SniperContent = observer(() => {
   }, [sniper]);
 
   useEffect(() => {
-    if (autoPilot && !sniper.isScanning && sniper.signals.length === 0) {
-      const delay = Math.floor(Math.random() * (60000 - 30000 + 1) + 30000);
-      sniper.addLog(`Auto-Pilot: Next scan in ${Math.round(delay/1000)}s`);
-      autoPilotTimer.current = setTimeout(startScan, delay);
-    } else if (!autoPilot && autoPilotTimer.current) {
+    if (!autoPilot && autoPilotTimer.current) {
       clearTimeout(autoPilotTimer.current);
     }
-  }, [autoPilot, sniper.isScanning, sniper.signals.length, startScan, sniper]);
+  }, [autoPilot]);
 
   useEffect(() => {
-    if (autoPilot && sniper.signals.length > 0 && !executionTimer) {
+    if (autoPilot && sniper.isScanning && sniper.signals.length > 0 && !executionTimer) {
       sniper.addLog('Auto-Pilot: High confidence signal found, executing...');
       sniper.executeTrade(sniper.signals[0]);
+      sniper.stopScan();
     }
-  }, [autoPilot, sniper.signals, executionTimer, sniper]);
+  }, [autoPilot, sniper.isScanning, sniper.signals, executionTimer, sniper]);
 
   // --- Render Helpers ---
   const getMarketName = (id: string) => VOLATILITY_MARKETS.find(m => m.id === id)?.name || id;
@@ -224,7 +221,7 @@ const SniperContent = observer(() => {
             <Shield size={28} />
             <div>
               <div className="title">AUTO-PILOT MODE</div>
-              <div className="desc">Automated continuous scanning</div>
+              <div className="desc">Auto-execute top signal on scan</div>
             </div>
           </div>
           <button 
