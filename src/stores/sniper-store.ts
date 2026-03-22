@@ -10,6 +10,8 @@ export interface Tick {
 }
 
 export interface StrategyResult {
+    marketId: string;
+    price: number;
     strategyId: string;
     match: boolean;
     confidence: number;
@@ -22,6 +24,7 @@ export default class SniperStore {
     root_store: RootStore;
     
     isScanning = false;
+    selectedMarket = 'AUTO';
     strategyLock = 'none';
     stake = 1;
     takeProfit = 10;
@@ -61,6 +64,7 @@ export default class SniperStore {
             
             startScan: action,
             stopScan: action,
+            setScannerSettings: action,
         });
         
         this.root_store = root_store;
@@ -73,6 +77,10 @@ export default class SniperStore {
     setStopLoss = (val: number) => { this.stopLoss = val; };
     setMultiplier = (val: number) => { this.multiplier = val; };
     
+    setScannerSettings = (settings: Partial<{ selectedMarket: string, strategyLock: string, stake: number, takeProfit: number, stopLoss: number, multiplier: number }>) => {
+        Object.assign(this, settings);
+    };
+    
     addLog = (msg: string) => {
         this.logs = [`[${new Date().toLocaleTimeString()}] ${msg}`, ...this.logs.slice(0, 99)];
     };
@@ -83,7 +91,7 @@ export default class SniperStore {
 
     updateTicks = (symbol: string, tick: Tick) => {
         if (!this.ticks[symbol]) this.ticks[symbol] = [];
-        this.ticks[symbol] = [tick, ...this.ticks[symbol]].slice(0, this.MAX_TICKS);
+        this.ticks[symbol] = [...this.ticks[symbol], tick].slice(-this.MAX_TICKS);
         
         // Analyze after update
         const result = this.analyzeMarket(symbol, this.ticks[symbol]);
@@ -112,7 +120,7 @@ export default class SniperStore {
                         digit: parseInt(p.toString().slice(-1)),
                         epoch: history.times[i]
                     }));
-                    this.ticks[mId] = ticks.reverse();
+                    this.ticks[mId] = ticks.slice(-this.MAX_TICKS);
                 }
             });
 
@@ -138,13 +146,15 @@ export default class SniperStore {
             return;
         }
         
-        // Check if signal already exists
-        const existingIdx = this.signals.findIndex(s => s.strategyId === result.strategyId);
+        const existingIdx = this.signals.findIndex(s => s.marketId === symbol && s.strategyId === result.strategyId);
         if (existingIdx > -1) {
             this.signals[existingIdx] = result;
         } else {
             this.signals = [result, ...this.signals];
         }
+        
+        // Keep only top 15 most confident signals
+        this.signals = this.signals.sort((a,b) => b.confidence - a.confidence).slice(0, 15);
     };
 
     calculateRSI = (ticks: Tick[], period: number = 14): number => {
@@ -205,6 +215,7 @@ export default class SniperStore {
     analyzeMarket = (marketId: string, ticks: Tick[]): StrategyResult | null => {
         if (ticks.length < this.MIN_TICKS_FOR_SIGNAL) return null;
 
+        const price = ticks[ticks.length - 1].quote;
         const lastDigits = ticks.map(t => t.digit);
         const results: StrategyResult[] = [];
         
@@ -244,6 +255,7 @@ export default class SniperStore {
         // UNDER 5
         const under5Match = (trend.pctUnder5 > 0.53 && trend.most < 5) || (momentum.pctUnder5 > 0.65);
         results.push({
+            marketId, price,
             strategyId: 'UNDER_5',
             match: under5Match,
             confidence: Math.max(trend.pctUnder5, momentum.pctUnder5),
@@ -255,6 +267,7 @@ export default class SniperStore {
         // OVER 4
         const over4Match = (trend.pctOver4 > 0.53 && trend.most > 4) || (momentum.pctOver4 > 0.65);
         results.push({
+            marketId, price,
             strategyId: 'OVER_4',
             match: over4Match,
             confidence: Math.max(trend.pctOver4, momentum.pctOver4),
@@ -266,6 +279,7 @@ export default class SniperStore {
         // EVEN
         const evenMatch = (trend.pctEven > 0.53 && trend.most % 2 === 0) || (momentum.pctEven > 0.65);
         results.push({
+            marketId, price,
             strategyId: 'EVEN',
             match: evenMatch,
             confidence: Math.max(trend.pctEven, momentum.pctEven),
@@ -277,6 +291,7 @@ export default class SniperStore {
         // ODD
         const oddMatch = (trend.pctOdd > 0.53 && trend.most % 2 !== 0) || (momentum.pctOdd > 0.65);
         results.push({
+            marketId, price,
             strategyId: 'ODD',
             match: oddMatch,
             confidence: Math.max(trend.pctOdd, momentum.pctOdd),
@@ -293,6 +308,7 @@ export default class SniperStore {
         else if (rsi < 25) { rsiMatch = true; rsiEntry = 'RISE'; }
         
         results.push({
+            marketId, price,
             strategyId: 'RSI_TECH',
             match: rsiMatch,
             confidence: Math.abs(rsi - 50) / 50,
