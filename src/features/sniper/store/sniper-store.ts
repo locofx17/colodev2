@@ -380,7 +380,19 @@ export default class SniperStore {
                 modifiedXml = modifiedXml.replace(/<field name="TYPE_LIST">.*?<\/field>/g, `<field name="TYPE_LIST">${contractType}</field>`);
                 modifiedXml = modifiedXml.replace(/<field name="PURCHASE_LIST">.*?<\/field>/g, `<field name="PURCHASE_LIST">${contractType}</field>`);
                 modifiedXml = modifiedXml.replace(/<field name="TRADETYPECAT_LIST">.*?<\/field>/g, `<field name="TRADETYPECAT_LIST">callput</field>`);
-                modifiedXml = modifiedXml.replace(/<field name="TRADETYPE_LIST">.*?<\/field>/g, `<field name="TRADETYPE_LIST">callput</field>`);
+                modifiedXml = modifiedXml.replace(/<field name="TRADETYPE_LIST">.*?<\/field>/g, `<field name="TRADETYPE_LIST">risefall</field>`);
+                
+                // Disable prediction for Call/Put
+                modifiedXml = modifiedXml.replace(
+                    /<mutation xmlns="http:\/\/www\.w3\.org\/1999\/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="(true|false)"><\/mutation>/g,
+                    '<mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="false"></mutation>'
+                );
+                
+                // Bypass Entry Loop for Rise/Fall
+                modifiedXml = modifiedXml.replace(
+                    /<field name="VAR" id="\$68\*z!dO\|ZT~V6#FW8XN">entry_loop<\/field>\s*<value name="VALUE">\s*<block type="logic_boolean" [^>]*>\s*<field name="BOOL">TRUE<\/field>/g,
+                    '<field name="VAR" id="$68*z!dO|ZT~V6#FW8XN">entry_loop</field><value name="VALUE"><block type="logic_boolean" id="Wa-a/Bi/D`+:7$F(~)ZJ"><field name="BOOL">FALSE</field>'
+                );
             }
 
             this.root_store.dashboard.setPendingFreeBot({ name: 'Entry Point Bot', xml: modifiedXml, should_auto_run: true });
