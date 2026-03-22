@@ -106,14 +106,18 @@ export default class SniperStore {
                     const digit = parseInt(quote.toString().slice(-1));
                     this.updateTicks(mId, { quote, digit, epoch: t.epoch });
                 }
-                if (data.msg_type === 'history') {
-                    const history = data.history;
+                if (data.history && !data.tick) {
+                    const history = (data as any).history;
                     const ticks = history.prices.map((p: number, i: number) => ({
                         quote: p,
                         digit: parseInt(p.toString().slice(-1)),
                         epoch: history.times[i]
                     }));
                     this.ticks[mId] = ticks.reverse();
+                    
+                    // Immediate analysis after history load
+                    const res = this.analyzeMarket(mId, this.ticks[mId]);
+                    if (res && res.match) this.handleSignalFound(mId, res);
                 }
             });
 

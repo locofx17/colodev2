@@ -70,10 +70,8 @@ export class DerivAPI {
   getTicksHistory(symbol: string, count: number) {
     this.send({
       ticks_history: symbol,
-      adjust_start_time: 1,
       count: count,
       end: 'latest',
-      start: 1,
       style: 'ticks',
     });
   }
