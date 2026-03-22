@@ -109,10 +109,12 @@ export default class SniperStore {
         this.ticks[symbol] = [...this.ticks[symbol], tick].slice(-this.MAX_TICKS);
         
         // Analyze after update
-        const result = this.analyzeMarket(symbol, this.ticks[symbol]);
-        if (result && result.match) {
-            this.handleSignalFound(symbol, result);
-        }
+        const results = this.analyzeMarket(symbol, this.ticks[symbol]);
+        results.forEach(result => {
+            if (result && result.match) {
+                this.handleSignalFound(symbol, result);
+            }
+        });
     };
 
     startScan = (markets: string[]) => {
@@ -138,8 +140,10 @@ export default class SniperStore {
                     this.ticks[mId] = ticks.slice(-this.MAX_TICKS);
                     
                     // Immediate analysis after history load
-                    const res = this.analyzeMarket(mId, this.ticks[mId]);
-                    if (res && res.match) this.handleSignalFound(mId, res);
+                    const results = this.analyzeMarket(mId, this.ticks[mId]);
+                    results.forEach(res => {
+                        if (res && res.match) this.handleSignalFound(mId, res);
+                    });
                 }
             });
 
@@ -233,8 +237,8 @@ export default class SniperStore {
         return bestDigit;
     };
 
-    analyzeMarket = (marketId: string, ticks: Tick[]): StrategyResult | null => {
-        if (ticks.length < this.MIN_TICKS_FOR_SIGNAL) return null;
+    analyzeMarket = (marketId: string, ticks: Tick[]): StrategyResult[] => {
+        if (ticks.length < this.MIN_TICKS_FOR_SIGNAL) return [];
 
         const price = ticks[ticks.length - 1].quote;
         const lastDigits = ticks.map(t => t.digit);
@@ -353,9 +357,7 @@ export default class SniperStore {
             ? results 
             : results.filter(r => r.strategyId.toUpperCase() === this.strategyLock.toUpperCase());
 
-        const best = finalResults.reduce((prev, curr) => (curr.match && curr.confidence > prev.confidence) ? curr : prev, { match: false, confidence: 0 } as any);
-
-        return best.match ? best : null;
+        return finalResults.filter(r => r.match);
     };
 
     executeTrade = async (signal: any) => {
