@@ -99,7 +99,7 @@
 // Mobile overrides
 @media screen and (max-width: 768px) {
   .sniper-button {
-    bottom: 85px; // Above bottom nav
+    bottom: 25px; // Overlaps bottom bar area as requested
     right: 20px;
     
     &__circle {
