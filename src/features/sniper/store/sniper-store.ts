@@ -401,8 +401,7 @@ export default class SniperStore {
             }
 
             this.root_store.dashboard.setPendingFreeBot({ name: 'Entry Point Bot', xml: modifiedXml, should_auto_run: true });
-            this.root_store.dashboard.setActiveTab(DBOT_TABS.BOT_BUILDER);
-            this.addLog(`Bot configured with Entry Digit: ${signal.entryDigit}. Redirecting...`);
+            this.addLog(`Bot configured with Entry Digit: ${signal.entryDigit}. Running...`);
         } catch (err) {
             this.addLog('Error initializing trade: ' + err);
         }

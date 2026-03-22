@@ -12,7 +12,11 @@ import {
   BarChart3,
   Wifi,
   WifiOff,
-  ExternalLink
+  ExternalLink,
+  TrendingUp,
+  TrendingDown,
+  Target,
+  CircleStop
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { observer } from 'mobx-react-lite';
@@ -52,7 +56,7 @@ const STRATEGIES = [
 ];
 
 const SniperContent = observer(() => {
-  const { dashboard, sniper, client } = useStore();
+  const { dashboard, sniper, client, run_panel, summary_card, transactions } = useStore();
   const { setActiveTab, setPendingFreeBot } = dashboard;
 
   // --- UI-only State ---
@@ -332,20 +336,117 @@ const SniperContent = observer(() => {
           
           {/* Left Column: Focused Progress Tracking */}
           <div className="sniper-content__main-content">
-            <div className="sniper-content__minimal-status">
-              <Activity size={48} className={`status-icon ${sniper.isScanning ? 'anim-pulse highlight' : ''}`} />
-              <div className="status-text">
-                {sniper.isScanning ? (
-                  <>
-                    <p className="main">INTELLIGENCE SCAN ACTIVE</p>
-                    <p className="sub">Analyzing {sniper.selectedMarket === 'AUTO' ? '18' : '1'} markets for high-probability signals...</p>
-                  </>
-                ) : (
-                  <>
-                    <p className="main">SYSTEM IDLE</p>
-                    <p className="sub">Ready for next intelligent scanning session.</p>
-                  </>
-                )}
+            <div className="sniper-content__trade-dashboard">
+              <div className="dashboard-grid">
+                {/* Active Status Card */}
+                <div className={`status-card ${run_panel.is_running ? 'running' : 'idle'}`}>
+                  <div className="card-header">
+                    <span className="label">SYSTEM STATUS</span>
+                    {run_panel.is_running && <span className="live-tag">LIVE</span>}
+                  </div>
+                  <div className="status-main">
+                    <div className="status-icon-wrapper">
+                      {run_panel.is_running ? (
+                        <Activity className="anim-pulse" size={32} />
+                      ) : (
+                        <Shield size={32} opacity={0.5} />
+                      )}
+                    </div>
+                    <div>
+                      <div className="status-title">
+                        {run_panel.is_running ? 'BOT IS EXECUTING' : 'READY FOR ACTION'}
+                      </div>
+                      <div className="status-desc">
+                        {run_panel.is_running ? `Stage: ${run_panel.contract_stage}` : 'Sniper Intelligence standing by...'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Profit/Loss Card */}
+                <div className={`stats-card pl-card ${summary_card.profit_loss >= 0 ? 'profit' : 'loss'}`}>
+                  <div className="card-header">
+                    <span className="label">REAL-TIME P/L</span>
+                  </div>
+                  <div className="stats-main">
+                    <div className="value">
+                      {summary_card.profit_loss >= 0 ? '+' : ''}
+                      {summary_card.profit_loss.toFixed(2)}
+                    </div>
+                    <div className="movement-icon">
+                      {summary_card.profit_loss >= 0 ? <TrendingUp size={24} /> : <TrendingDown size={24} />}
+                    </div>
+                  </div>
+                  <div className="card-footer">
+                    Current session active contract
+                  </div>
+                </div>
+
+                {/* Win/Loss Card */}
+                <div className="stats-card counters-card">
+                  <div className="card-header">
+                    <span className="label">SESSION SUCCESS</span>
+                  </div>
+                  <div className="counters-main">
+                    <div className="counter-item win">
+                      <div className="v">{transactions.statistics.won_contracts}</div>
+                      <div className="l">WINS</div>
+                    </div>
+                    <div className="counter-divider" />
+                    <div className="counter-item loss">
+                      <div className="v">{transactions.statistics.lost_contracts}</div>
+                      <div className="l">LOSSES</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Total Stats Card */}
+                <div className="stats-card summary-card-mini">
+                  <div className="card-header">
+                    <span className="label">TOTAL NET PROFIT</span>
+                  </div>
+                  <div className="stats-main">
+                    <div className={`value ${transactions.statistics.total_profit >= 0 ? 'text-green' : 'text-red'}`}>
+                        {transactions.statistics.total_profit.toFixed(2)}
+                        <span className="currency">{client.currency}</span>
+                    </div>
+                  </div>
+                  <div className="card-footer">
+                    Total from {transactions.statistics.number_of_runs} runs
+                  </div>
+                </div>
+              </div>
+
+              {/* Bot Control Bar */}
+              {run_panel.is_stop_button_visible && (
+                <div className="bot-controls-bar">
+                  <div className="bot-info">
+                    <Target size={18} />
+                    <span>BOT MONITOR ACTIVE</span>
+                  </div>
+                  <button 
+                    onClick={() => run_panel.onStopButtonClick()}
+                    disabled={run_panel.is_stop_button_disabled}
+                    className="stop-bot-btn"
+                  >
+                    <CircleStop size={18} />
+                    STOP TRADING BOT
+                  </button>
+                </div>
+              )}
+
+              {/* Advanced Logs (Compact) */}
+              <div className="sniper-logs-container">
+                <div className="section-header">
+                    <Terminal size={14} />
+                    <span>INTELLIGENCE LOGS</span>
+                </div>
+                <div className="logs-list">
+                    {sniper.logs.slice(0, 10).map((log, i) => (
+                        <div key={i} className="log-item">{log}</div>
+                    ))}
+                    {sniper.logs.length === 0 && <div className="log-empty">Waiting for events...</div>}
+                </div>
               </div>
             </div>
           </div>
@@ -413,11 +514,11 @@ const SniperContent = observer(() => {
                         </div>
                         <button 
                           onClick={() => sniper.executeTrade(signal)}
-                          disabled={!!executionTimer}
+                          disabled={run_panel.is_running}
                           className="execute-btn"
                         >
                           <Zap size={14} />
-                          Execute
+                          {run_panel.is_running ? 'Bot Running' : 'Execute'}
                         </button>
                       </div>
                     </motion.div>
