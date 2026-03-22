@@ -247,23 +247,23 @@ export default class SniperStore {
         const trend = getWindowStats(trendWindow);
         const momentum = getWindowStats(momentumWindow);
 
-        // UNDER 5
-        const under5Match = (trend.pctUnder5 > 0.53 && trend.most < 5) || (momentum.pctUnder5 > 0.65);
+        // UNDER 5 (Now triggers on Over 4 dominance)
+        const under5Match = (trend.pctOver4 > 0.53 && trend.most > 4) || (momentum.pctOver4 > 0.65);
         results.push({
             strategyId: 'UNDER_5',
             match: under5Match,
-            confidence: Math.max(trend.pctUnder5, momentum.pctUnder5),
+            confidence: Math.max(trend.pctOver4, momentum.pctOver4),
             entry: 'UNDER 5',
             entryDigit: this.findPredictiveEntryDigit(lastDigits, [0,1,2,3,4], mostAppearing),
             digitDistribution
         });
 
-        // OVER 4
-        const over4Match = (trend.pctOver4 > 0.53 && trend.most > 4) || (momentum.pctOver4 > 0.65);
+        // OVER 4 (Now triggers on Under 5 dominance)
+        const over4Match = (trend.pctUnder5 > 0.53 && trend.most < 5) || (momentum.pctUnder5 > 0.65);
         results.push({
             strategyId: 'OVER_4',
             match: over4Match,
-            confidence: Math.max(trend.pctOver4, momentum.pctOver4),
+            confidence: Math.max(trend.pctUnder5, momentum.pctUnder5),
             entry: 'OVER 4',
             entryDigit: this.findPredictiveEntryDigit(lastDigits, [5,6,7,8,9], mostAppearing),
             digitDistribution

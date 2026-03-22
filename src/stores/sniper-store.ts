@@ -271,30 +271,30 @@ export default class SniperStore {
         const isEven = (d: number) => d % 2 === 0;
         const isOdd = (d: number) => d % 2 !== 0;
 
-        // UNDER 5
+        // UNDER 5 (Now triggers on Over 4 dominance)
         const u5Digit = this.findPredictiveEntryDigit(lastDigits, [0,1,2,3,4]);
-        const under5Match = stats.pctUnder5 > 0.55 && isUnder5(mostAppearing) && isUnder5(secondMostAppearing) && leastAppearingDigits.some(isOver4) && u5Digit !== null;
+        const under5Match = stats.pctOver4 > 0.55 && isOver4(mostAppearing) && isOver4(secondMostAppearing) && leastAppearingDigits.some(isUnder5) && u5Digit !== null;
         if (under5Match) {
             results.push({
                 marketId, price,
                 strategyId: 'UNDER_5',
                 match: true,
-                confidence: stats.pctUnder5,
+                confidence: stats.pctOver4,
                 entry: 'UNDER 5',
                 entryDigit: u5Digit!,
                 digitDistribution
             });
         }
 
-        // OVER 4
+        // OVER 4 (Now triggers on Under 5 dominance)
         const o4Digit = this.findPredictiveEntryDigit(lastDigits, [5,6,7,8,9]);
-        const over4Match = stats.pctOver4 > 0.55 && isOver4(mostAppearing) && isOver4(secondMostAppearing) && leastAppearingDigits.some(isUnder5) && o4Digit !== null;
+        const over4Match = stats.pctUnder5 > 0.55 && isUnder5(mostAppearing) && isUnder5(secondMostAppearing) && leastAppearingDigits.some(isOver4) && o4Digit !== null;
         if (over4Match) {
             results.push({
                 marketId, price,
                 strategyId: 'OVER_4',
                 match: true,
-                confidence: stats.pctOver4,
+                confidence: stats.pctUnder5,
                 entry: 'OVER 4',
                 entryDigit: o4Digit!,
                 digitDistribution
