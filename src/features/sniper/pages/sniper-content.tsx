@@ -225,7 +225,13 @@ const SniperContent = observer(() => {
             </div>
           </div>
           <button 
-            onClick={() => setAutoPilot(!autoPilot)}
+            onClick={() => {
+              const nextVal = !autoPilot;
+              setAutoPilot(nextVal);
+              if (nextVal && !sniper.isScanning) {
+                startScan();
+              }
+            }}
             className={`sniper-setup__toggle ${autoPilot ? 'on' : 'off'}`}
           >
             <motion.div 

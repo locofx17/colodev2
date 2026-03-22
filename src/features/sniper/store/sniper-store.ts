@@ -26,8 +26,8 @@ export default class SniperStore {
     strategyLock = 'none';
     stake = 1;
     takeProfit = 10;
-    stopLoss = 10;
-    multiplier = 10;
+    stopLoss = 50;
+    multiplier = 2;
     
     signals: StrategyResult[] = [];
     logs: string[] = [];
