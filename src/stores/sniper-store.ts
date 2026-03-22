@@ -38,7 +38,7 @@ export default class SniperStore {
     subscribers: Record<string, any> = {};
     
     MAX_TICKS = 180;
-    MIN_TICKS_FOR_SIGNAL = 30;
+    MIN_TICKS_FOR_SIGNAL = 20;
 
     get scanningProgress() {
         if (!this.isScanning) return 0;
@@ -142,6 +142,7 @@ export default class SniperStore {
             api.connect().then(() => {
                 const token = this.root_store.client.getToken();
                 if (token) api.authorize(token);
+                api.getTicksHistory(mId, this.MAX_TICKS);
                 api.subscribeTicks(mId);
             });
             this.subscribers[mId] = api;

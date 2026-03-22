@@ -67,6 +67,17 @@ export class DerivAPI {
     this.send({ ticks: symbol, subscribe: 1 });
   }
 
+  getTicksHistory(symbol: string, count: number) {
+    this.send({
+      ticks_history: symbol,
+      adjust_start_time: 1,
+      count: count,
+      end: 'latest',
+      start: 1,
+      style: 'ticks',
+    });
+  }
+
   buy(symbol: string, amount: number, type: string = 'CALL') {
     this.send({
       buy: 1,

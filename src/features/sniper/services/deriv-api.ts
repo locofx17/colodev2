@@ -37,7 +37,7 @@ export class DerivAPI {
         this.send({ ticks: symbol, subscribe: 1 });
     }
 
-    getHistory(symbol: string, count = 200): void {
+    getTicksHistory(symbol: string, count = 200): void {
         this.send({
             ticks_history: symbol,
             count,
