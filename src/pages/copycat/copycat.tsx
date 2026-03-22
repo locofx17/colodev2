@@ -129,6 +129,17 @@ const Copycat = observer(() => {
         </div>
 
 
+        {/* Disclaimer Section */}
+        <div className="section-card disclaimer-card" style={{ backgroundColor: 'rgba(234, 179, 8, 0.05)', border: '1px solid rgba(234, 179, 8, 0.2)', marginBottom: '1rem', padding: '1rem', borderRadius: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#eab308', marginBottom: '0.5rem' }}>
+            <AlertCircle size={18} />
+            <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 'bold' }}>Risk Warning & Disclaimer</h3>
+          </div>
+          <p style={{ fontSize: '12px', color: '#9ca3af', margin: 0, lineHeight: 1.5 }}>
+            Copy trading involves significant risks and may not be suitable for all users. Past performance does not guarantee future results. By using the Copy Trading feature, you acknowledge that you are automating trades at your own risk. We do not provide financial advice and are not responsible for any potential losses incurred while using this tool. Please trade responsibly.
+          </p>
+        </div>
+
         {/* Add Tokens Section */}
         <div className="add-tokens-section">
           <div className="add-tokens-header">

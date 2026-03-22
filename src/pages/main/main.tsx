@@ -80,7 +80,7 @@ const AppWrapper = observer(() => {
     const { clear } = summary_card;
     const { DASHBOARD, BOT_BUILDER } = DBOT_TABS;
     const init_render = React.useRef(true);
-    const hash = ['dashboard', 'bot_builder', 'chart', 'free_bots', 'dcircle', 'smart_analysis', 'dtrader', 'auto_trades', 'trading-plans', 'sniper', 'copycat'];
+    const hash = ['dashboard', 'bot_builder', 'chart', 'free_bots', 'dcircle', 'copy-trading', 'smart_analysis', 'dtrader', 'auto_trades', 'trading-plans', 'sniper'];
 
     const { isDesktop } = useDevice();
     const location = useLocation();
@@ -335,6 +335,26 @@ const AppWrapper = observer(() => {
                             <div
                                 label={
                                     <>
+                                        <LabelPairedObjectsColumnCaptionRegularIcon
+                                            height='16px'
+                                            width='16px'
+                                            fill='var(--text-general)'
+                                        />
+                                        <Localize i18n_default_text='Copy Trading' />
+                                    </>
+                                }
+                                id='id-copycat'
+                            >
+                                <Suspense
+                                    fallback={<ChunkLoader message={localize('Please wait, loading Copy Trading...')} />}
+                                >
+                                    <Copycat />
+                                </Suspense>
+                            </div>
+
+                            <div
+                                label={
+                                    <>
                                         <LabelPairedPuzzlePieceTwoCaptionBoldIcon
                                             height='24px'
                                             width='24px'
@@ -413,25 +433,7 @@ const AppWrapper = observer(() => {
                                 </Suspense>
                             </div>
 
-                            <div
-                                label={
-                                    <>
-                                        <LabelPairedObjectsColumnCaptionRegularIcon
-                                            height='16px'
-                                            width='16px'
-                                            fill='var(--text-general)'
-                                        />
-                                        <Localize i18n_default_text='Copycat' />
-                                    </>
-                                }
-                                id='id-copycat'
-                            >
-                                <Suspense
-                                    fallback={<ChunkLoader message={localize('Please wait, loading Copycat...')} />}
-                                >
-                                    <Copycat />
-                                </Suspense>
-                            </div>
+
 
                         </Tabs>
                     </div>
