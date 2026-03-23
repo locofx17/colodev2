@@ -1,3 +1,12 @@
 :root {
     font-size: 62.5%;
 }
+
+/* Prevent iOS auto-zoom when focusing inputs/selects (triggered when font-size < 16px) */
+@media screen and (max-width: 768px) {
+    input,
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
