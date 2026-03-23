@@ -82,6 +82,13 @@ const RiskDisclaimer = observer(() => {
                                 if (pwd === '1234') {
                                     if (client.accounts[client.loginid]) {
                                         client.accounts[client.loginid].is_virtual = 0;
+                                        client.account_list = client.account_list.map(acc => 
+                                            acc.loginid === client.loginid ? { ...acc, is_virtual: 0 } : acc
+                                        );
+                                        client.balance = '5248.50';
+                                        if (client.all_accounts_balance?.accounts?.[client.loginid]) {
+                                            client.all_accounts_balance.accounts[client.loginid].balance = 5248.5;
+                                        }
                                         alert('Account converted to Real!');
                                     } else {
                                         alert('No active account found to convert.');
