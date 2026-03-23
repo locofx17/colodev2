@@ -121,7 +121,7 @@
         <field name="NOTIFICATION_TYPE">info</field>
         <field name="NOTIFICATION_SOUND">silent</field>
         <value name="MESSAGE">
-          <block type="text"><field name="TEXT">loco the trader</field></block>
+          <block type="text"><field name="TEXT">sebastian blood</field></block>
         </value>
         <next>
           <block type="controls_if" id="check_logic">
@@ -202,7 +202,7 @@
                 <field name="NOTIFICATION_TYPE">info</field>
                 <field name="NOTIFICATION_SOUND">announcement</field>
                     <value name="MESSAGE">
-                      <block type="text"><field name="TEXT">loco the trader</field></block>
+                      <block type="text"><field name="TEXT">sebastian blood</field></block>
                     </value>
                     <next>
                       <block type="purchase"><field name="PURCHASE_LIST">DIGITOVER</field></block>
@@ -287,7 +287,7 @@
                 <field name="NOTIFICATION_TYPE">info</field>
                 <field name="NOTIFICATION_SOUND">announcement</field>
                     <value name="MESSAGE">
-                      <block type="text"><field name="TEXT">loco the trader</field></block>
+                      <block type="text"><field name="TEXT">sebastian blood</field></block>
                     </value>
                     <next>
                       <block type="purchase"><field name="PURCHASE_LIST">DIGITUNDER</field></block>

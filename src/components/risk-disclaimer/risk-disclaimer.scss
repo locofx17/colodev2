@@ -6,7 +6,7 @@
     animation: slide-in-left 0.5s ease-out;
 
     &__btn {
-        background: #9333ea !important; // Purple
+        background: #2563eb !important; // Blue
         color: #ffffff !important;
         border: none !important;
         padding: 8px 16px !important;
@@ -17,7 +17,7 @@
         transition: all 0.3s ease !important;
 
         &:hover {
-            background: #7e22ce !important; // Darker purple on hover
+            background: #1e40af !important; // Darker blue on hover
             transform: translateY(-1px) !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
         }
@@ -52,7 +52,7 @@
     }
 
     &__understand-btn {
-        background: #9333ea !important; // Purple
+        background: #2563eb !important; // Blue
         color: #ffffff !important;
         border: none !important;
         padding: 12px 32px !important;
@@ -61,7 +61,7 @@
         min-width: 150px;
 
         &:hover {
-            background: #7e22ce !important; // Darker purple on hover
+            background: #1e40af !important; // Darker blue on hover
         }
     }
 }

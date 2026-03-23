@@ -93,7 +93,7 @@
         margin-bottom: 1.5rem;
 
         .dc-text {
-            color: #9333ea;
+            color: #2563eb;
             font-weight: 600;
             font-size: 1.2rem;
             text-transform: uppercase;
@@ -153,16 +153,16 @@
         align-items: center;
         gap: 0.75rem;
         padding: 0.75rem 1.5rem;
-        background: rgb(147 51 234 / 10%);
+        background: rgb(37 99 235 / 10%);
         border-radius: 25px;
-        border: 1px solid rgb(147 51 234 / 20%);
+        border: 1px solid rgb(37 99 235 / 20%);
     }
 
     &__status-dot {
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        background: #9333ea;
+        background: #2563eb;
         animation: dtrader-maintenance-pulse 2s ease-in-out infinite;
     }
 

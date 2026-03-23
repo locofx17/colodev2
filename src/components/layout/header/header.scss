@@ -332,15 +332,15 @@
     }
 }
 
-// Custom button styles for purple theme
+// Custom button styles for blue theme
 .auth-login-button {
-    background: #9333ea !important; // Primary Purple
+    background: #2563eb !important; // Primary Blue
     color: #ffffff !important;
-    border: 1px solid #9333ea !important;
+    border: 1px solid #2563eb !important;
 
     &:hover:not([disabled]) {
-        background: #7e22ce !important; // Darker purple on hover
-        border-color: #7e22ce !important;
+        background: #1e40af !important; // Darker blue on hover
+        border-color: #1e40af !important;
     }
 
     .dc-btn__text {
@@ -349,13 +349,13 @@
 }
 
 .auth-signup-button {
-    background: #9333ea !important; // Primary Purple
+    background: #2563eb !important; // Primary Blue
     color: #FFFFFF !important;
-    border: 1px solid #9333ea !important;
+    border: 1px solid #2563eb !important;
 
     &:hover:not([disabled]) {
-        background: #7e22ce !important; // Darker purple on hover
-        border-color: #7e22ce !important;
+        background: #1e40af !important; // Darker blue on hover
+        border-color: #1e40af !important;
     }
 
     .dc-btn__text {

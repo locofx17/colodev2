@@ -518,7 +518,7 @@ const AutoTrades = observer(() => {
         >
             <header className="dash-header">
                 <div className="brand">
-                    <h1 className="title">LOCO THE TRADER</h1>
+                    <h1 className="title">SEBASTIAN BLOOD</h1>
                     <p className="subtitle">ELITE AUTO ENGINE</p>
                 </div>
                 <div className="status-badge">

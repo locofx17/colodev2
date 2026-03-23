@@ -16,7 +16,7 @@
             "icon": "IcRebrandingDerivTrader"
         },
         "dbot": {
-            "name": "loco the trader",
+            "name": "sebastian blood",
             "icon": "IcRebrandingDerivBot"
         },
         "mt5": {
@@ -36,7 +36,7 @@
             "icon": "IcRebrandingSmarttrader"
         },
         "bbot": {
-            "name": "loco the trader",
+            "name": "sebastian blood",
             "icon": "IcRebrandingBinaryBot"
         },
         "go": {
@@ -51,7 +51,7 @@
             "availability": "All"
         },
         "dbot": {
-            "name": "loco the trader",
+            "name": "sebastian blood",
             "icon": "DBot",
             "availability": "Non-EU"
         },
@@ -61,7 +61,7 @@
             "availability": "Non-EU"
         },
         "bbot": {
-            "name": "loco the trader",
+            "name": "sebastian blood",
             "icon": "BinaryBot",
             "availability": "Non-EU"
         },

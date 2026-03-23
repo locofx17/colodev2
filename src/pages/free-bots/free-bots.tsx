@@ -32,8 +32,8 @@ const FreeBots = observer(() => {
     // Manifest-driven list for instant load and prefetch
     const getXmlFiles = () => {
         return [
-            'LOCOFX V2 MEGAMIND.xml',
-            'LOCO-SPEED-BOT.xml',
+            'SEBASTIAN BLOOD FX V2 MEGAMIND.xml',
+            'SEBASTIAN-BLOOD-SPEED-BOT.xml',
             'UNDER3 BOT V1.xml',
             'Entry point Bot over 2.xml',
         ];
@@ -90,13 +90,13 @@ const FreeBots = observer(() => {
 
             const formatBotName = (rawName: string) => {
                 let name = rawName.replace(/[_-]/g, ' ');
-                name = name.replace(/by\s+\{?www\.360tradinghub\.co\.ke\}?/gi, 'by Loco The Trader')
-                           .replace(/by\s+360\s+Trading\s+Hub/gi, 'by Loco The Trader')
-                           .replace(/360\s+PRINTER/gi, 'Loco The Trader PRINTER')
-                           .replace(/Mathews'/gi, "Loco The Trader's");
+                name = name.replace(/by\s+\{?www\.360tradinghub\.co\.ke\}?/gi, 'by Sebastian Blood')
+                           .replace(/by\s+360\s+Trading\s+Hub/gi, 'by Sebastian Blood')
+                           .replace(/360\s+PRINTER/gi, 'Sebastian Blood PRINTER')
+                           .replace(/Mathews'/gi, "Sebastian Blood's");
                            
-                if (!name.toLowerCase().includes('loco')) {
-                    name += ' by Loco The Trader';
+                if (!name.toLowerCase().includes('sebastian')) {
+                    name += ' by Sebastian Blood';
                 }
                 return name;
             };

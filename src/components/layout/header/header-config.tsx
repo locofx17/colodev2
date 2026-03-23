@@ -40,33 +40,33 @@ export type TAccount = {
     type: string;
 };
 
-const LocoLogoIcon = ({ height, width }: { height: number; width: number }) => (
-    <img src='/loco_logo.png' alt='Loco Logo' style={{ height, width, borderRadius: '50%', objectFit: 'cover' }} />
+const SebastianBloodLogoIcon = ({ height, width }: { height: number; width: number }) => (
+    <img src='/sebastian_logo.png' alt='Sebastian Blood Logo' style={{ height, width, borderRadius: '50%', objectFit: 'cover' }} />
 );
 
 export const platformsConfig: PlatformsConfig[] = [
     {
         active: false,
-        buttonIcon: <LocoLogoIcon height={25} width={25} />,
+        buttonIcon: <SebastianBloodLogoIcon height={25} width={25} />,
         description: localize('A whole new trading experience on a powerful yet easy to use platform.'),
         href: standalone_routes.trade,
-        icon: <LocoLogoIcon height={32} width={32} />,
+        icon: <SebastianBloodLogoIcon height={32} width={32} />,
         showInEU: true,
     },
     {
         active: true,
-        buttonIcon: <LocoLogoIcon height={25} width={25} />,
+        buttonIcon: <SebastianBloodLogoIcon height={25} width={25} />,
         description: localize('Automated trading at your fingertips. No coding needed.'),
         href: standalone_routes.bot,
-        icon: <LocoLogoIcon height={32} width={32} />,
+        icon: <SebastianBloodLogoIcon height={32} width={32} />,
         showInEU: false,
     },
     {
         active: false,
-        buttonIcon: <LocoLogoIcon height={25} width={25} />,
+        buttonIcon: <SebastianBloodLogoIcon height={25} width={25} />,
         description: localize('Trade the world’s markets with our popular user-friendly platform.'),
         href: standalone_routes.smarttrader,
-        icon: <LocoLogoIcon height={32} width={32} />,
+        icon: <SebastianBloodLogoIcon height={32} width={32} />,
         showInEU: false,
     },
 ];

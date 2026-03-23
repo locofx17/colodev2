@@ -66,26 +66,17 @@
             grid-template-rows: auto 1fr;
             overflow: hidden;
             &__active-line {
-                background-color: #9333ea;
+                background-color: #2563eb;
                 transition: none;
-
-                body.theme--light & {
-                    background-color: #2962ff;
-                }
             }
 
             &__active {
-                background: #9333ea !important;
+                background: #2563eb !important;
                 color: #ffffff !important;
                 border-radius: 16px !important;
                 margin: 0.4rem;
                 height: calc(100% - 0.8rem);
-                box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
-
-                body.theme--light & {
-                    background: #2962ff !important; // Blue background for active tab in white mode
-                    box-shadow: 0 4px 12px rgba(41, 98, 255, 0.3);
-                }
+                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 
                 // Ensure active tab text uses white
                 * {
@@ -108,9 +99,6 @@
                 background: #030d1e; // Dark navy background
                 justify-content: start;
 
-                body.theme--light & {
-                    background: #ffffff; // White background for white mode
-                }
                 padding: 0 0.4rem; // Reduced padding
                 height: 6rem;
                 align-items: center;
@@ -210,11 +198,10 @@
                 padding: 0 1.6rem; // Reduced padding
                 width: auto;
                 font-size: 1.4rem;
-                color: rgba(255, 255, 255, 0.7); // Light text for inactive tabs
+                color: #ffffff; // Bold white text for inactive tabs
+                font-weight: bold;
 
-                body.theme--light & {
-                    color: #2962ff; // Blue text for white mode
-                }
+
 
                 // Ensure inactive tab icons are visible (targeting SVGs in labels)
                 &:not(.dc-tabs__active) {
@@ -223,9 +210,7 @@
                     svg > g > path {
                         fill: #fbbf24 !important; // Yellow/Orange icons for inactive tabs
 
-                        body.theme--light & {
-                            fill: #2962ff !important; // Blue icons for white mode
-                        }
+
                     }
                 }
 
@@ -896,7 +881,22 @@ body.theme--dark .main__container .main__tabs .dc-tabs__item {
         }
     }
 
-    // Special handling for active tabs to ensure maximum visibility
+// Special handling for Bot Builder tab to be red in light mode
+body.theme--light {
+    #id-bot-builder.dc-tabs__item:not(.dc-tabs__active) {
+        color: #ff444f !important;
+        * {
+            color: #ff444f !important;
+        }
+        svg,
+        svg > path,
+        svg > g > path {
+            fill: #ff444f !important;
+        }
+    }
+}
+
+// Special handling for active tabs to ensure maximum visibility
     &.dc-tabs__active {
         color: var(--text-prominent) !important;
 

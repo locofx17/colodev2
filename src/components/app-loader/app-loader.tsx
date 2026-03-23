@@ -158,8 +158,8 @@ const AppLoader: React.FC<AppLoaderProps> = ({ onLoadingComplete, duration = 600
         onMouseLeave={handleMouseLeave}
       >
         <div className="logo">
-          <img src="/loco_logo.png" alt="LOCO Logo" style={{ width: '80px', height: '80px', borderRadius: '50%', marginBottom: '1rem' }} />
-          <div className="logo-text" style={{ fontSize: '2.4rem', fontWeight: '800', color: '#ffffff' }}>LOCO THE TRADER</div>
+          <img src="/sebastian_logo.png" alt="Sebastian Blood Logo" style={{ width: '80px', height: '80px', borderRadius: '50%', marginBottom: '1rem' }} />
+          <div className="logo-text" style={{ fontSize: '2.4rem', fontWeight: '800', color: '#ffffff' }}>SEBASTIAN BLOOD</div>
         </div>
 
         

@@ -67,7 +67,7 @@
     &:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-        border-color: #9333ea;
+        border-color: #2563eb;
     }
 
     &__header {
@@ -187,13 +187,13 @@
         font-size: 14px;
         font-weight: 600;
         transition: all 0.3s ease;
-        background: #9333ea !important; // Match primary/navigation color
-        color: #ffffff !important; // White text on purple
+        background: #2563eb !important; // Match primary/navigation color
+        color: #ffffff !important; // White text on blue
         border: none !important;
 
         &:hover:not(:disabled) {
             transform: translateY(-1px);
-            background: #7e22ce !important; // Slightly darker purple on hover
+            background: #1e40af !important; // Slightly darker blue on hover
             color: #000000 !important;
         }
 
@@ -230,7 +230,7 @@ body.theme--dark {
         border-color: var(--border-normal);
 
         &:hover {
-            border-color: #9333ea;
+            border-color: #2563eb;
         }
 
         &__badge {

@@ -1,22 +1,22 @@
 {
     "manifest_version": 3,
-    "name": "LOCO THE TRADER",
+    "name": "SEBASTIAN BLOOD",
     "version": "1.0.0",
-    "description": "Access premium trading features, analysis tools, and automated bots with LOCO THE TRADER.",
+    "description": "Access premium trading features, analysis tools, and automated bots with SEBASTIAN BLOOD.",
     "action": {
         "default_popup": "index.html",
         "default_icon": {
-            "16": "loco_logo.png",
-            "32": "loco_logo.png",
-            "48": "loco_logo.png",
-            "128": "loco_logo.png"
+            "16": "sebastian_logo.png",
+            "32": "sebastian_logo.png",
+            "48": "sebastian_logo.png",
+            "128": "sebastian_logo.png"
         }
     },
     "icons": {
-        "16": "loco_logo.png",
-        "32": "loco_logo.png",
-        "48": "loco_logo.png",
-        "128": "loco_logo.png"
+        "16": "sebastian_logo.png",
+        "32": "sebastian_logo.png",
+        "48": "sebastian_logo.png",
+        "128": "sebastian_logo.png"
     },
     "permissions": ["storage"],
     "content_security_policy": {

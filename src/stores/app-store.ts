@@ -49,7 +49,7 @@ export default class AppStore {
         text: localize(
             'Unfortunately, this trading platform is not available for EU Deriv account. Please switch to a non-EU account to continue trading.'
         ),
-        title: localize('loco the trader is unavailable for this account'),
+        title: localize('sebastian blood is unavailable for this account'),
         link: localize('Switch to another account'),
     });
 
@@ -57,8 +57,8 @@ export default class AppStore {
         return {
             text: ' ',
             title: is_logged_in
-                ? localize(`loco the trader is not available for ${country || 'EU'} clients`)
-                : localize(`loco the trader is unavailable in ${country || 'the EU'}`),
+                ? localize(`sebastian blood is not available for ${country || 'EU'} clients`)
+                : localize(`sebastian blood is unavailable in ${country || 'the EU'}`),
             link: is_logged_in ? localize("Back to Trader's Hub") : localize('Refresh'),
             route: standalone_routes.traders_hub,
         };

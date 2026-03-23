@@ -14,7 +14,7 @@ export class DerivAPI {
 
   connect() {
     return new Promise((resolve, reject) => {
-      this.socket = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=84755');
+      this.socket = new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=120181');
 
       this.socket.onopen = () => {
         this.isConnected = true;

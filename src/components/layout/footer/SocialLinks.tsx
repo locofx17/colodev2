@@ -9,13 +9,13 @@ const SocialLinks = () => {
     const socialLinks = [
         {
             name: 'YouTube',
-            href: 'https://www.youtube.com/@LocoTradinghub',
+            href: 'https://www.youtube.com/@SebastianBlood',
             icon: <Youtube size={16} />,
             tooltip: localize('YouTube')
         },
         {
             name: 'TikTok',
-            href: 'https://www.tiktok.com/@loco_fx1',
+            href: 'https://www.tiktok.com/@sebastianblood_fx',
             icon: <Music2 size={16} />,
             tooltip: localize('TikTok')
         },
@@ -27,7 +27,7 @@ const SocialLinks = () => {
         },
         {
             name: 'Telegram',
-            href: 'https://t.me/Loco_tradinghub',
+            href: 'https://t.me/SebastianBlood_tradinghub',
             icon: <Send size={16} />,
             tooltip: localize('Telegram')
         }

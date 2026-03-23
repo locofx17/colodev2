@@ -701,7 +701,7 @@ export default class RunPanelStore {
         this.onOkButtonClick = this.onCloseDialog;
         this.onCancelButtonClick = null;
         this.dialog_options = {
-            title: localize('loco the trader'),
+            title: localize('sebastian blood'),
             message: final_message,
         };
         this.is_dialog_open = true;
@@ -737,7 +737,7 @@ export default class RunPanelStore {
             this.onOkButtonClick = this.onCloseDialog;
             this.onCancelButtonClick = null;
             this.dialog_options = {
-                title: localize('loco the trader'),
+                title: localize('sebastian blood'),
                 message: `${error_message}. ${label}: ${formatted_profit} ${currency}`,
             };
             this.is_dialog_open = true;
