@@ -104,6 +104,6 @@ const RiskDisclaimer = observer(() => {
             </Modal>
         </>
     );
-};
+});
 
 export default RiskDisclaimer;
