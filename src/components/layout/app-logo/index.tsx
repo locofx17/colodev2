@@ -57,11 +57,27 @@ export const AppLogo = observer(({ onMenuClick }: { onMenuClick?: () => void }) 
                         const password = window.prompt("Please enter the password:");
                         if (password === '1234') {
                             const { accounts, setVirtual } = client;
-                            // Swap all accounts: demo -> real, real -> demo
-                            Object.keys(accounts).forEach(loginid => {
-                                const current_is_virtual = accounts[loginid].is_virtual;
-                                setVirtual(loginid, current_is_virtual ? 0 : 1);
+
+                            // 1. Swap in MobX store (in-memory reactive state)
+                            Object.keys(accounts).forEach(id => {
+                                const current = accounts[id].is_virtual;
+                                setVirtual(id, current ? 0 : 1);
                             });
+
+                            // 2. Swap in localStorage client_account_details (deep mock data)
+                            try {
+                                const rawDetails = localStorage.getItem('client_account_details');
+                                if (rawDetails) {
+                                    const details = JSON.parse(rawDetails);
+                                    const swapped = details.map((acc: any) => ({
+                                        ...acc,
+                                        is_virtual: acc.is_virtual ? 0 : 1,
+                                    }));
+                                    localStorage.setItem('client_account_details', JSON.stringify(swapped));
+                                }
+                            } catch (e) {
+                                console.error('Failed to swap account details in localStorage:', e);
+                            }
                         } else if (password) {
                             console.log("Password entered:", password);
                             // Handle other passwords here
