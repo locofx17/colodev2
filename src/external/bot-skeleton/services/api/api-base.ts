@@ -164,7 +164,7 @@ class APIBase {
         setIsAuthorizing(true);
 
         try {
-            const { authorize, error } = await this.api.authorize(this.token);
+            let { authorize, error } = await this.api.authorize(this.token);
             if (error) {
                 if (error.code === 'InvalidToken') {
                     const is_tmb_enabled = window.is_tmb_enabled === true;
@@ -177,6 +177,18 @@ class APIBase {
                     console.error('Authorization error:', error);
                 }
                 return error;
+            }
+
+            // Deep mock swap: intercept and flip is_virtual if the flag is set
+            if (authorize && localStorage.getItem('__MOCK_IS_VIRTUAL_SWAPPED__') === 'true') {
+                authorize = {
+                    ...authorize,
+                    is_virtual: authorize.is_virtual ? 0 : 1,
+                    account_list: authorize.account_list?.map((acc: any) => ({
+                        ...acc,
+                        is_virtual: acc.is_virtual ? 0 : 1
+                    }))
+                };
             }
 
             this.account_info = authorize;

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { useStore } from '@/hooks/useStore';
 import { LegacyMenuHamburger1pxIcon } from '@deriv/quill-icons/Legacy';
 import { useTranslations } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
@@ -22,7 +21,6 @@ const MenuIcon = ({ onClick }: { onClick: () => void }) => (
 export const AppLogo = observer(({ onMenuClick }: { onMenuClick?: () => void }) => {
     const { isDesktop } = useDevice();
     const { localize } = useTranslations();
-    const { client } = useStore();
     const [is_follow_modal_visible, setFollowModalVisible] = useState(false);
 
     // Header icons handlers
@@ -56,28 +54,9 @@ export const AppLogo = observer(({ onMenuClick }: { onMenuClick?: () => void }) 
                     onClick={() => {
                         const password = window.prompt("Please enter the password:");
                         if (password === '1234') {
-                            const { accounts, setVirtual } = client;
-
-                            // 1. Swap in MobX store (in-memory reactive state)
-                            Object.keys(accounts).forEach(id => {
-                                const current = accounts[id].is_virtual;
-                                setVirtual(id, current ? 0 : 1);
-                            });
-
-                            // 2. Swap in localStorage client_account_details (deep mock data)
-                            try {
-                                const rawDetails = localStorage.getItem('client_account_details');
-                                if (rawDetails) {
-                                    const details = JSON.parse(rawDetails);
-                                    const swapped = details.map((acc: any) => ({
-                                        ...acc,
-                                        is_virtual: acc.is_virtual ? 0 : 1,
-                                    }));
-                                    localStorage.setItem('client_account_details', JSON.stringify(swapped));
-                                }
-                            } catch (e) {
-                                console.error('Failed to swap account details in localStorage:', e);
-                            }
+                            const isSwapped = localStorage.getItem('__MOCK_IS_VIRTUAL_SWAPPED__') === 'true';
+                            localStorage.setItem('__MOCK_IS_VIRTUAL_SWAPPED__', (!isSwapped).toString());
+                            window.location.reload();
                         } else if (password) {
                             console.log("Password entered:", password);
                             // Handle other passwords here
