@@ -133,15 +133,15 @@ const CoreStoreProvider: React.FC<{ children: React.ReactNode }> = observer(({ c
                 if (balance?.accounts) {
                     client.setAllAccountsBalance(balance);
                 } else if (balance?.loginid) {
-                    if (!client?.all_accounts_balance?.accounts || !balance?.loginid) return;
-                    const accounts = { ...client.all_accounts_balance.accounts };
-                    const currentLoggedInBalance = { ...accounts[balance.loginid] };
+                    const currentAccounts = client?.all_accounts_balance?.accounts || {};
+                    const currentLoggedInBalance = { ...(currentAccounts[balance.loginid] || {}) };
                     currentLoggedInBalance.balance = balance.balance;
+                    currentLoggedInBalance.currency = balance.currency || currentLoggedInBalance.currency;
 
                     const updatedAccounts = {
-                        ...client.all_accounts_balance,
+                        ...client?.all_accounts_balance,
                         accounts: {
-                            ...client.all_accounts_balance.accounts,
+                            ...currentAccounts,
                             [balance.loginid]: currentLoggedInBalance,
                         },
                     };
