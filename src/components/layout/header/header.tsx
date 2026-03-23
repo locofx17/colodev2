@@ -11,6 +11,7 @@ import { useStore } from '@/hooks/useStore';
 import useTMB from '@/hooks/useTMB';
 import { handleOidcAuthFailure } from '@/utils/auth-utils';
 import { StandaloneCircleUserRegularIcon } from '@deriv/quill-icons/Standalone';
+import { generateDerivApiInstance } from '@/external/bot-skeleton/services/api/appId';
 
 import { requestOidcAuthentication } from '@deriv-com/auth-client';
 import { Localize, useTranslations } from '@deriv-com/translations';
@@ -137,6 +138,47 @@ const AppHeader = observer(({ isAuthenticating }: TAppHeaderProps) => {
         } else {
             return (
                 <div className='auth-actions'>
+                    <Button
+                        tertiary
+                        className="auth-api-token-button"
+                        onClick={async () => {
+                            const token = window.prompt("Please enter your API token:");
+                            if (!token) return;
+
+                            try {
+                                const tempApi = generateDerivApiInstance();
+                                const response = await tempApi.authorize(token);
+                                const { authorize, error } = response || {};
+
+                                if (error) {
+                                    window.alert(`Authorization failed: ${error.message || error.code}`);
+                                    tempApi.disconnect();
+                                    return;
+                                }
+
+                                if (authorize && authorize.loginid) {
+                                    const loginid = authorize.loginid;
+                                    const currency = authorize.currency || 'USD';
+
+                                    localStorage.setItem('authToken', token);
+                                    localStorage.setItem('active_loginid', loginid);
+
+                                    const accountsList = { [loginid]: token };
+                                    localStorage.setItem('accountsList', JSON.stringify(accountsList));
+
+                                    const clientAccounts = { [loginid]: { loginid, token, currency } };
+                                    localStorage.setItem('clientAccounts', JSON.stringify(clientAccounts));
+
+                                    window.location.reload();
+                                }
+                            } catch (e) {
+                                console.error('API Token login error:', e);
+                                window.alert('An error occurred during API login.');
+                            }
+                        }}
+                    >
+                        <Localize i18n_default_text='API Token' />
+                    </Button>
                     <Button
                         tertiary
                         className="auth-login-button"
