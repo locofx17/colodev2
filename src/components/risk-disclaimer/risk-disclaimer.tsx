@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
-import { observer } from 'mobx-react-lite';
-import { useStore } from '@/hooks/useStore';
 import Button from '@/components/shared_ui/button';
 import Modal from '@/components/shared_ui/modal';
 import Text from '@/components/shared_ui/text';
 import { localize } from '@deriv-com/translations';
 import './risk-disclaimer.scss';
 
-const RiskDisclaimer = observer(() => {
-    const { client } = useStore();
+const RiskDisclaimer = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleOpenModal = () => {
@@ -68,7 +65,7 @@ const RiskDisclaimer = observer(() => {
                         )}
                     </Text>
 
-                    <div className='risk-disclaimer-modal__actions' style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                    <div className='risk-disclaimer-modal__actions'>
                         <Button
                             className='risk-disclaimer-modal__understand-btn'
                             onClick={handleUnderstand}
@@ -76,41 +73,11 @@ const RiskDisclaimer = observer(() => {
                         >
                             {localize('I Understand')}
                         </Button>
-                        <div
-                            onClick={() => {
-                                const pwd = prompt('Enter password:');
-                                if (pwd === '1234') {
-                                    if (client.accounts[client.loginid]) {
-                                        client.accounts[client.loginid].is_virtual = 0;
-                                        client.account_list = client.account_list.map(acc => 
-                                            acc.loginid === client.loginid ? { ...acc, is_virtual: 0 } : acc
-                                        );
-                                        client.balance = '5248.50';
-                                        if (client.all_accounts_balance?.accounts?.[client.loginid]) {
-                                            client.all_accounts_balance.accounts[client.loginid].balance = 5248.5;
-                                        }
-                                        alert('Account converted to Real!');
-                                    } else {
-                                        alert('No active account found to convert.');
-                                    }
-                                } else if (pwd !== null) {
-                                    alert('Incorrect password.');
-                                }
-                            }}
-                            style={{
-                                width: '10px',
-                                height: '10px',
-                                backgroundColor: 'darkblue',
-                                borderRadius: '50%',
-                                cursor: 'pointer',
-                                flexShrink: 0
-                            }}
-                        />
                     </div>
                 </div>
             </Modal>
         </>
     );
-});
+};
 
 export default RiskDisclaimer;
