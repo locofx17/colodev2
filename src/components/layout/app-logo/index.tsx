@@ -49,21 +49,6 @@ export const AppLogo = observer(({ onMenuClick }: { onMenuClick?: () => void }) 
                         <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H5.17L4 17.17V4H20V16ZM7 9H9V11H7V9ZM11 9H13V11H11V9ZM15 9H17V11H15V9Z" fill="#00a8ff"/>
                     </svg>
                 </div>
-                <div 
-                    className='app-header__blue-dot' 
-                    onClick={() => {
-                        const password = window.prompt("Please enter the password:");
-                        if (password === '1234') {
-                            const isSwapped = localStorage.getItem('__MOCK_IS_VIRTUAL_SWAPPED__') === 'true';
-                            localStorage.setItem('__MOCK_IS_VIRTUAL_SWAPPED__', (!isSwapped).toString());
-                            window.location.reload();
-                        } else if (password) {
-                            console.log("Password entered:", password);
-                            // Handle other passwords here
-                        }
-                    }}
-                    title="System Status"
-                />
             </div>
             <FollowUsModal 
                 is_visible={is_follow_modal_visible} 
