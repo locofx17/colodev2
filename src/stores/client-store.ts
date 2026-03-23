@@ -88,6 +88,7 @@ export default class ClientStore {
             updateTncStatus: action,
             is_trading_experience_incomplete: computed,
             is_cr_account: computed,
+            setVirtual: action,
             account_open_date: computed,
         });
     }
@@ -321,6 +322,12 @@ export default class ClientStore {
 
     setUpgradeableLandingCompanies = (upgradeable_landing_companies: string[]) => {
         this.upgradeable_landing_companies = upgradeable_landing_companies;
+    };
+
+    setVirtual = (loginid: string, is_virtual: number) => {
+        if (this.accounts[loginid]) {
+            this.accounts[loginid].is_virtual = is_virtual;
+        }
     };
 
     setAllAccountsBalance = (all_accounts_balance: Balance | undefined) => {

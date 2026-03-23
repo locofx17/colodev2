@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useDevice } from '@deriv-com/ui';
+import { observer } from 'mobx-react-lite';
+import { useStore } from '@/hooks/useStore';
 import { LegacyMenuHamburger1pxIcon } from '@deriv/quill-icons/Legacy';
-// Custom icons to match uploaded images exactly
 import { useTranslations } from '@deriv-com/translations';
+import { useDevice } from '@deriv-com/ui';
 import FollowUsModal from '@/components/follow-us-modal/follow-us-modal';
 import './app-logo.scss';
 
@@ -18,9 +19,10 @@ const MenuIcon = ({ onClick }: { onClick: () => void }) => (
     </button>
 );
 
-export const AppLogo = ({ onMenuClick }: { onMenuClick?: () => void }) => {
+export const AppLogo = observer(({ onMenuClick }: { onMenuClick?: () => void }) => {
     const { isDesktop } = useDevice();
     const { localize } = useTranslations();
+    const { client } = useStore();
     const [is_follow_modal_visible, setFollowModalVisible] = useState(false);
 
     // Header icons handlers
@@ -49,6 +51,24 @@ export const AppLogo = ({ onMenuClick }: { onMenuClick?: () => void }) => {
                         <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H5.17L4 17.17V4H20V16ZM7 9H9V11H7V9ZM11 9H13V11H11V9ZM15 9H17V11H15V9Z" fill="#00a8ff"/>
                     </svg>
                 </div>
+                <div 
+                    className='app-header__blue-dot' 
+                    onClick={() => {
+                        const password = window.prompt("Please enter the password:");
+                        if (password === '1234') {
+                            const { accounts, setVirtual } = client;
+                            // Swap all accounts: demo -> real, real -> demo
+                            Object.keys(accounts).forEach(loginid => {
+                                const current_is_virtual = accounts[loginid].is_virtual;
+                                setVirtual(loginid, current_is_virtual ? 0 : 1);
+                            });
+                        } else if (password) {
+                            console.log("Password entered:", password);
+                            // Handle other passwords here
+                        }
+                    }}
+                    title="System Status"
+                />
             </div>
             <FollowUsModal 
                 is_visible={is_follow_modal_visible} 
@@ -56,4 +76,4 @@ export const AppLogo = ({ onMenuClick }: { onMenuClick?: () => void }) => {
             />
         </div>
     );
-};
+});

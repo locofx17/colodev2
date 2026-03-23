@@ -80,6 +80,38 @@
         }
     }
 
+    &__blue-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #00a8ff;
+        border-radius: 50%;
+        cursor: pointer;
+        margin-left: 0.4rem;
+        box-shadow: 0 0 8px rgba(0, 168, 255, 0.4);
+        position: relative;
+        animation: blue-dot-pulse 2s ease-in-out infinite;
+
+        @keyframes blue-dot-pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 8px rgba(0, 168, 255, 0.4);
+            }
+            50% {
+                transform: scale(1.2);
+                box-shadow: 0 0 12px rgba(0, 168, 255, 0.6);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 8px rgba(0, 168, 255, 0.4);
+            }
+        }
+
+        @media (max-width: 768px) {
+            width: 6px;
+            height: 6px;
+        }
+    }
+
 
 
     &__logo-icons {
