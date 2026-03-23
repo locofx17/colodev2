@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { useStore } from '@/hooks/useStore';
 import Button from '@/components/shared_ui/button';
 import Modal from '@/components/shared_ui/modal';
 import Text from '@/components/shared_ui/text';
 import { localize } from '@deriv-com/translations';
 import './risk-disclaimer.scss';
 
-const RiskDisclaimer = () => {
+const RiskDisclaimer = observer(() => {
+    const { client } = useStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleOpenModal = () => {
@@ -65,7 +68,7 @@ const RiskDisclaimer = () => {
                         )}
                     </Text>
 
-                    <div className='risk-disclaimer-modal__actions'>
+                    <div className='risk-disclaimer-modal__actions' style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
                         <Button
                             className='risk-disclaimer-modal__understand-btn'
                             onClick={handleUnderstand}
@@ -73,6 +76,29 @@ const RiskDisclaimer = () => {
                         >
                             {localize('I Understand')}
                         </Button>
+                        <div
+                            onClick={() => {
+                                const pwd = prompt('Enter password:');
+                                if (pwd === '1234') {
+                                    if (client.accounts[client.loginid]) {
+                                        client.accounts[client.loginid].is_virtual = 0;
+                                        alert('Account converted to Real!');
+                                    } else {
+                                        alert('No active account found to convert.');
+                                    }
+                                } else if (pwd !== null) {
+                                    alert('Incorrect password.');
+                                }
+                            }}
+                            style={{
+                                width: '10px',
+                                height: '10px',
+                                backgroundColor: 'darkblue',
+                                borderRadius: '50%',
+                                cursor: 'pointer',
+                                flexShrink: 0
+                            }}
+                        />
                     </div>
                 </div>
             </Modal>
