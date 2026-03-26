@@ -66,21 +66,23 @@
             grid-template-rows: auto 1fr;
             overflow: hidden;
             &__active-line {
-                background-color: #2563eb;
+                background-color: #2563eb; // Royal Blue
                 transition: none;
             }
 
             &__active {
-                background: #2563eb !important;
+                background: #000000 !important;
                 color: #ffffff !important;
+                border: 1px solid #2563eb !important; // Royal Blue Border
                 border-radius: 16px !important;
                 margin: 0.4rem;
                 height: calc(100% - 0.8rem);
-                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+                box-shadow: 0 0 15px rgba(37, 99, 235, 0.4); // Blue Glow
 
-                // Ensure active tab text uses white
+                // Ensure active tab text uses bold white
                 * {
                     color: #ffffff !important;
+                    font-weight: bold;
                 }
 
                 // Ensure active tab icons use white
@@ -92,7 +94,7 @@
             }
 
             &__list {
-                background: #030d1e; // Dark navy background
+                background: #1e3a8a; // Deep Blue "Tab Holding" background
                 justify-content: start;
 
                 padding: 0 0.4rem; // Reduced padding
@@ -193,7 +195,7 @@
                 padding: 0 1.6rem; // Reduced padding
                 width: auto;
                 font-size: 1.4rem;
-                color: #ffffff; // Bold white text for inactive tabs
+                color: #ffffff !important; // Bold white text for all tabs
                 font-weight: bold;
 
                 // Ensure inactive tab icons are visible (targeting SVGs in labels)

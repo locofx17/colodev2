@@ -113,8 +113,19 @@ const useMobileMenuConfig = (client?: RootStore['client']) => {
                     removeBorderBottom: true,
                 },
             ].filter(Boolean) as TMenuConfig,
-        ],
-        [is_dark_mode_on, toggleTheme]
+            is_logged_in &&
+                ([
+                    {
+                        as: 'button',
+                        label: localize('Log out'),
+                        LeftComponent: LegacyLogout1pxIcon,
+                        onClick: () => {
+                            oAuthLogout();
+                        },
+                    },
+                ].filter(Boolean) as TMenuConfig),
+        ].filter(Boolean) as TMenuConfig[],
+        [is_dark_mode_on, toggleTheme, is_logged_in, oAuthLogout]
     );
 
     return {
