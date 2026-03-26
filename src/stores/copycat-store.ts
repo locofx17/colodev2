@@ -1,6 +1,7 @@
 import { action, makeObservable, observable, reaction } from 'mobx';
 import { DerivAccount, TradeLog } from '../pages/copycat/types';
 import { DerivAPI } from '../pages/copycat/services/derivApi';
+import { transaction_elements } from '../constants/transactions';
 import RootStore from './root-store';
 
 export default class CopycatStore {
@@ -86,6 +87,27 @@ export default class CopycatStore {
             () => this.root_store.client.is_logged_in + this.root_store.client.loginid,
             () => {
                 this.autoLinkMaster();
+            }
+        );
+
+        // Observe global transactions to replicate Master trades taken within the app (DCircle, Smart Trader, etc.)
+        reaction(
+            () => this.root_store.transactions.transactions.length,
+            () => {
+                if (!this.isReplicating) return;
+                
+                const masterAccount = this.accounts.find(a => a.type === 'master');
+                if (!masterAccount || !masterAccount.isActive) return;
+
+                const lastTrx = this.root_store.transactions.transactions[0];
+                if (lastTrx?.type === transaction_elements.CONTRACT && typeof lastTrx.data === 'object') {
+                    const contract = lastTrx.data;
+                    // Ensure it's an open contract and hasn't been copied yet
+                    if (contract.contract_id && !this.copiedTrades.has(String(contract.contract_id))) {
+                        this.copiedTrades.add(String(contract.contract_id));
+                        this.copyTrade(masterAccount, contract);
+                    }
+                }
             }
         );
     }

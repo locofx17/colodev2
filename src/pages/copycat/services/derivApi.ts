@@ -76,19 +76,11 @@ export class DerivAPI {
         });
     }
 
-    buy(symbol: string, amount: number, type: string = 'CALL') {
+    buy(price: number, parameters: any) {
         this.send({
             buy: 1,
-            price: amount,
-            parameters: {
-                amount: amount,
-                basis: 'stake',
-                contract_type: type,
-                currency: 'USD',
-                duration: 1,
-                duration_unit: 'm',
-                symbol: symbol,
-            },
+            price: price,
+            parameters: parameters,
         });
     }
 
