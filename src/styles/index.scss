@@ -21,6 +21,10 @@ body {
 }
 
 // Prevent double-tap-to-zoom on interactive elements globally for mobile
-button, input, select, .dc-tabs__item, .btn {
+button,
+input,
+select,
+.dc-tabs__item,
+.btn {
     touch-action: manipulation;
 }

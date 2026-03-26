@@ -62,11 +62,11 @@ const WorkspaceWrapper = observer(() => {
                     } as any);
                     // Show import notification and clear handoff
                     setOpenSettings?.(NOTIFICATION_TYPE.BOT_IMPORT);
-                    
+
                     if (should_auto_run) {
                         onRunButtonClick();
                     }
-                    
+
                     clearPendingFreeBot();
 
                     // Reset the processed bot ref after successful load

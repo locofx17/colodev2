@@ -45,7 +45,7 @@
         @media (max-width: 480px) {
             gap: 0.4rem;
         }
-        
+
         span {
             font-size: 1.6rem;
             font-weight: 800;
@@ -58,7 +58,7 @@
             }
 
             @media (max-width: 480px) {
-                font-size: 1.0rem;
+                font-size: 1rem;
                 letter-spacing: 0px;
             }
         }
@@ -136,11 +136,13 @@
             background-color: var(--general-active);
         }
 
-        svg, img {
+        svg,
+        img {
             transition: opacity 0.2s ease;
         }
 
-        &:hover svg, &:hover img {
+        &:hover svg,
+        &:hover img {
             opacity: 0.8;
         }
     }

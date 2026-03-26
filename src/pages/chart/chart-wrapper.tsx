@@ -24,13 +24,17 @@ const ChartWrapper = observer(({ prefix = 'chart', show_digits_stats }: ChartWra
     const uniqueKey = client.loginid ? `${prefix}-${client.loginid}` : `${prefix}-${uuid}`;
 
     return (
-        <Div100vhContainer className="chart-wrapper-container" height_offset='260px' style={{ position: 'relative', width: '100%' }}>
+        <Div100vhContainer
+            className='chart-wrapper-container'
+            height_offset='260px'
+            style={{ position: 'relative', width: '100%' }}
+        >
             <ChartToggle active_chart={active_chart} onToggle={setActiveChart} />
             {active_chart === 'chart' ? (
                 <Chart key={uniqueKey} show_digits_stats={show_digits_stats} />
             ) : (
                 <Suspense fallback={<ChunkLoader message={localize('Please wait, loading TradingView...')} />}>
-                    <div className="tradingview-scroll-wrapper">
+                    <div className='tradingview-scroll-wrapper'>
                         <TradingView />
                     </div>
                 </Suspense>

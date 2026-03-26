@@ -11,31 +11,31 @@ const SocialLinks = () => {
             name: 'YouTube',
             href: 'https://www.youtube.com/@SebastianBlood',
             icon: <Youtube size={16} />,
-            tooltip: localize('YouTube')
+            tooltip: localize('YouTube'),
         },
         {
             name: 'TikTok',
             href: 'https://www.tiktok.com/@sebastianblood_fx',
             icon: <Music2 size={16} />,
-            tooltip: localize('TikTok')
+            tooltip: localize('TikTok'),
         },
         {
             name: 'WhatsApp',
             href: 'https://chat.whatsapp.com/LvAW1tmssZgAqmSffDm61e?mode=gi_t',
             icon: <MessageCircle size={16} />,
-            tooltip: localize('WhatsApp')
+            tooltip: localize('WhatsApp'),
         },
         {
             name: 'Telegram',
             href: 'https://t.me/SebastianBlood_tradinghub',
             icon: <Send size={16} />,
-            tooltip: localize('Telegram')
-        }
+            tooltip: localize('Telegram'),
+        },
     ];
 
     return (
         <>
-            {socialLinks.map((link) => (
+            {socialLinks.map(link => (
                 <Tooltip
                     key={link.name}
                     as='a'

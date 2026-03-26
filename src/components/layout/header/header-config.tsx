@@ -41,7 +41,11 @@ export type TAccount = {
 };
 
 const SebastianBloodLogoIcon = ({ height, width }: { height: number; width: number }) => (
-    <img src='/sebastian_logo.png' alt='Sebastian Blood Logo' style={{ height, width, borderRadius: '50%', objectFit: 'cover' }} />
+    <img
+        src='/sebastian_logo.png'
+        alt='Sebastian Blood Logo'
+        style={{ height, width, borderRadius: '50%', objectFit: 'cover' }}
+    />
 );
 
 export const platformsConfig: PlatformsConfig[] = [
@@ -70,7 +74,6 @@ export const platformsConfig: PlatformsConfig[] = [
         showInEU: false,
     },
 ];
-
 
 export const TRADERS_HUB_LINK_CONFIG = {
     as: 'a',

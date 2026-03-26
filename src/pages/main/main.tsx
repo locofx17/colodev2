@@ -40,7 +40,6 @@ const SmartAnalysis = lazy(() => import('../smart-analysis'));
 
 const TradingPlans = lazy(() => import('../trading-plans'));
 
-
 const Dtrader = lazy(() => import('../dtrader'));
 const DCircle = lazy(() => import('../dcircle'));
 const AutoTrades = lazy(() => import('../auto-trades'));
@@ -80,7 +79,19 @@ const AppWrapper = observer(() => {
     const { clear } = summary_card;
     const { DASHBOARD, BOT_BUILDER } = DBOT_TABS;
     const init_render = React.useRef(true);
-    const hash = ['dashboard', 'bot_builder', 'chart', 'free_bots', 'dcircle', 'copy-trading', 'smart_analysis', 'dtrader', 'auto_trades', 'trading-plans', 'sniper'];
+    const hash = [
+        'dashboard',
+        'bot_builder',
+        'chart',
+        'free_bots',
+        'dcircle',
+        'copy-trading',
+        'smart_analysis',
+        'dtrader',
+        'auto_trades',
+        'trading-plans',
+        'sniper',
+    ];
 
     const { isDesktop } = useDevice();
     const location = useLocation();
@@ -324,9 +335,7 @@ const AppWrapper = observer(() => {
                                 id='id-dcircle'
                             >
                                 <Suspense
-                                    fallback={
-                                        <ChunkLoader message={localize('Please wait, loading DCircle...')} />
-                                    }
+                                    fallback={<ChunkLoader message={localize('Please wait, loading DCircle...')} />}
                                 >
                                     <DCircle />
                                 </Suspense>
@@ -346,7 +355,9 @@ const AppWrapper = observer(() => {
                                 id='id-copycat'
                             >
                                 <Suspense
-                                    fallback={<ChunkLoader message={localize('Please wait, loading Copy Trading...')} />}
+                                    fallback={
+                                        <ChunkLoader message={localize('Please wait, loading Copy Trading...')} />
+                                    }
                                 >
                                     <Copycat />
                                 </Suspense>
@@ -366,7 +377,9 @@ const AppWrapper = observer(() => {
                                 id='id-smart-analysis'
                             >
                                 <Suspense
-                                    fallback={<ChunkLoader message={localize('Please wait, loading Smart Analysis...')} />}
+                                    fallback={
+                                        <ChunkLoader message={localize('Please wait, loading Smart Analysis...')} />
+                                    }
                                 >
                                     <SmartAnalysis />
                                 </Suspense>
@@ -405,9 +418,7 @@ const AppWrapper = observer(() => {
                                 id='id-auto-trades'
                             >
                                 <Suspense
-                                    fallback={
-                                        <ChunkLoader message={localize('Please wait, loading Auto Trades...')} />
-                                    }
+                                    fallback={<ChunkLoader message={localize('Please wait, loading Auto Trades...')} />}
                                 >
                                     <AutoTrades />
                                 </Suspense>
@@ -427,14 +438,13 @@ const AppWrapper = observer(() => {
                                 id='id-trading-plans'
                             >
                                 <Suspense
-                                    fallback={<ChunkLoader message={localize('Please wait, loading Trading Plans...')} />}
+                                    fallback={
+                                        <ChunkLoader message={localize('Please wait, loading Trading Plans...')} />
+                                    }
                                 >
                                     <TradingPlans />
                                 </Suspense>
                             </div>
-
-
-
                         </Tabs>
                     </div>
                 </div>

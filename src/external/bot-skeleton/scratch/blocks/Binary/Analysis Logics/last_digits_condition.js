@@ -61,16 +61,16 @@ Blockly.JavaScript.javascriptGenerator.forBlock.last_digits_condition = block =>
     const n = Number(block.getFieldValue('N')) || 1;
     const condition = block.getFieldValue('CONDITION');
     const d = Number(block.getFieldValue('DIGIT')) || 0;
-    const op = {
-        LESS: '<',
-        LEQ: '<=',
-        GREATER: '>',
-        GEQ: '>=',
-        EQ: '===',
-        NEQ: '!==',
-    }[condition] || '===';
+    const op =
+        {
+            LESS: '<',
+            LEQ: '<=',
+            GREATER: '>',
+            GEQ: '>=',
+            EQ: '===',
+            NEQ: '!==',
+        }[condition] || '===';
 
     const code = `Bot.getLastDigitsCondition({ n: ${n}, op: '${condition}', digit: ${d} })`;
     return [code, Blockly.JavaScript.javascriptGenerator.ORDER_ATOMIC];
 };
-

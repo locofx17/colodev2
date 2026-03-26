@@ -7,11 +7,7 @@ interface AppLoaderWrapperProps {
     enabled?: boolean; // Whether to show the loader, default true
 }
 
-const AppLoaderWrapper: React.FC<AppLoaderWrapperProps> = ({ 
-    children, 
-    duration = 5000, 
-    enabled = true 
-}) => {
+const AppLoaderWrapper: React.FC<AppLoaderWrapperProps> = ({ children, duration = 5000, enabled = true }) => {
     const [isLoading, setIsLoading] = useState(enabled);
 
     const handleLoadingComplete = () => {
@@ -20,12 +16,7 @@ const AppLoaderWrapper: React.FC<AppLoaderWrapperProps> = ({
 
     return (
         <>
-            {isLoading && (
-                <AppLoader 
-                    onLoadingComplete={handleLoadingComplete}
-                    duration={duration}
-                />
-            )}
+            {isLoading && <AppLoader onLoadingComplete={handleLoadingComplete} duration={duration} />}
             {!isLoading && children}
         </>
     );

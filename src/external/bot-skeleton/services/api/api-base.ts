@@ -186,8 +186,8 @@ class APIBase {
                     is_virtual: authorize.is_virtual ? 0 : 1,
                     account_list: authorize.account_list?.map((acc: any) => ({
                         ...acc,
-                        is_virtual: acc.is_virtual ? 0 : 1
-                    }))
+                        is_virtual: acc.is_virtual ? 0 : 1,
+                    })),
                 };
             }
 
@@ -225,12 +225,46 @@ class APIBase {
 
     async subscribe() {
         const subscribeToStream = (streamName: string) => {
+            if (streamName === 'balance') {
+                // Try with account: 'all' first (works for OAuth logins).
+                // Fall back to single-account balance if that fails (API token logins).
+                return doUntilDone(
+                    () => {
+                        const subscription = this.api?.send({
+                            balance: 1,
+                            subscribe: 1,
+                            account: 'all',
+                        });
+                        if (subscription) {
+                            this.current_auth_subscriptions.push(subscription);
+                        }
+                        return subscription;
+                    },
+                    [],
+                    this
+                ).catch(() => {
+                    // Fallback: subscribe to current account balance only
+                    return doUntilDone(
+                        () => {
+                            const subscription = this.api?.send({
+                                balance: 1,
+                                subscribe: 1,
+                            });
+                            if (subscription) {
+                                this.current_auth_subscriptions.push(subscription);
+                            }
+                            return subscription;
+                        },
+                        [],
+                        this
+                    );
+                });
+            }
             return doUntilDone(
                 () => {
                     const subscription = this.api?.send({
                         [streamName]: 1,
                         subscribe: 1,
-                        ...(streamName === 'balance' ? { account: 'all' } : {}),
                     });
                     if (subscription) {
                         this.current_auth_subscriptions.push(subscription);

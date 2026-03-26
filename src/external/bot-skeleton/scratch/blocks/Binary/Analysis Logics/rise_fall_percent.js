@@ -2,12 +2,21 @@ import { localize } from '@deriv-com/translations';
 import { modifyContextMenu } from '../../../utils';
 
 Blockly.Blocks.rise_fall_percent = {
-    init() { this.jsonInit(this.definition()); },
+    init() {
+        this.jsonInit(this.definition());
+    },
     definition() {
         return {
             message0: localize('Rise %1 %% of last %2 ticks'),
             args0: [
-                { type: 'field_dropdown', name: 'TYPE', options: [[localize('Rise'), 'RISE'], [localize('Fall'), 'FALL']] },
+                {
+                    type: 'field_dropdown',
+                    name: 'TYPE',
+                    options: [
+                        [localize('Rise'), 'RISE'],
+                        [localize('Fall'), 'FALL'],
+                    ],
+                },
                 { type: 'field_number', name: 'N', value: 1000, min: 1, precision: 1 },
             ],
             output: 'Number',
@@ -19,8 +28,15 @@ Blockly.Blocks.rise_fall_percent = {
             category: Blockly.Categories.Tick_Analysis,
         };
     },
-    meta() { return { display_name: localize('Rise/Fall %'), description: localize('Percentage of rising or falling ticks in last N ticks') }; },
-    customContextMenu(menu) { modifyContextMenu(menu); },
+    meta() {
+        return {
+            display_name: localize('Rise/Fall %'),
+            description: localize('Percentage of rising or falling ticks in last N ticks'),
+        };
+    },
+    customContextMenu(menu) {
+        modifyContextMenu(menu);
+    },
 };
 
 Blockly.JavaScript.javascriptGenerator.forBlock.rise_fall_percent = block => {
@@ -29,4 +45,3 @@ Blockly.JavaScript.javascriptGenerator.forBlock.rise_fall_percent = block => {
     const code = `Bot.getRiseFallPercent({ type: '${type}', n: ${n} })`;
     return [code, Blockly.JavaScript.javascriptGenerator.ORDER_ATOMIC];
 };
-

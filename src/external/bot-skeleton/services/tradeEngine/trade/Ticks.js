@@ -93,14 +93,15 @@ export default Engine =>
             const list = await this.getLastDigitList();
             const lastN = list.slice(-Number(n || 0));
             const d = Number(digit);
-            const cmp = {
-                LESS: x => Number(x) < d,
-                LEQ: x => Number(x) <= d,
-                GREATER: x => Number(x) > d,
-                GEQ: x => Number(x) >= d,
-                EQ: x => Number(x) === d,
-                NEQ: x => Number(x) !== d,
-            }[op] || (x => Number(x) === d);
+            const cmp =
+                {
+                    LESS: x => Number(x) < d,
+                    LEQ: x => Number(x) <= d,
+                    GREATER: x => Number(x) > d,
+                    GEQ: x => Number(x) >= d,
+                    EQ: x => Number(x) === d,
+                    NEQ: x => Number(x) !== d,
+                }[op] || (x => Number(x) === d);
             return lastN.every(cmp);
         }
 
@@ -171,7 +172,7 @@ export default Engine =>
             const lastN = (ohlc || []).slice(-Number(n || 0));
             const rises = lastN.filter(o => Number(o.close) > Number(o.open)).length;
             const falls = lastN.filter(o => Number(o.close) < Number(o.open)).length;
-            const pct = (type === 'RISE' ? rises : falls) / Math.max(1, lastN.length) * 100;
+            const pct = ((type === 'RISE' ? rises : falls) / Math.max(1, lastN.length)) * 100;
             return Math.round(pct);
         }
 

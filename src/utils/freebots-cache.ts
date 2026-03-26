@@ -94,7 +94,7 @@ export const getBotsManifest = async (): Promise<TBotsManifestItem[] | null> => 
     try {
         // Fallback to generic manifest
         const res = await fetch('/xml/bots.json', { cache: 'no-cache' });
-        
+
         if (!res.ok) return null;
 
         const data = (await res.json()) as TBotsManifestItem[];
@@ -105,4 +105,3 @@ export const getBotsManifest = async (): Promise<TBotsManifestItem[] | null> => 
         return null;
     }
 };
-

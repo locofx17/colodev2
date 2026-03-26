@@ -83,17 +83,13 @@
                     color: #ffffff !important;
                 }
 
-
                 // Ensure active tab icons use white
                 svg,
                 svg > path,
                 svg > g > path {
                     fill: #ffffff !important;
                 }
-
             }
-
-
 
             &__list {
                 background: #030d1e; // Dark navy background
@@ -150,7 +146,6 @@
                     flex-direction: column;
                 }
 
-
                 @include mobile-or-tablet-screen {
                     width: 100%;
                     overflow-x: auto;
@@ -201,16 +196,12 @@
                 color: #ffffff; // Bold white text for inactive tabs
                 font-weight: bold;
 
-
-
                 // Ensure inactive tab icons are visible (targeting SVGs in labels)
                 &:not(.dc-tabs__active) {
                     svg,
                     svg > path,
                     svg > g > path {
                         fill: #fbbf24 !important; // Yellow/Orange icons for inactive tabs
-
-
                     }
                 }
 
@@ -241,7 +232,6 @@
             }
         }
     }
-
 
     &__run-strategy-wrapper {
         inset-inline-end: 1.6rem;
@@ -864,7 +854,6 @@ body.theme--dark .main__container .main__tabs .dc-tabs__item {
             }
         }
 
-
         &:hover {
             // Full prominence on hover for better UX
             color: var(--text-prominent) !important;
@@ -881,22 +870,22 @@ body.theme--dark .main__container .main__tabs .dc-tabs__item {
         }
     }
 
-// Special handling for Bot Builder tab to be red in light mode
-body.theme--light {
-    #id-bot-builder.dc-tabs__item:not(.dc-tabs__active) {
-        color: #ff444f !important;
-        * {
+    // Special handling for Bot Builder tab to be red in light mode
+    body.theme--light {
+        #id-bot-builder.dc-tabs__item:not(.dc-tabs__active) {
             color: #ff444f !important;
-        }
-        svg,
-        svg > path,
-        svg > g > path {
-            fill: #ff444f !important;
+            * {
+                color: #ff444f !important;
+            }
+            svg,
+            svg > path,
+            svg > g > path {
+                fill: #ff444f !important;
+            }
         }
     }
-}
 
-// Special handling for active tabs to ensure maximum visibility
+    // Special handling for active tabs to ensure maximum visibility
     &.dc-tabs__active {
         color: var(--text-prominent) !important;
 

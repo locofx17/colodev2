@@ -78,7 +78,7 @@ const Plan: React.FC = () => {
                         startBal,
                         endBal: balance,
                         sessionGain,
-                        cumRoi
+                        cumRoi,
                     });
                 }
             }
@@ -96,7 +96,7 @@ const Plan: React.FC = () => {
                         startBal,
                         endBal: balance,
                         sessionGain: sessionGainPercent,
-                        cumRoi
+                        cumRoi,
                     });
                 }
             }
@@ -153,7 +153,9 @@ const Plan: React.FC = () => {
                     <div class="param-row"><b>Sessions per Day:</b> ${sessionsPerDay}</div>
                 </div>
 
-                ${planData ? `
+                ${
+                    planData
+                        ? `
                 <div class="summary-box">
                     <h2>Performance Summary</h2>
                     <div class="param-row"><b>Final Balance:</b> $${planData.finalBal.toFixed(2)}</div>
@@ -174,13 +176,14 @@ const Plan: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        ${planData.records.map(rec => {
-                            const sessionInfo = [
-                                { label: 'Morning', emoji: '🌅' },
-                                { label: 'Daytime', emoji: '☀️' },
-                                { label: 'Night', emoji: '🌙' }
-                            ][rec.session - 1];
-                            return `
+                        ${planData.records
+                            .map(rec => {
+                                const sessionInfo = [
+                                    { label: 'Morning', emoji: '🌅' },
+                                    { label: 'Daytime', emoji: '☀️' },
+                                    { label: 'Night', emoji: '🌙' },
+                                ][rec.session - 1];
+                                return `
                             <tr>
                                 <td>Day ${rec.day}${planData.sessions > 1 ? ` · S${rec.session} ${sessionInfo.emoji} ${sessionInfo.label}` : ''}</td>
                                 <td>$${rec.startBal.toFixed(2)}</td>
@@ -189,18 +192,21 @@ const Plan: React.FC = () => {
                                 <td>${rec.cumRoi.toFixed(2)}%</td>
                             </tr>
                             `;
-                        }).join('')}
+                            })
+                            .join('')}
                     </tbody>
                 </table>
-                ` : '<p>No data generated yet.</p>'}
+                `
+                        : '<p>No data generated yet.</p>'
+                }
             </body>
             </html>
         `;
 
         const blob = new Blob(['\ufeff', header], {
-            type: 'application/msword'
+            type: 'application/msword',
         });
-        
+
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -211,135 +217,158 @@ const Plan: React.FC = () => {
     };
 
     return (
-        <div className="plan-wrapper">
-            <div className="plan-container">
+        <div className='plan-wrapper'>
+            <div className='plan-container'>
                 {/* ===== TRADING PARAMETERS ===== */}
-                <div className="section">
-                    <div className="section-header">
-                        <i className="fas fa-chart-line"></i>
-                        <h2><Localize i18n_default_text="Trading Parameters" /></h2>
+                <div className='section'>
+                    <div className='section-header'>
+                        <i className='fas fa-chart-line'></i>
+                        <h2>
+                            <Localize i18n_default_text='Trading Parameters' />
+                        </h2>
                     </div>
 
-                    <div className="param-row">
-                        <span className="param-label"><i className="fas fa-coins"></i> <Localize i18n_default_text="Starting Capital ($)" /></span>
-                        <div className="param-value">
+                    <div className='param-row'>
+                        <span className='param-label'>
+                            <i className='fas fa-coins'></i> <Localize i18n_default_text='Starting Capital ($)' />
+                        </span>
+                        <div className='param-value'>
                             <span>$</span>
-                            <input 
-                                type="number" 
-                                value={startCapital} 
-                                onChange={(e) => setStartCapital(parseFloat(e.target.value) || 0)}
-                                step="100" 
-                                min="100" 
+                            <input
+                                type='number'
+                                value={startCapital}
+                                onChange={e => setStartCapital(parseFloat(e.target.value) || 0)}
+                                step='100'
+                                min='100'
                             />
                         </div>
                     </div>
 
-                    <div className="param-row">
-                        <span className="param-label"><i className="fas fa-calculator"></i> <Localize i18n_default_text="Calculation Mode" /></span>
-                        <div className="calc-mode-toggle">
-                            <div 
-                                className={`mode-option ${calculationMode === 'percent' ? 'active' : ''}`} 
+                    <div className='param-row'>
+                        <span className='param-label'>
+                            <i className='fas fa-calculator'></i> <Localize i18n_default_text='Calculation Mode' />
+                        </span>
+                        <div className='calc-mode-toggle'>
+                            <div
+                                className={`mode-option ${calculationMode === 'percent' ? 'active' : ''}`}
                                 onClick={() => handleModeChange('percent')}
                             >
-                                <i className="fas fa-percent"></i> <Localize i18n_default_text="Daily Gain %" />
+                                <i className='fas fa-percent'></i> <Localize i18n_default_text='Daily Gain %' />
                             </div>
-                            <div 
-                                className={`mode-option ${calculationMode === 'fixed' ? 'active' : ''}`} 
+                            <div
+                                className={`mode-option ${calculationMode === 'fixed' ? 'active' : ''}`}
                                 onClick={() => handleModeChange('fixed')}
                             >
-                                <i className="fas fa-dollar-sign"></i> <Localize i18n_default_text="Fixed Daily $" />
+                                <i className='fas fa-dollar-sign'></i> <Localize i18n_default_text='Fixed Daily $' />
                             </div>
                         </div>
                     </div>
 
-                    <div className="param-row">
-                        <span className="param-label">
-                            <i className="fas fa-bullseye"></i> 
-                            {calculationMode === 'percent' ? 
-                                <Localize i18n_default_text="↑ Daily Gain Target (%)" /> : 
-                                <Localize i18n_default_text="↑ Fixed Daily Target ($)" />
-                            }
+                    <div className='param-row'>
+                        <span className='param-label'>
+                            <i className='fas fa-bullseye'></i>
+                            {calculationMode === 'percent' ? (
+                                <Localize i18n_default_text='↑ Daily Gain Target (%)' />
+                            ) : (
+                                <Localize i18n_default_text='↑ Fixed Daily Target ($)' />
+                            )}
                         </span>
-                        <div className="daily-target-wrapper">
-                            <div className="target-input-group">
-                                <input 
-                                    type="number" 
-                                    value={targetValue} 
-                                    onChange={(e) => setTargetValue(parseFloat(e.target.value) || 0)}
-                                    step={calculationMode === 'percent' ? "0.1" : "1"} 
-                                    min="0.1" 
+                        <div className='daily-target-wrapper'>
+                            <div className='target-input-group'>
+                                <input
+                                    type='number'
+                                    value={targetValue}
+                                    onChange={e => setTargetValue(parseFloat(e.target.value) || 0)}
+                                    step={calculationMode === 'percent' ? '0.1' : '1'}
+                                    min='0.1'
                                 />
                                 <span>{calculationMode === 'percent' ? '%' : '$'}</span>
                             </div>
-                            <span className="percent-sign">
-                                <i className={`fas ${calculationMode === 'percent' ? 'fa-percent' : 'fa-dollar-sign'}`}></i>
+                            <span className='percent-sign'>
+                                <i
+                                    className={`fas ${calculationMode === 'percent' ? 'fa-percent' : 'fa-dollar-sign'}`}
+                                ></i>
                             </span>
                         </div>
                     </div>
 
-                    <div className="param-row">
-                        <span className="param-label"><i className="fas fa-calendar-alt"></i> <Localize i18n_default_text="Trading Days" /></span>
-                        <div className="param-value">
-                            <input 
-                                type="number" 
-                                value={tradingDays} 
-                                onChange={(e) => setTradingDays(parseInt(e.target.value) || 0)}
-                                step="1" 
-                                min="1" 
-                                max="100" 
+                    <div className='param-row'>
+                        <span className='param-label'>
+                            <i className='fas fa-calendar-alt'></i> <Localize i18n_default_text='Trading Days' />
+                        </span>
+                        <div className='param-value'>
+                            <input
+                                type='number'
+                                value={tradingDays}
+                                onChange={e => setTradingDays(parseInt(e.target.value) || 0)}
+                                step='1'
+                                min='1'
+                                max='100'
                             />
                         </div>
                     </div>
 
-                    <div className="sessions-title">
-                        <i className="fas fa-clock"></i> <Localize i18n_default_text="SESSIONS PER DAY" />
+                    <div className='sessions-title'>
+                        <i className='fas fa-clock'></i> <Localize i18n_default_text='SESSIONS PER DAY' />
                     </div>
-                    <div className="session-options">
+                    <div className='session-options'>
                         {[
                             { val: 1, label: 'Morning', emoji: '🌅' },
                             { val: 2, label: 'Daytime', emoji: '☀️' },
-                            { val: 3, label: 'Night', emoji: '🌙' }
+                            { val: 3, label: 'Night', emoji: '🌙' },
                         ].map(session => (
-                            <div 
+                            <div
                                 key={session.val}
-                                className={`session-btn ${sessionsPerDay === session.val ? 'active' : ''}`} 
+                                className={`session-btn ${sessionsPerDay === session.val ? 'active' : ''}`}
                                 onClick={() => setSessionsPerDay(session.val)}
                             >
-                                <span>{session.val}. <Localize i18n_default_text={session.label} /> {session.emoji}</span>
+                                <span>
+                                    {session.val}. <Localize i18n_default_text={session.label} /> {session.emoji}
+                                </span>
                             </div>
                         ))}
                     </div>
 
-                    <div className="action-buttons">
-                        <button className="btn-primary" onClick={handleGenerate}>
-                            <Localize i18n_default_text="Generate Plan" />
+                    <div className='action-buttons'>
+                        <button className='btn-primary' onClick={handleGenerate}>
+                            <Localize i18n_default_text='Generate Plan' />
                         </button>
                     </div>
                 </div>
 
                 {/* ===== PERFORMANCE SUMMARY ===== */}
                 {planData && (
-                    <div className="section">
-                        <div className="section-header">
-                            <i className="fas fa-star"></i>
-                            <h2><Localize i18n_default_text="Performance Summary" /></h2>
+                    <div className='section'>
+                        <div className='section-header'>
+                            <i className='fas fa-star'></i>
+                            <h2>
+                                <Localize i18n_default_text='Performance Summary' />
+                            </h2>
                         </div>
-                        <div className="summary-grid">
-                            <div className="summary-item">
-                                <span className="summary-label"><Localize i18n_default_text="Final Balance" /></span>
-                                <span className="summary-value">${planData.finalBal.toFixed(2)}</span>
+                        <div className='summary-grid'>
+                            <div className='summary-item'>
+                                <span className='summary-label'>
+                                    <Localize i18n_default_text='Final Balance' />
+                                </span>
+                                <span className='summary-value'>${planData.finalBal.toFixed(2)}</span>
                             </div>
-                            <div className="summary-item">
-                                <span className="summary-label"><Localize i18n_default_text="Total Profit" /></span>
-                                <span className="summary-value positive">+${planData.totalProfitVal.toFixed(2)}</span>
+                            <div className='summary-item'>
+                                <span className='summary-label'>
+                                    <Localize i18n_default_text='Total Profit' />
+                                </span>
+                                <span className='summary-value positive'>+${planData.totalProfitVal.toFixed(2)}</span>
                             </div>
-                            <div className="summary-item">
-                                <span className="summary-label"><Localize i18n_default_text="Total ROI" /></span>
-                                <span className="summary-value">{planData.totalROIVal.toFixed(2)}%</span>
+                            <div className='summary-item'>
+                                <span className='summary-label'>
+                                    <Localize i18n_default_text='Total ROI' />
+                                </span>
+                                <span className='summary-value'>{planData.totalROIVal.toFixed(2)}%</span>
                             </div>
-                            <div className="summary-item">
-                                <span className="summary-label"><Localize i18n_default_text="Daily Average" /></span>
-                                <span className="summary-value">${planData.dailyAvgVal.toFixed(2)}</span>
+                            <div className='summary-item'>
+                                <span className='summary-label'>
+                                    <Localize i18n_default_text='Daily Average' />
+                                </span>
+                                <span className='summary-value'>${planData.dailyAvgVal.toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
@@ -347,29 +376,39 @@ const Plan: React.FC = () => {
 
                 {/* ===== TRADING PLAN DETAILS ===== */}
                 {planData && (
-                    <div className="section">
-                        <div className="details-header">
+                    <div className='section'>
+                        <div className='details-header'>
                             <h3>
                                 <span>
-                                    <Localize 
-                                        i18n_default_text="Trading Plan Details ({{sessions}} Session{{plural}})" 
-                                        values={{ 
+                                    <Localize
+                                        i18n_default_text='Trading Plan Details ({{sessions}} Session{{plural}})'
+                                        values={{
                                             sessions: planData.sessions,
-                                            plural: planData.sessions > 1 ? 's' : ''
-                                        }} 
+                                            plural: planData.sessions > 1 ? 's' : '',
+                                        }}
                                     />
                                 </span>
                             </h3>
                         </div>
-                        <div className="plan-table-container">
-                            <table className="plan-table">
+                        <div className='plan-table-container'>
+                            <table className='plan-table'>
                                 <thead>
                                     <tr>
-                                        <th><Localize i18n_default_text="Day / Session" /></th>
-                                        <th><Localize i18n_default_text="Start Balance" /></th>
-                                        <th><Localize i18n_default_text="ROI %" /></th>
-                                        <th><Localize i18n_default_text="End Balance" /></th>
-                                        <th><Localize i18n_default_text="Cumulative ROI" /></th>
+                                        <th>
+                                            <Localize i18n_default_text='Day / Session' />
+                                        </th>
+                                        <th>
+                                            <Localize i18n_default_text='Start Balance' />
+                                        </th>
+                                        <th>
+                                            <Localize i18n_default_text='ROI %' />
+                                        </th>
+                                        <th>
+                                            <Localize i18n_default_text='End Balance' />
+                                        </th>
+                                        <th>
+                                            <Localize i18n_default_text='Cumulative ROI' />
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -377,22 +416,23 @@ const Plan: React.FC = () => {
                                         const sessionInfo = [
                                             { label: 'Morning', emoji: '🌅' },
                                             { label: 'Daytime', emoji: '☀️' },
-                                            { label: 'Night', emoji: '🌙' }
+                                            { label: 'Night', emoji: '🌙' },
                                         ][rec.session - 1];
-                                        
+
                                         return (
                                             <tr key={idx}>
                                                 <td>
-                                                    <span className="day-val">Day {rec.day}</span>
+                                                    <span className='day-val'>Day {rec.day}</span>
                                                     {planData.sessions > 1 && (
-                                                        <span className="session-val-extra">
-                                                            S{rec.session} {sessionInfo.emoji} <Localize i18n_default_text={sessionInfo.label} />
+                                                        <span className='session-val-extra'>
+                                                            S{rec.session} {sessionInfo.emoji}{' '}
+                                                            <Localize i18n_default_text={sessionInfo.label} />
                                                         </span>
                                                     )}
                                                 </td>
                                                 <td>${rec.startBal.toFixed(2)}</td>
-                                                <td className="roi-val">{rec.sessionGain.toFixed(2)}%</td>
-                                                <td className="end-bal-val">${rec.endBal.toFixed(2)}</td>
+                                                <td className='roi-val'>{rec.sessionGain.toFixed(2)}%</td>
+                                                <td className='end-bal-val'>${rec.endBal.toFixed(2)}</td>
                                                 <td>{rec.cumRoi.toFixed(2)}%</td>
                                             </tr>
                                         );
@@ -404,20 +444,29 @@ const Plan: React.FC = () => {
                 )}
 
                 {/* ===== EXPORT & PROFIT ===== */}
-                <div className="export-controls">
-                    <div className="export-section pdf" onClick={exportToPDF}>
-                        <h2><i className="fas fa-file-pdf"></i> <Localize i18n_default_text="Download to PDF" /></h2>
+                <div className='export-controls'>
+                    <div className='export-section pdf' onClick={exportToPDF}>
+                        <h2>
+                            <i className='fas fa-file-pdf'></i> <Localize i18n_default_text='Download to PDF' />
+                        </h2>
                     </div>
-                    <div className="export-section word" onClick={exportToWord}>
-                        <h2><i className="fas fa-file-word"></i> <Localize i18n_default_text="Download to Word" /></h2>
-                        <div className="pdf-badge"><Localize i18n_default_text="DOWNLOAD" /></div>
+                    <div className='export-section word' onClick={exportToWord}>
+                        <h2>
+                            <i className='fas fa-file-word'></i> <Localize i18n_default_text='Download to Word' />
+                        </h2>
+                        <div className='pdf-badge'>
+                            <Localize i18n_default_text='DOWNLOAD' />
+                        </div>
                     </div>
                 </div>
 
                 {planData && (
-                    <div className="profit-footer">
+                    <div className='profit-footer'>
                         <span>
-                            <Localize i18n_default_text="Profit +${{profit}}" values={{ profit: planData.totalProfitVal.toFixed(2) }} />
+                            <Localize
+                                i18n_default_text='Profit +${{profit}}'
+                                values={{ profit: planData.totalProfitVal.toFixed(2) }}
+                            />
                         </span>
                     </div>
                 )}

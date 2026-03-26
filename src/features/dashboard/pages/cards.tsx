@@ -74,7 +74,9 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
         },
         {
             id: 'google-drive',
-            icon: <DerivLightGoogleDriveIcon height={is_mobile ? '36px' : '48px'} width={is_mobile ? '36px' : '48px'} />,
+            icon: (
+                <DerivLightGoogleDriveIcon height={is_mobile ? '36px' : '48px'} width={is_mobile ? '36px' : '48px'} />
+            ),
             content: <Localize i18n_default_text='Google Drive' />,
             callback: () => {
                 openGoogleDriveDialog();
@@ -100,7 +102,9 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
         },
         {
             id: 'quick-strategy',
-            icon: <DerivLightQuickStrategyIcon height={is_mobile ? '36px' : '48px'} width={is_mobile ? '36px' : '48px'} />,
+            icon: (
+                <DerivLightQuickStrategyIcon height={is_mobile ? '36px' : '48px'} width={is_mobile ? '36px' : '48px'} />
+            ),
             content: <Localize i18n_default_text='Quick strategy' />,
             callback: () => {
                 setActiveTab(DBOT_TABS.BOT_BUILDER);

@@ -45,7 +45,10 @@ const RiskCalculator: React.FC = () => {
     }, [contractType, selectedBarrier]);
 
     const connectWebSocket = React.useCallback(() => {
-        if (ws.current && (ws.current.readyState === WebSocket.OPEN || ws.current.readyState === WebSocket.CONNECTING)) {
+        if (
+            ws.current &&
+            (ws.current.readyState === WebSocket.OPEN || ws.current.readyState === WebSocket.CONNECTING)
+        ) {
             return;
         }
 
@@ -57,7 +60,7 @@ const RiskCalculator: React.FC = () => {
         ws.current.onopen = () => {
             setApiConnected(true);
             setApiStatusText('Connected to Deriv API');
-            
+
             // Start heartbeat
             if (pingInterval.current) clearInterval(pingInterval.current);
             pingInterval.current = setInterval(() => {
@@ -65,7 +68,7 @@ const RiskCalculator: React.FC = () => {
                     ws.current.send(JSON.stringify({ ping: 1 }));
                 }
             }, 30000);
-            
+
             fetchProposal();
         };
 
@@ -81,11 +84,11 @@ const RiskCalculator: React.FC = () => {
             setTimeout(connectWebSocket, 3000);
         };
 
-        ws.current.onmessage = (message) => {
+        ws.current.onmessage = message => {
             try {
                 const data = JSON.parse(message.data);
                 if (data.msg_type === 'ping') return;
-                
+
                 if (data.error) {
                     setApiStatusText('API error: ' + data.error.message);
                     return;
@@ -209,7 +212,7 @@ const RiskCalculator: React.FC = () => {
                             step='any'
                             min='1'
                             value={balanceInput}
-                            onChange={(e) => setBalanceInput(e.target.value)}
+                            onChange={e => setBalanceInput(e.target.value)}
                             placeholder='1000.00'
                         />
                         <button onClick={handleSetBalance}>
@@ -217,7 +220,7 @@ const RiskCalculator: React.FC = () => {
                         </button>
                     </div>
                     <div className='percentage-buttons'>
-                        {[1, 2, 5, 10, 15, 25, 50, 100].map((pct) => (
+                        {[1, 2, 5, 10, 15, 25, 50, 100].map(pct => (
                             <button key={pct} className='percent-btn' onClick={() => handlePercentClick(pct)}>
                                 {pct}%
                             </button>
@@ -251,7 +254,7 @@ const RiskCalculator: React.FC = () => {
                         <label>
                             <Localize i18n_default_text='🎯 Contract type' />
                         </label>
-                        <select value={contractType} onChange={(e) => setContractType(e.target.value)}>
+                        <select value={contractType} onChange={e => setContractType(e.target.value)}>
                             <option value='DIGITMATCH'>{localize('Digit Match')}</option>
                             <option value='DIGITDIFF'>{localize('Digit Diff')}</option>
                             <option value='DIGITEVEN'>{localize('Even')}</option>
@@ -266,7 +269,7 @@ const RiskCalculator: React.FC = () => {
                             <Localize i18n_default_text='🎯 Select barrier digit (0-9)' />
                         </div>
                         <div className='barrier-digits'>
-                            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((digit) => (
+                            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(digit => (
                                 <button
                                     key={digit}
                                     className={`digit-btn ${selectedBarrier === digit ? 'selected' : ''}`}
@@ -280,11 +283,16 @@ const RiskCalculator: React.FC = () => {
 
                     <div className='payout-display'>
                         <span>
-                            <Localize i18n_default_text='📊 Live payout for ${{stake}} stake:' values={{ stake: baseStake.toFixed(2) }} />
+                            <Localize
+                                i18n_default_text='📊 Live payout for ${{stake}} stake:'
+                                values={{ stake: baseStake.toFixed(2) }}
+                            />
                         </span>
                         <span>
                             <span className='payout-amount'>
-                                {currentPayoutPerDollar > 0 ? `$${(currentPayoutPerDollar * baseStake).toFixed(2)}` : '...'}
+                                {currentPayoutPerDollar > 0
+                                    ? `$${(currentPayoutPerDollar * baseStake).toFixed(2)}`
+                                    : '...'}
                             </span>{' '}
                             <span className='payout-note'>(+{payoutPercent}%)</span>
                         </span>
@@ -296,7 +304,9 @@ const RiskCalculator: React.FC = () => {
                         </span>
                         <span>
                             <span className='payout-amount' style={{ color: '#ff4444' }}>
-                                {currentPayoutPerDollar > 0 ? `$${(effectivePayoutMultiplier * baseStake).toFixed(2)}` : '...'}
+                                {currentPayoutPerDollar > 0
+                                    ? `$${(effectivePayoutMultiplier * baseStake).toFixed(2)}`
+                                    : '...'}
                             </span>
                         </span>
                     </div>
@@ -306,7 +316,7 @@ const RiskCalculator: React.FC = () => {
                             type='checkbox'
                             id='feeCheckbox'
                             checked={applyFee}
-                            onChange={(e) => setApplyFee(e.target.checked)}
+                            onChange={e => setApplyFee(e.target.checked)}
                         />
                         <label htmlFor='feeCheckbox'>
                             <Localize i18n_default_text='Apply 3% app markup (your fee)' />
@@ -328,7 +338,7 @@ const RiskCalculator: React.FC = () => {
                                 step='0.1'
                                 min='1'
                                 value={multiplier}
-                                onChange={(e) => setMultiplier(parseFloat(e.target.value))}
+                                onChange={e => setMultiplier(parseFloat(e.target.value))}
                             />
                         </div>
                         <div className='field'>
@@ -340,7 +350,7 @@ const RiskCalculator: React.FC = () => {
                                 min='1'
                                 max='10'
                                 value={tradesCount}
-                                onChange={(e) => setTradesCount(parseInt(e.target.value))}
+                                onChange={e => setTradesCount(parseInt(e.target.value))}
                             />
                             <div className='helper'>
                                 <Localize i18n_default_text='Total number of stakes (including base)' />
@@ -357,7 +367,7 @@ const RiskCalculator: React.FC = () => {
                                 step='any'
                                 min='0'
                                 value={takeProfit}
-                                onChange={(e) => setTakeProfit(parseFloat(e.target.value))}
+                                onChange={e => setTakeProfit(parseFloat(e.target.value))}
                             />
                         </div>
                         <div className='field'>
@@ -369,7 +379,7 @@ const RiskCalculator: React.FC = () => {
                                 step='any'
                                 min='0'
                                 value={stopLoss}
-                                onChange={(e) => setStopLoss(parseFloat(e.target.value))}
+                                onChange={e => setStopLoss(parseFloat(e.target.value))}
                             />
                         </div>
                     </div>
@@ -377,10 +387,7 @@ const RiskCalculator: React.FC = () => {
                         <label>
                             <Localize i18n_default_text='📅 Sessions per day' />
                         </label>
-                        <select
-                            value={sessionsPerDay}
-                            onChange={(e) => setSessionsPerDay(parseInt(e.target.value))}
-                        >
+                        <select value={sessionsPerDay} onChange={e => setSessionsPerDay(parseInt(e.target.value))}>
                             <option value='1'>{localize('1 Session')}</option>
                             <option value='2'>{localize('2 Sessions')}</option>
                             <option value='3'>{localize('3 Sessions')}</option>
@@ -426,11 +433,12 @@ const RiskCalculator: React.FC = () => {
                 </div>
 
                 <div className='actions'>
-                    <button
-                        className='btn btn-primary'
-                        disabled={!apiConnected || currentPayoutPerDollar === 0}
-                    >
-                        {!apiConnected ? localize('connecting...') : currentPayoutPerDollar === 0 ? localize('fetching payout...') : localize('update calculator')}
+                    <button className='btn btn-primary' disabled={!apiConnected || currentPayoutPerDollar === 0}>
+                        {!apiConnected
+                            ? localize('connecting...')
+                            : currentPayoutPerDollar === 0
+                              ? localize('fetching payout...')
+                              : localize('update calculator')}
                     </button>
                     <button className='btn' onClick={handleReset}>
                         <Localize i18n_default_text='reset' />

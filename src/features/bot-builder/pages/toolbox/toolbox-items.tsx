@@ -440,7 +440,6 @@ export const ToolboxItems = () =>
                         <Field name='STATUS'>DISABLE</Field>
                     </Block>
                 </Category>
-
             </Category>
 
             <Category id='utility' name={localize('Utility')}>

@@ -22,7 +22,6 @@ import TransactionsStore from './transactions-store';
 import UiStore from './ui-store';
 import SniperStore from './sniper-store';
 
-
 // TODO: need to write types for the individual classes and convert them to ts
 export default class RootStore {
     public dbot;
@@ -91,7 +90,5 @@ export default class RootStore {
         this.chart_store = new ChartStore(this);
         this.blockly_store = new BlocklyStore(this);
         this.data_collection_store = new DataCollectionStore(this, this.core);
-
-
     }
 }

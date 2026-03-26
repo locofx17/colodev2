@@ -6,13 +6,7 @@ import useIsLiveChatWidgetAvailable from './useIsLiveChatWidgetAvailable';
 
 // Custom WhatsApp Icon - using your uploaded image
 const CustomWhatsAppIcon = () => (
-    <img
-        src="/whatsapp icon.png"
-        alt="WhatsApp"
-        width="16"
-        height="16"
-        style={{ objectFit: 'contain' }}
-    />
+    <img src='/whatsapp icon.png' alt='WhatsApp' width='16' height='16' style={{ objectFit: 'contain' }} />
 );
 
 const Livechat = observer(() => {

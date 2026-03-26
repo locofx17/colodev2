@@ -21,20 +21,20 @@ export interface StrategyResult {
 
 export default class SniperStore {
     root_store: RootStore;
-    
+
     isScanning = false;
     strategyLock = 'none';
     stake = 1;
     takeProfit = 10;
     stopLoss = 50;
     multiplier = 2;
-    
+
     signals: StrategyResult[] = [];
     logs: string[] = [];
-    
+
     ticks: Record<string, Tick[]> = {};
     subscribers: Record<string, any> = {};
-    
+
     MAX_TICKS = 180;
     MIN_TICKS_FOR_SIGNAL = 20;
 
@@ -48,7 +48,7 @@ export default class SniperStore {
             multiplier: observable,
             signals: observable,
             logs: observable,
-            
+
             setIsScanning: action,
             setStrategyLock: action,
             setStake: action,
@@ -59,33 +59,50 @@ export default class SniperStore {
             clearLogs: action,
             updateTicks: action,
             setSignals: action,
-            
+
             startScan: action,
             stopScan: action,
         });
-        
+
         this.root_store = root_store;
     }
 
-    setIsScanning = (val: boolean) => { this.isScanning = val; if (!val) this.stopScan(); };
-    setStrategyLock = (val: string) => { this.strategyLock = val; };
-    setStake = (val: number) => { this.stake = val; };
-    setTakeProfit = (val: number) => { this.takeProfit = val; };
-    setStopLoss = (val: number) => { this.stopLoss = val; };
-    setMultiplier = (val: number) => { this.multiplier = val; };
-    
+    setIsScanning = (val: boolean) => {
+        this.isScanning = val;
+        if (!val) this.stopScan();
+    };
+    setStrategyLock = (val: string) => {
+        this.strategyLock = val;
+    };
+    setStake = (val: number) => {
+        this.stake = val;
+    };
+    setTakeProfit = (val: number) => {
+        this.takeProfit = val;
+    };
+    setStopLoss = (val: number) => {
+        this.stopLoss = val;
+    };
+    setMultiplier = (val: number) => {
+        this.multiplier = val;
+    };
+
     addLog = (msg: string) => {
         this.logs = [`[${new Date().toLocaleTimeString()}] ${msg}`, ...this.logs.slice(0, 99)];
     };
-    
-    clearLogs = () => { this.logs = []; };
-    
-    setSignals = (signals: StrategyResult[]) => { this.signals = signals; };
+
+    clearLogs = () => {
+        this.logs = [];
+    };
+
+    setSignals = (signals: StrategyResult[]) => {
+        this.signals = signals;
+    };
 
     updateTicks = (symbol: string, tick: Tick) => {
         if (!this.ticks[symbol]) this.ticks[symbol] = [];
         this.ticks[symbol] = [tick, ...this.ticks[symbol]].slice(0, this.MAX_TICKS);
-        
+
         // Analyze after update
         const results = this.analyzeMarket(symbol, this.ticks[symbol]);
         results.forEach(result => {
@@ -99,9 +116,9 @@ export default class SniperStore {
         this.stopScan();
         this.isScanning = true;
         this.addLog(`Starting scan on ${markets.length} markets...`);
-        
+
         markets.forEach(mId => {
-            const api = new DerivAPI((data) => {
+            const api = new DerivAPI(data => {
                 if (data.msg_type === 'tick') {
                     const t = data.tick;
                     const quote = t.quote;
@@ -113,10 +130,10 @@ export default class SniperStore {
                     const ticks = history.prices.map((p: number, i: number) => ({
                         quote: p,
                         digit: parseInt(p.toString().slice(-1)),
-                        epoch: history.times[i]
+                        epoch: history.times[i],
                     }));
                     this.ticks[mId] = ticks.reverse();
-                    
+
                     // Immediate analysis after history load
                     const results = this.analyzeMarket(mId, this.ticks[mId]);
                     results.forEach(res => {
@@ -140,14 +157,14 @@ export default class SniperStore {
         Object.values(this.subscribers).forEach(s => s.disconnect());
         this.subscribers = {};
         this.signals = [];
-        this.addLog("Scanner stopped.");
+        this.addLog('Scanner stopped.');
     };
 
     handleSignalFound = (symbol: string, result: StrategyResult) => {
         if (this.strategyLock !== 'none' && result.strategyId.toLowerCase() !== this.strategyLock.toLowerCase()) {
             return;
         }
-        
+
         // Check if signal already exists
         const existingIdx = this.signals.findIndex(s => s.strategyId === result.strategyId);
         if (existingIdx > -1) {
@@ -159,10 +176,10 @@ export default class SniperStore {
 
     calculateRSI = (ticks: Tick[], period: number = 14): number => {
         if (ticks.length <= period) return 50;
-        
+
         let gains = 0;
         let losses = 0;
-        
+
         for (let i = 1; i <= period; i++) {
             const t1 = ticks[ticks.length - i];
             const t2 = ticks[ticks.length - i - 1];
@@ -171,17 +188,17 @@ export default class SniperStore {
             if (diff >= 0) gains += diff;
             else losses -= diff;
         }
-        
+
         if (losses === 0) return 100;
         const rs = gains / losses;
-        return 100 - (100 / (1 + rs));
+        return 100 - 100 / (1 + rs);
     };
 
     findPredictiveEntryDigit = (digits: number[], winningDigits: number[], mostAppearing: number) => {
-        const windowSize = 121; 
+        const windowSize = 121;
         const lookAhead = 25;
         const analysisDigits = digits.slice(-windowSize);
-        
+
         const scores = Array(10).fill(0);
         const counts = Array(10).fill(0);
 
@@ -197,7 +214,7 @@ export default class SniperStore {
             counts[currentDigit]++;
         }
 
-        let bestDigit = mostAppearing; 
+        let bestDigit = mostAppearing;
         let maxAvgWins = -1;
 
         for (let d = 0; d <= 9; d++) {
@@ -217,7 +234,7 @@ export default class SniperStore {
 
         const lastDigits = ticks.map(t => t.digit);
         const results: StrategyResult[] = [];
-        
+
         // Digit Distribution for UI
         const digitFreq: Record<number, number> = {};
         for (let i = 0; i <= 9; i++) digitFreq[i] = 0;
@@ -230,15 +247,15 @@ export default class SniperStore {
         const mostAppearing = sortedDigits[0].digit;
 
         // === NEW RESPONSIVE LOGIC ===
-        const trendWindow = lastDigits.slice(-60); 
+        const trendWindow = lastDigits.slice(-60);
         const momentumWindow = lastDigits.slice(-15);
 
         const getWindowStats = (digits: number[]) => {
             if (digits.length === 0) return { most: -1, pctEven: 0, pctOdd: 0, pctUnder5: 0, pctOver4: 0 };
             const counts: Record<number, number> = {};
-            digits.forEach(d => counts[d] = (counts[d] || 0) + 1);
-            const most = Object.entries(counts).sort((a,b) => b[1] - a[1])[0];
-            
+            digits.forEach(d => (counts[d] = (counts[d] || 0) + 1));
+            const most = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+
             return {
                 most: most ? parseInt(most[0]) : -1,
                 pctEven: digits.filter(d => d % 2 === 0).length / digits.length,
@@ -252,76 +269,82 @@ export default class SniperStore {
         const momentum = getWindowStats(momentumWindow);
 
         // UNDER 5 (Now triggers on Over 4 dominance)
-        const under5Match = (trend.pctOver4 > 0.53 && trend.most > 4) || (momentum.pctOver4 > 0.65);
+        const under5Match = (trend.pctOver4 > 0.53 && trend.most > 4) || momentum.pctOver4 > 0.65;
         results.push({
             strategyId: 'UNDER_5',
             match: under5Match,
             confidence: Math.max(trend.pctOver4, momentum.pctOver4),
             entry: 'UNDER 5',
-            entryDigit: this.findPredictiveEntryDigit(lastDigits, [0,1,2,3,4], mostAppearing),
-            digitDistribution
+            entryDigit: this.findPredictiveEntryDigit(lastDigits, [0, 1, 2, 3, 4], mostAppearing),
+            digitDistribution,
         });
 
         // OVER 4 (Now triggers on Under 5 dominance)
-        const over4Match = (trend.pctUnder5 > 0.53 && trend.most < 5) || (momentum.pctUnder5 > 0.65);
+        const over4Match = (trend.pctUnder5 > 0.53 && trend.most < 5) || momentum.pctUnder5 > 0.65;
         results.push({
             strategyId: 'OVER_4',
             match: over4Match,
             confidence: Math.max(trend.pctUnder5, momentum.pctUnder5),
             entry: 'OVER 4',
-            entryDigit: this.findPredictiveEntryDigit(lastDigits, [5,6,7,8,9], mostAppearing),
-            digitDistribution
+            entryDigit: this.findPredictiveEntryDigit(lastDigits, [5, 6, 7, 8, 9], mostAppearing),
+            digitDistribution,
         });
 
         // EVEN
-        const evenMatch = (trend.pctEven > 0.53 && trend.most % 2 === 0) || (momentum.pctEven > 0.65);
+        const evenMatch = (trend.pctEven > 0.53 && trend.most % 2 === 0) || momentum.pctEven > 0.65;
         results.push({
             strategyId: 'EVEN',
             match: evenMatch,
             confidence: Math.max(trend.pctEven, momentum.pctEven),
             entry: 'EVEN',
-            entryDigit: this.findPredictiveEntryDigit(lastDigits, [0,2,4,6,8], mostAppearing),
-            digitDistribution
+            entryDigit: this.findPredictiveEntryDigit(lastDigits, [0, 2, 4, 6, 8], mostAppearing),
+            digitDistribution,
         });
 
         // ODD
-        const oddMatch = (trend.pctOdd > 0.53 && trend.most % 2 !== 0) || (momentum.pctOdd > 0.65);
+        const oddMatch = (trend.pctOdd > 0.53 && trend.most % 2 !== 0) || momentum.pctOdd > 0.65;
         results.push({
             strategyId: 'ODD',
             match: oddMatch,
             confidence: Math.max(trend.pctOdd, momentum.pctOdd),
             entry: 'ODD',
-            entryDigit: this.findPredictiveEntryDigit(lastDigits, [1,3,5,7,9], mostAppearing),
-            digitDistribution
+            entryDigit: this.findPredictiveEntryDigit(lastDigits, [1, 3, 5, 7, 9], mostAppearing),
+            digitDistribution,
         });
 
         // RSI
         const rsi = this.calculateRSI(ticks);
         let rsiMatch = false;
         let rsiEntry = '';
-        if (rsi > 75) { rsiMatch = true; rsiEntry = 'FALL'; }
-        else if (rsi < 25) { rsiMatch = true; rsiEntry = 'RISE'; }
-        
+        if (rsi > 75) {
+            rsiMatch = true;
+            rsiEntry = 'FALL';
+        } else if (rsi < 25) {
+            rsiMatch = true;
+            rsiEntry = 'RISE';
+        }
+
         results.push({
             strategyId: 'RSI_TECH',
             match: rsiMatch,
             confidence: Math.abs(rsi - 50) / 50,
             entry: rsiEntry,
             entryDigit: mostAppearing,
-            digitDistribution
+            digitDistribution,
         });
 
         // Filter by lock
-        const finalResults = this.strategyLock === 'none' 
-            ? results 
-            : results.filter(r => r.strategyId.toUpperCase() === this.strategyLock.toUpperCase());
+        const finalResults =
+            this.strategyLock === 'none'
+                ? results
+                : results.filter(r => r.strategyId.toUpperCase() === this.strategyLock.toUpperCase());
 
         return finalResults.filter(r => r.match);
     };
 
     executeTrade = async (signal: any) => {
         if (!signal) return;
-        
+
         this.addLog(`Loading Bot for ${signal.marketId} @ ${signal.entry}...`);
 
         try {
@@ -353,20 +376,48 @@ export default class SniperStore {
             );
 
             // Market and Strategy mapping
-            modifiedXml = modifiedXml.replace(/<field name="SYMBOL_LIST">.*?<\/field>/g, `<field name="SYMBOL_LIST">${signal.marketId}</field>`);
+            modifiedXml = modifiedXml.replace(
+                /<field name="SYMBOL_LIST">.*?<\/field>/g,
+                `<field name="SYMBOL_LIST">${signal.marketId}</field>`
+            );
             const isJumpIndex = signal.marketId.startsWith('JD');
-            modifiedXml = modifiedXml.replace(/<field name="SUBMARKET_LIST">.*?<\/field>/g, `<field name="SUBMARKET_LIST">${isJumpIndex ? 'jump_index' : 'random_index'}</field>`);
+            modifiedXml = modifiedXml.replace(
+                /<field name="SUBMARKET_LIST">.*?<\/field>/g,
+                `<field name="SUBMARKET_LIST">${isJumpIndex ? 'jump_index' : 'random_index'}</field>`
+            );
 
             const isDigitEntry = ['UNDER 5', 'OVER 4', 'EVEN', 'ODD'].includes(signal.entry);
             if (isDigitEntry) {
-                modifiedXml = modifiedXml.replace(/<field name="TRADETYPECAT_LIST">.*?<\/field>/g, `<field name="TRADETYPECAT_LIST">digits</field>`);
-                const typeMap: Record<string, string> = { 'UNDER 5': 'overunder', 'OVER 4': 'overunder', 'EVEN': 'evenodd', 'ODD': 'evenodd' };
-                const subTypeMap: Record<string, string> = { 'UNDER 5': 'DIGITUNDER', 'OVER 4': 'DIGITOVER', 'EVEN': 'DIGITEVEN', 'ODD': 'DIGITODD' };
-                
-                modifiedXml = modifiedXml.replace(/<field name="TRADETYPE_LIST">.*?<\/field>/g, `<field name="TRADETYPE_LIST">${typeMap[signal.entry] || 'overunder'}</field>`);
-                modifiedXml = modifiedXml.replace(/<field name="TYPE_LIST">.*?<\/field>/g, `<field name="TYPE_LIST">${subTypeMap[signal.entry] || 'DIGITUNDER'}</field>`);
-                modifiedXml = modifiedXml.replace(/<field name="PURCHASE_LIST">.*?<\/field>/g, `<field name="PURCHASE_LIST">${subTypeMap[signal.entry] || 'DIGITUNDER'}</field>`);
-                
+                modifiedXml = modifiedXml.replace(
+                    /<field name="TRADETYPECAT_LIST">.*?<\/field>/g,
+                    `<field name="TRADETYPECAT_LIST">digits</field>`
+                );
+                const typeMap: Record<string, string> = {
+                    'UNDER 5': 'overunder',
+                    'OVER 4': 'overunder',
+                    EVEN: 'evenodd',
+                    ODD: 'evenodd',
+                };
+                const subTypeMap: Record<string, string> = {
+                    'UNDER 5': 'DIGITUNDER',
+                    'OVER 4': 'DIGITOVER',
+                    EVEN: 'DIGITEVEN',
+                    ODD: 'DIGITODD',
+                };
+
+                modifiedXml = modifiedXml.replace(
+                    /<field name="TRADETYPE_LIST">.*?<\/field>/g,
+                    `<field name="TRADETYPE_LIST">${typeMap[signal.entry] || 'overunder'}</field>`
+                );
+                modifiedXml = modifiedXml.replace(
+                    /<field name="TYPE_LIST">.*?<\/field>/g,
+                    `<field name="TYPE_LIST">${subTypeMap[signal.entry] || 'DIGITUNDER'}</field>`
+                );
+                modifiedXml = modifiedXml.replace(
+                    /<field name="PURCHASE_LIST">.*?<\/field>/g,
+                    `<field name="PURCHASE_LIST">${subTypeMap[signal.entry] || 'DIGITUNDER'}</field>`
+                );
+
                 const needsPrediction = typeMap[signal.entry] === 'overunder';
                 modifiedXml = modifiedXml.replace(
                     /<block type="trade_definition_tradeoptions" id="bTRRAtlrO1HOKPi6\/\(ac">\s*<mutation xmlns="http:\/\/www\.w3\.org\/1999\/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="(true|false)"><\/mutation>/g,
@@ -384,17 +435,29 @@ export default class SniperStore {
                 }
             } else {
                 const contractType = signal.entry === 'RISE' ? 'CALL' : 'PUT';
-                modifiedXml = modifiedXml.replace(/<field name="TYPE_LIST">.*?<\/field>/g, `<field name="TYPE_LIST">${contractType}</field>`);
-                modifiedXml = modifiedXml.replace(/<field name="PURCHASE_LIST">.*?<\/field>/g, `<field name="PURCHASE_LIST">${contractType}</field>`);
-                modifiedXml = modifiedXml.replace(/<field name="TRADETYPECAT_LIST">.*?<\/field>/g, `<field name="TRADETYPECAT_LIST">callput</field>`);
-                modifiedXml = modifiedXml.replace(/<field name="TRADETYPE_LIST">.*?<\/field>/g, `<field name="TRADETYPE_LIST">risefall</field>`);
-                
+                modifiedXml = modifiedXml.replace(
+                    /<field name="TYPE_LIST">.*?<\/field>/g,
+                    `<field name="TYPE_LIST">${contractType}</field>`
+                );
+                modifiedXml = modifiedXml.replace(
+                    /<field name="PURCHASE_LIST">.*?<\/field>/g,
+                    `<field name="PURCHASE_LIST">${contractType}</field>`
+                );
+                modifiedXml = modifiedXml.replace(
+                    /<field name="TRADETYPECAT_LIST">.*?<\/field>/g,
+                    `<field name="TRADETYPECAT_LIST">callput</field>`
+                );
+                modifiedXml = modifiedXml.replace(
+                    /<field name="TRADETYPE_LIST">.*?<\/field>/g,
+                    `<field name="TRADETYPE_LIST">risefall</field>`
+                );
+
                 // Disable prediction for Call/Put
                 modifiedXml = modifiedXml.replace(
                     /<mutation xmlns="http:\/\/www\.w3\.org\/1999\/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="(true|false)"><\/mutation>/g,
                     '<mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="false"></mutation>'
                 );
-                
+
                 // Bypass Entry Loop for Rise/Fall
                 modifiedXml = modifiedXml.replace(
                     /<field name="VAR" id="\$68\*z!dO\|ZT~V6#FW8XN">entry_loop<\/field>\s*<value name="VALUE">\s*<block type="logic_boolean" [^>]*>\s*<field name="BOOL">TRUE<\/field>/g,
@@ -402,7 +465,11 @@ export default class SniperStore {
                 );
             }
 
-            this.root_store.dashboard.setPendingFreeBot({ name: 'Entry Point Bot', xml: modifiedXml, should_auto_run: true });
+            this.root_store.dashboard.setPendingFreeBot({
+                name: 'Entry Point Bot',
+                xml: modifiedXml,
+                should_auto_run: true,
+            });
             this.addLog(`Bot configured with Entry Digit: ${signal.entryDigit}. Running...`);
         } catch (err) {
             this.addLog('Error initializing trade: ' + err);

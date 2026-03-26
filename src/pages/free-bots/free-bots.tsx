@@ -1,4 +1,4 @@
-import { ArrowUp, ArrowDown, Hash, Sigma, Dice5, Youtube } from "lucide-react";
+import { ArrowUp, ArrowDown, Hash, Sigma, Dice5, Youtube } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import Button from '@/components/shared_ui/button';
@@ -20,7 +20,6 @@ interface BotData {
 }
 
 const DEFAULT_FEATURES = ['Automated Trading', 'Risk Management', 'Profit Optimization'];
-
 
 const FreeBots = observer(() => {
     const { dashboard, app } = useStore();
@@ -90,11 +89,12 @@ const FreeBots = observer(() => {
 
             const formatBotName = (rawName: string) => {
                 let name = rawName.replace(/[_-]/g, ' ');
-                name = name.replace(/by\s+\{?www\.360tradinghub\.co\.ke\}?/gi, 'by Sebastian Blood')
-                           .replace(/by\s+360\s+Trading\s+Hub/gi, 'by Sebastian Blood')
-                           .replace(/360\s+PRINTER/gi, 'Sebastian Blood PRINTER')
-                           .replace(/Mathews'/gi, "Sebastian Blood's");
-                           
+                name = name
+                    .replace(/by\s+\{?www\.360tradinghub\.co\.ke\}?/gi, 'by Sebastian Blood')
+                    .replace(/by\s+360\s+Trading\s+Hub/gi, 'by Sebastian Blood')
+                    .replace(/360\s+PRINTER/gi, 'Sebastian Blood PRINTER')
+                    .replace(/Mathews'/gi, "Sebastian Blood's");
+
                 if (!name.toLowerCase().includes('sebastian')) {
                     name += ' by Sebastian Blood';
                 }
@@ -103,18 +103,18 @@ const FreeBots = observer(() => {
 
             // 0) Immediately render skeleton cards from a small fallback list
             const fallback = getXmlFiles().map(file => ({ name: file.replace('.xml', ''), file }));
-                const initialSkeleton: BotData[] = fallback.map(item => {
-                    const botName = formatBotName(item.name || item.file.replace('.xml', ''));
-                    return {
-                        name: botName,
-                        description: `Advanced trading bot: ${botName}`,
-                        difficulty: 'Intermediate',
-                        strategy: 'Multi-Strategy',
-                        features: DEFAULT_FEATURES,
-                        xml: '',
-                        youtube_url: item.youtube_url,
-                    };
-                });
+            const initialSkeleton: BotData[] = fallback.map(item => {
+                const botName = formatBotName(item.name || item.file.replace('.xml', ''));
+                return {
+                    name: botName,
+                    description: `Advanced trading bot: ${botName}`,
+                    difficulty: 'Intermediate',
+                    strategy: 'Multi-Strategy',
+                    features: DEFAULT_FEATURES,
+                    xml: '',
+                    youtube_url: item.youtube_url,
+                };
+            });
             setAvailableBots(initialSkeleton);
             setIsLoading(false); // hide "Loading free bots..." right away
 

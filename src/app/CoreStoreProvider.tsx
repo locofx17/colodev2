@@ -25,7 +25,7 @@ type TClientInformation = {
 };
 const CoreStoreProvider: React.FC<{ children: React.ReactNode }> = observer(({ children }) => {
     const currentDomain = useMemo(() => '.' + window.location.hostname.split('.').slice(-2).join('.'), []);
-    const { isAuthorizing, isAuthorized, connectionStatus, accountList, activeLoginid } = useApiBase();
+    const { isAuthorizing, isAuthorized, connectionStatus, accountList, activeLoginid, authData } = useApiBase();
 
     const appInitialization = useRef(false);
     const accountInitialization = useRef(false);
@@ -74,6 +74,29 @@ const CoreStoreProvider: React.FC<{ children: React.ReactNode }> = observer(({ c
             client?.setIsLoggedIn(true);
         }
     }, [accountList, activeAccount, activeLoginid, client]);
+
+    // Seed balance immediately from the authorize response so the UI shows
+    // the correct balance even before the balance WS subscription fires.
+    // This is critical for API token logins where `account: 'all'` may fail.
+    useEffect(() => {
+        if (!authData || !client) return;
+        const { loginid, balance, currency } = authData as any;
+        if (loginid && balance !== undefined && currency) {
+            const currentAccounts = client.all_accounts_balance?.accounts || {};
+            const updatedBalance = {
+                ...client.all_accounts_balance,
+                accounts: {
+                    ...currentAccounts,
+                    [loginid]: {
+                        ...(currentAccounts[loginid] || {}),
+                        balance: Number(balance),
+                        currency,
+                    },
+                },
+            };
+            client.setAllAccountsBalance(updatedBalance as any);
+        }
+    }, [authData, client]);
 
     useEffect(() => {
         initFormErrorMessages(FORM_ERROR_MESSAGES());

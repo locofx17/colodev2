@@ -21,9 +21,9 @@ import AppLoaderWrapper from '@/components/app-loader/app-loader-wrapper';
 
 function App() {
     return (
-        <AppLoaderWrapper 
-            duration={5000}  // 5 seconds
-            enabled={true}   // Show loader
+        <AppLoaderWrapper
+            duration={5000} // 5 seconds
+            enabled={true} // Show loader
         >
             <YourMainApp />
         </AppLoaderWrapper>
@@ -46,12 +46,7 @@ function App() {
 
     return (
         <>
-            {isLoading && (
-                <AppLoader 
-                    onLoadingComplete={handleLoadingComplete}
-                    duration={5000}
-                />
-            )}
+            {isLoading && <AppLoader onLoadingComplete={handleLoadingComplete} duration={5000} />}
             {!isLoading && <YourMainApp />}
         </>
     );
@@ -65,11 +60,11 @@ import AppLoaderWrapper from '@/components/app-loader/app-loader-wrapper';
 
 function App() {
     const showLoader = process.env.NODE_ENV === 'production';
-    
+
     return (
-        <AppLoaderWrapper 
+        <AppLoaderWrapper
             duration={5000}
-            enabled={showLoader}  // Only show in production
+            enabled={showLoader} // Only show in production
         >
             <YourMainApp />
         </AppLoaderWrapper>
@@ -81,18 +76,18 @@ function App() {
 
 ### AppLoaderWrapper Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `children` | `React.ReactNode` | - | Your main app content |
-| `duration` | `number` | `5000` | Loading duration in milliseconds |
-| `enabled` | `boolean` | `true` | Whether to show the loader |
+| Prop       | Type              | Default | Description                      |
+| ---------- | ----------------- | ------- | -------------------------------- |
+| `children` | `React.ReactNode` | -       | Your main app content            |
+| `duration` | `number`          | `5000`  | Loading duration in milliseconds |
+| `enabled`  | `boolean`         | `true`  | Whether to show the loader       |
 
 ### AppLoader Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `onLoadingComplete` | `() => void` | - | Callback when loading is complete |
-| `duration` | `number` | `5000` | Loading duration in milliseconds |
+| Prop                | Type         | Default | Description                       |
+| ------------------- | ------------ | ------- | --------------------------------- |
+| `onLoadingComplete` | `() => void` | -       | Callback when loading is complete |
+| `duration`          | `number`     | `5000`  | Loading duration in milliseconds  |
 
 ## Customization
 
@@ -132,13 +127,13 @@ Edit `src/components/app-loader/app-loader.scss`:
 ```tsx
 const getDuration = () => {
     if (process.env.NODE_ENV === 'development') return 2000; // 2 seconds in dev
-    if (process.env.NODE_ENV === 'production') return 5000;  // 5 seconds in prod
+    if (process.env.NODE_ENV === 'production') return 5000; // 5 seconds in prod
     return 3000; // 3 seconds default
 };
 
 <AppLoaderWrapper duration={getDuration()} enabled={true}>
     <YourMainApp />
-</AppLoaderWrapper>
+</AppLoaderWrapper>;
 ```
 
 ## Integration Examples
@@ -154,7 +149,7 @@ function App() {
         <AppLoaderWrapper duration={5000}>
             <BrowserRouter>
                 <Routes>
-                    <Route path="/" element={<Home />} />
+                    <Route path='/' element={<Home />} />
                     {/* Other routes */}
                 </Routes>
             </BrowserRouter>

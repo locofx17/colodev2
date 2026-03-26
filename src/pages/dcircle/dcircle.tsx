@@ -1,13 +1,47 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import { getAppId, getSocketURL } from '@/components/shared/utils/config/config';
+import { useStore } from '@/hooks/useStore';
+import { generateDerivApiInstance, V2GetActiveToken } from '@/external/bot-skeleton/services/api/appId';
+import { contract_stages } from '@/constants/contract-stage';
 import './dcircle.scss';
 
+const tradeOptionToBuy = (contract_type: string, trade_option: any) => {
+    const buy: any = {
+        buy: '1',
+        price: trade_option.amount,
+        parameters: {
+            amount: trade_option.amount,
+            basis: trade_option.basis,
+            contract_type,
+            currency: trade_option.currency,
+            duration: trade_option.duration,
+            duration_unit: trade_option.duration_unit,
+            symbol: trade_option.symbol,
+        },
+    };
+    if (trade_option.prediction !== undefined) {
+        buy.parameters.selected_tick = trade_option.prediction;
+    }
+    if (!['TICKLOW', 'TICKHIGH'].includes(contract_type) && trade_option.prediction !== undefined) {
+        buy.parameters.barrier = trade_option.prediction;
+    }
+    return buy;
+};
+
 const DCircle = observer(() => {
+    const store = useStore();
+    const { run_panel, transactions } = store;
+    const apiRef = useRef<any>(null);
+
     const [symbol, setSymbol] = useState(() => localStorage.getItem('dcircle_symbol') || '1HZ100V');
     const [tradeType, setTradeType] = useState(() => localStorage.getItem('dcircle_tradeType') || 'Over/Under');
     const [ticks, setTicks] = useState(() => parseInt(localStorage.getItem('dcircle_ticks') || '1000'));
     const [barrier, setBarrier] = useState(() => parseInt(localStorage.getItem('dcircle_barrier') || '4'));
+    const [tradeDuration, setTradeDuration] = useState(() => parseInt(localStorage.getItem('dcircle_tradeDuration') || '1'));
+    const [tradeStake, setTradeStake] = useState(() => parseFloat(localStorage.getItem('dcircle_tradeStake') || '0.35'));
+    const [isTrading, setIsTrading] = useState(false);
+    const [tradeStatus, setTradeStatus] = useState('');
     const [history, setHistory] = useState<any[]>([]);
     const [digitFreq, setDigitFreq] = useState<number[]>(Array(10).fill(0));
     const [pipSize, setPipSize] = useState(-1);
@@ -15,6 +49,8 @@ const DCircle = observer(() => {
     const [price, setPrice] = useState('0.0000');
     const [activeDigit, setActiveDigit] = useState<number | undefined>(undefined);
     const [isConnected, setIsConnected] = useState(false);
+    const [isAuthorized, setIsAuthorized] = useState(false);
+    const [lastTradeResult, setLastTradeResult] = useState<{ profit: number; exitDigit: number; isWin: boolean; exitTime: number; contractId: string } | null>(null);
     const [showExtendedHistory, setShowExtendedHistory] = useState(false);
 
     const ws = useRef<WebSocket | null>(null);
@@ -25,6 +61,186 @@ const DCircle = observer(() => {
     useEffect(() => { localStorage.setItem('dcircle_tradeType', tradeType); }, [tradeType]);
     useEffect(() => { localStorage.setItem('dcircle_ticks', ticks.toString()); }, [ticks]);
     useEffect(() => { localStorage.setItem('dcircle_barrier', barrier.toString()); }, [barrier]);
+    useEffect(() => { localStorage.setItem('dcircle_tradeDuration', tradeDuration.toString()); }, [tradeDuration]);
+    useEffect(() => { localStorage.setItem('dcircle_tradeStake', tradeStake.toString()); }, [tradeStake]);
+
+    // Pre-authorize the trading API instance for faster execution
+    useEffect(() => {
+        const initApi = async () => {
+            if (!apiRef.current) {
+                apiRef.current = generateDerivApiInstance();
+            }
+            const token = V2GetActiveToken();
+            if (token && !isAuthorized) {
+                try {
+                    const { authorize, error } = await apiRef.current.authorize(token);
+                    if (!error && authorize) {
+                        setIsAuthorized(true);
+                        try {
+                            store?.client?.setLoginId?.(authorize?.loginid || '');
+                            store?.client?.setCurrency?.(authorize?.currency || 'USD');
+                            store?.client?.setIsLoggedIn?.(true);
+                        } catch {}
+                    }
+                } catch (e) {
+                    console.error("BG Auth failed", e);
+                }
+            }
+        };
+        initApi();
+    }, [isAuthorized, V2GetActiveToken()]); // Re-run if authorization is lost or token changes
+
+
+    const executeTrade = async (specificTradeType: string) => {
+        if (isTrading) return;
+        setIsTrading(true);
+        setTradeStatus('');
+        try {
+            if (!apiRef.current) {
+                apiRef.current = generateDerivApiInstance();
+            }
+            const token = V2GetActiveToken();
+            if (!token) throw new Error('No active token found.');
+            
+            let currency = store?.client?.currency || 'USD';
+
+            if (!isAuthorized) {
+                setTradeStatus('Authorizing...');
+                const { authorize, error: authErr } = await apiRef.current.authorize(token);
+                if (authErr) throw authErr;
+                setIsAuthorized(true);
+                currency = authorize?.currency || 'USD';
+                try {
+                    store?.client?.setLoginId?.(authorize?.loginid || '');
+                    store?.client?.setCurrency?.(currency);
+                    store?.client?.setIsLoggedIn?.(true);
+                } catch {}
+            }
+
+            run_panel.toggleDrawer(true);
+            run_panel.setActiveTabIndex(1);
+            run_panel.run_id = `dcircle-${Date.now()}`;
+            run_panel.setIsRunning(true);
+            run_panel.setContractStage(contract_stages.STARTING);
+
+            const trade_option: any = {
+                amount: Number(tradeStake),
+                basis: 'stake',
+                contractTypes: [specificTradeType],
+                currency,
+                duration: Number(tradeDuration),
+                duration_unit: 't',
+                symbol,
+            };
+
+            if (tradeType === 'Over/Under' || tradeType === 'Matches/Differs') {
+                trade_option.prediction = Number(barrier);
+            }
+
+            const buy_req = tradeOptionToBuy(specificTradeType, trade_option);
+            
+            setLastTradeResult(null);
+            
+            let targetId: string | null = null;
+            let pocSubId: string | null = null;
+            let handled = false;
+
+            const onMsg = (evt: MessageEvent) => {
+                try {
+                    const data = JSON.parse(evt.data as any);
+                    if (data?.msg_type === 'proposal_open_contract') {
+                        const poc = data.proposal_open_contract;
+                        if (!pocSubId && data?.subscription?.id) pocSubId = data.subscription.id;
+                        
+                        if (targetId && String(poc?.contract_id || '') === targetId) {
+                            if (handled && poc?.status === 'open') return;
+
+                            const isFinalTick = poc?.tick_count && Number(poc.tick_count) === Number(tradeDuration);
+                            const isOfficiallyClosed = poc?.is_sold || poc?.status !== 'open';
+
+                            if (isFinalTick || isOfficiallyClosed) {
+                                if (!handled) {
+                                    handled = true;
+                                    const dVal = String(poc.current_spot_display_value || '');
+                                    const currentDigit = parseInt(dVal.slice(-1) || '0');
+                                    
+                                    let isWin = false;
+                                    if (isOfficiallyClosed) {
+                                        isWin = Number(poc.profit || 0) > 0;
+                                    } else {
+                                        if (specificTradeType === 'CALL') isWin = Number(poc.current_spot) > Number(poc.entry_tick);
+                                        else if (specificTradeType === 'PUT') isWin = Number(poc.current_spot) < Number(poc.entry_tick);
+                                        else if (specificTradeType === 'DIGITEVEN') isWin = currentDigit % 2 === 0;
+                                        else if (specificTradeType === 'DIGITODD') isWin = currentDigit % 2 !== 0;
+                                        else if (specificTradeType === 'DIGITOVER') isWin = currentDigit > Number(barrier);
+                                        else if (specificTradeType === 'DIGITUNDER') isWin = currentDigit < Number(barrier);
+                                        else if (specificTradeType === 'DIGITMATCH') isWin = currentDigit === Number(barrier);
+                                        else if (specificTradeType === 'DIGITDIFF') isWin = currentDigit !== Number(barrier);
+                                    }
+
+                                    const exitDigit = isOfficiallyClosed ? parseInt(String(poc.exit_tick_display_value || '').slice(-1) || '0') : currentDigit;
+                                    
+                                    setLastTradeResult({
+                                        profit: Number(poc.profit || (isWin ? Number(tradeStake) * 0.95 : -Number(tradeStake))),
+                                        exitDigit,
+                                        isWin,
+                                        exitTime: Number(poc.exit_tick_time || poc.last_tick_time || Date.now()/1000),
+                                        contractId: String(poc.contract_id),
+                                    });
+             
+                                    setTradeStatus(isWin ? 'WIN' : 'LOSS');
+                                    setIsTrading(false);
+                                }
+
+                                if (isOfficiallyClosed) {
+                                    if (pocSubId) apiRef.current?.forget?.({ forget: pocSubId });
+                                    apiRef.current?.connection?.removeEventListener('message', onMsg);
+                                    setTimeout(() => setTradeStatus(''), 5000);
+                                }
+                            } else if (!handled && poc?.tick_count && poc?.status === 'open') {
+                                const lastDigit = String(poc.current_spot_display_value || '').slice(-1);
+                                setTradeStatus(`Tick ${poc.tick_count} of ${tradeDuration}: ${lastDigit}`);
+                            }
+                        }
+                    }
+                } catch {}
+            };
+
+            // Add listener BEFORE sending buy with subscribe
+            apiRef.current?.connection?.addEventListener('message', onMsg);
+
+            try {
+                // Unified Buy + Subscribe
+                const buyPromise = apiRef.current.send({
+                    ...buy_req,
+                    subscribe: 1
+                });
+                
+                setTradeStatus('Sending Buy ...');
+                const buyRes = await buyPromise;
+                
+                const { buy: buyData, error: buyErr, subscription } = buyRes || {};
+                if (buyErr) throw buyErr;
+                
+                targetId = String(buyData?.contract_id || '');
+                if (subscription?.id) pocSubId = subscription.id;
+
+                setTradeStatus(`Purchased successfully!`);
+            } catch (e) {
+                apiRef.current?.connection?.removeEventListener('message', onMsg);
+                setIsTrading(false);
+                throw e;
+            }
+
+            
+        } catch (e: any) {
+            setTradeStatus(`Error: ${e?.message || e?.error?.message || 'Trade failed'}`);
+            setIsTrading(false);
+            run_panel.setIsRunning(false);
+            run_panel.setHasOpenContract(false);
+            run_panel.setContractStage(contract_stages.NOT_RUNNING);
+        }
+    };
 
     const detectPrecision = (quote: number) => {
         if (Math.floor(quote) === quote) return 0;
@@ -33,7 +249,7 @@ const DCircle = observer(() => {
         return 0;
     };
 
-    const handleTick = useCallback((quote: number, isBulk = false) => {
+    const handleTick = useCallback((quote: number, time: number, isBulk = false) => {
         setPipSize(prevPip => {
             const currentPip = prevPip === -1 ? detectPrecision(quote) : prevPip;
             const str = quote.toFixed(currentPip);
@@ -49,8 +265,8 @@ const DCircle = observer(() => {
                             : 1;
                         streakRef.current = newStreak;
                         setStreak(newStreak);
-
-                        const newHistory = [...prevHistory, { digit: d, quote }];
+ 
+                        const newHistory = [...prevHistory, { digit: d, quote, time }];
                         if (newHistory.length > ticksRef.current) {
                             const removed = newHistory.shift();
                             if (removed) {
@@ -73,7 +289,7 @@ const DCircle = observer(() => {
                 } else {
                     // Bulk update
                     setHistory(prevHistory => {
-                        const newHistory = [...prevHistory, { digit: d, quote }];
+                        const newHistory = [...prevHistory, { digit: d, quote, time }];
                         setDigitFreq(prevFreq => {
                             const nextFreq = [...prevFreq];
                             nextFreq[d]++;
@@ -124,7 +340,7 @@ const DCircle = observer(() => {
 
         ws.current.onopen = () => {
             setIsConnected(true);
-            // Redundant call removed here, useEffect([isConnected]) handles it
+            subscribeMarket();
         };
 
         ws.current.onmessage = (msg) => {
@@ -138,12 +354,14 @@ const DCircle = observer(() => {
                     setPrice(lastPrice.toFixed(precision));
 
                     // Process history in bulk
+                    const times = data.history.times;
                     const limitedPrices = prices.slice(-ticksRef.current);
+                    const limitedTimes = times.slice(-ticksRef.current);
                     const newFreq = Array(10).fill(0);
-                    const newHistory = limitedPrices.map((q: number) => {
+                    const newHistory = limitedPrices.map((q: number, idx: number) => {
                         const d = parseInt(q.toFixed(precision).slice(-1));
                         newFreq[d]++;
-                        return { digit: d, quote: q };
+                        return { digit: d, quote: q, time: limitedTimes[idx] };
                     });
 
                     setHistory(newHistory);
@@ -153,7 +371,7 @@ const DCircle = observer(() => {
                     }
                 }
             }
-            if (data.tick) handleTick(data.tick.quote);
+            if (data.tick) handleTick(data.tick.quote, data.tick.epoch);
         };
 
         ws.current.onclose = () => {
@@ -246,20 +464,31 @@ const DCircle = observer(() => {
                     </div>
                 </div>
 
+
                 <div className="card">
                     <div className="control-row">
                         <div>
                             <div className="card-title">Market</div>
                             <select value={symbol} onChange={(e) => setSymbol(e.target.value)}>
                                 <optgroup label="Volatility (1s)">
-                                    <option value="1HZ10V">V10 (1s)</option>
-                                    <option value="1HZ15V">V15 (1s)</option>
-                                    <option value="1HZ25V">V25 (1s)</option>
-                                    <option value="1HZ30V">V30 (1s)</option>
-                                    <option value="1HZ50V">V50 (1s)</option>
-                                    <option value="1HZ75V">V75 (1s)</option>
-                                    <option value="1HZ90V">V90 (1s)</option>
-                                    <option value="1HZ100V">V100 (1s)</option>
+                                    <option value="1HZ10V">Volatility 10 (1s)</option>
+                                    <option value="1HZ25V">Volatility 25 (1s)</option>
+                                    <option value="1HZ50V">Volatility 50 (1s)</option>
+                                    <option value="1HZ75V">Volatility 75 (1s)</option>
+                                    <option value="1HZ100V">Volatility 100 (1s)</option>
+                                </optgroup>
+                                <optgroup label="Volatility Indices">
+                                    <option value="R_10">Volatility 10</option>
+                                    <option value="R_25">Volatility 25</option>
+                                    <option value="R_50">Volatility 50</option>
+                                    <option value="R_75">Volatility 75</option>
+                                    <option value="R_100">Volatility 100</option>
+                                </optgroup>
+                                <optgroup label="Crash/Boom">
+                                    <option value="BOOM500">Boom 500</option>
+                                    <option value="BOOM1000">Boom 1000</option>
+                                    <option value="CRASH500">Crash 500</option>
+                                    <option value="CRASH1000">Crash 1000</option>
                                 </optgroup>
                                 <optgroup label="Volatility Standard">
                                     <option value="R_10">V10</option>
@@ -316,6 +545,8 @@ const DCircle = observer(() => {
                         )}
                     </div>
                 </div>
+                {/* settings card end — col-left continues */}
+
 
                 <div className="card">
                     <div className="card-title">Market Pulse</div>
@@ -324,6 +555,8 @@ const DCircle = observer(() => {
                         <div className="l5-row">
                             {history.slice(-5).map((h, i) => {
                                 let col = '#8b949e';
+                                const isExitTick = lastTradeResult && h.time === lastTradeResult.exitTime;
+                                
                                 if (tradeType === 'Over/Under') {
                                     if (h.digit > barrier) col = '#3fb950';
                                     else if (h.digit < barrier) col = '#f85149';
@@ -338,8 +571,13 @@ const DCircle = observer(() => {
                                     }
                                 }
                                 return (
-                                    <div key={i} className="l5-dot" style={{ border: `1px solid ${col}`, color: col }}>
+                                    <div key={i} className={`l5-dot ${isExitTick ? 'is-exit' : ''}`} style={{ border: `1px solid ${col}`, color: col, position: 'relative' }}>
                                         {h.digit}
+                                        {isExitTick && (
+                                            <div style={{ position: 'absolute', top: '-15px', fontSize: '10px', color: lastTradeResult.isWin ? '#3fb950' : '#f85149', fontWeight: 'bold' }}>
+                                                {lastTradeResult.isWin ? 'WIN' : 'LOSS'}
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}
@@ -373,6 +611,92 @@ const DCircle = observer(() => {
                         </div>
                     </div>
                 </div>
+
+                <div className="card">
+                    <div className="card-title">Manual Execution</div>
+                    <div className="control-row">
+                        <div>
+                            <div className="card-title" style={{ color: '#4bb4b3' }}>Trade Ticks</div>
+                            <input 
+                                type="number" 
+                                value={tradeDuration} 
+                                onChange={(e) => setTradeDuration(Math.max(1, parseInt(e.target.value) || 1))}
+                                min="1" 
+                                max="10"
+                            />
+                        </div>
+                        <div>
+                            <div className="card-title" style={{ color: '#4bb4b3' }}>Stake (USD)</div>
+                            <input 
+                                type="number" 
+                                value={tradeStake} 
+                                onChange={(e) => setTradeStake(Math.max(0.35, parseFloat(e.target.value) || 0.35))}
+                                step="0.01"
+                                min="0.35" 
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="manual-trade-actions" style={{ marginTop: '15px', display: 'flex', gap: '10px', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', gap: '10px' }}>                             {tradeType === 'Rise/Fall' && (
+                                <>
+                                    <button className="trade-btn buy-btn" disabled={isTrading} onMouseDown={() => executeTrade('CALL')} style={{ background: '#238636', flex: 1, padding: '10px', borderRadius: '4px', border: 'none', color: '#fff', fontWeight: 'bold', cursor: isTrading ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <span>RISE</span>
+                                    </button>
+                                    <button className="trade-btn sell-btn" disabled={isTrading} onMouseDown={() => executeTrade('PUT')} style={{ background: '#da3633', flex: 1, padding: '10px', borderRadius: '4px', border: 'none', color: '#fff', fontWeight: 'bold', cursor: isTrading ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <span>FALL</span>
+                                    </button>
+                                </>
+                            )}
+                             {tradeType === 'Even/Odd' && (
+                                <>
+                                    <button className="trade-btn buy-btn" disabled={isTrading} onMouseDown={() => executeTrade('DIGITEVEN')} style={{ background: '#238636', flex: 1, padding: '10px', borderRadius: '4px', border: 'none', color: '#fff', fontWeight: 'bold', cursor: isTrading ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <span>EVEN</span>
+                                    </button>
+                                    <button className="trade-btn sell-btn" disabled={isTrading} onMouseDown={() => executeTrade('DIGITODD')} style={{ background: '#da3633', flex: 1, padding: '10px', borderRadius: '4px', border: 'none', color: '#fff', fontWeight: 'bold', cursor: isTrading ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <span>ODD</span>
+                                    </button>
+                                </>
+                            )}
+                             {tradeType === 'Over/Under' && (
+                                <>
+                                    <button className="trade-btn buy-btn" disabled={isTrading} onMouseDown={() => executeTrade('DIGITOVER')} style={{ background: '#238636', flex: 1, padding: '10px', borderRadius: '4px', border: 'none', color: '#fff', fontWeight: 'bold', cursor: isTrading ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <span>OVER {barrier}</span>
+                                    </button>
+                                    <button className="trade-btn sell-btn" disabled={isTrading} onMouseDown={() => executeTrade('DIGITUNDER')} style={{ background: '#da3633', flex: 1, padding: '10px', borderRadius: '4px', border: 'none', color: '#fff', fontWeight: 'bold', cursor: isTrading ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <span>UNDER {barrier}</span>
+                                    </button>
+                                </>
+                            )}
+                             {tradeType === 'Matches/Differs' && (
+                                <>
+                                    <button className="trade-btn buy-btn" disabled={isTrading} onMouseDown={() => executeTrade('DIGITMATCH')} style={{ background: '#238636', flex: 1, padding: '10px', borderRadius: '4px', border: 'none', color: '#fff', fontWeight: 'bold', cursor: isTrading ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <span>MATCH {barrier}</span>
+                                    </button>
+                                    <button className="trade-btn sell-btn" disabled={isTrading} onMouseDown={() => executeTrade('DIGITDIFF')} style={{ background: '#da3633', flex: 1, padding: '10px', borderRadius: '4px', border: 'none', color: '#fff', fontWeight: 'bold', cursor: isTrading ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                        <span>DIFFERS {barrier}</span>
+                                    </button>
+                                </>
+                            )}
+
+                        </div>
+                        {tradeStatus && (
+                            <div className="trade-status-msg" style={{ fontSize: '13px', color: tradeStatus.includes('Error') ? '#f85149' : (tradeStatus.includes('WIN') ? '#3fb950' : '#8b949e'), textAlign: 'center', fontWeight: 'bold', padding: '5px', borderRadius: '4px', background: tradeStatus.includes('WIN') ? 'rgba(63, 185, 80, 0.1)' : 'transparent' }}>
+                                {tradeStatus}
+                            </div>
+                        )}
+                        {lastTradeResult && !isTrading && (
+                             <div className="last-result-summary" style={{ textAlign: 'center', padding: '8px', borderRadius: '6px', background: 'rgba(0,0,0,0.2)', borderLeft: `3px solid ${lastTradeResult.isWin ? '#3fb950' : '#f85149'}` }}>
+                                <span style={{ fontSize: '11px', opacity: 0.7 }}>LAST RESULT: </span>
+                                <span style={{ fontWeight: 'bold', color: lastTradeResult.isWin ? '#3fb950' : '#f85149' }}>
+                                    {lastTradeResult.isWin ? 'PROFIT' : 'LOSS'} ${Math.abs(lastTradeResult.profit).toFixed(2)}
+                                </span>
+                                <div style={{ fontSize: '10px', opacity: 0.6 }}>Exit Digit: {lastTradeResult.exitDigit}</div>
+                             </div>
+                        )}
+                    </div>
+                </div>
+
 
                 <div className="card">
                     <div className="card-title">Forecast (Last {totalHistory} Ticks)</div>
@@ -439,11 +763,17 @@ const DCircle = observer(() => {
                                     bg = (h.digit === barrier) ? '#238636' : '#da3633';
                                 }
 
-                                return (
-                                    <div key={i} className={`h-dot ${isNewest ? 'h-newest' : ''}`} style={{ background: bg }}>
-                                        {displayVal}
-                                    </div>
-                                );
+                                 const isExitTick = lastTradeResult && h.time === lastTradeResult.exitTime;
+                                 return (
+                                     <div key={i} className={`h-dot ${isNewest ? 'h-newest' : ''} ${isExitTick ? 'is-exit-history' : ''}`} style={{ background: bg, position: 'relative' }}>
+                                         {displayVal}
+                                         {isExitTick && (
+                                             <div style={{ position: 'absolute', bottom: '-8px', fontSize: '8px', color: lastTradeResult.isWin ? '#3fb950' : '#f85149', fontWeight: 'bold' }}>
+                                                 {lastTradeResult.isWin ? 'W' : 'L'}
+                                             </div>
+                                         )}
+                                     </div>
+                                 );
                             })}
                         </div>
                     </div>

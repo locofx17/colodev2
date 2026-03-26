@@ -37,7 +37,6 @@ import {
     CashierInformationResponse,
     ContractsForSymbolRequest,
     ContractsForSymbolResponse,
-
     CountriesListRequest,
     CountriesListResponse,
     CryptocurrencyConfigurationsRequest,

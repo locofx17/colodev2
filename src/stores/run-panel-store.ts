@@ -720,8 +720,7 @@ export default class RunPanelStore {
         const stop_loss_msg = localize('Stop loss reached').toLowerCase();
         const max_loss_msg = localize('Maximum loss amount reached').toLowerCase();
 
-        const is_tp =
-            lower_message.includes('take profit reached') || lower_message.includes(take_profit_msg);
+        const is_tp = lower_message.includes('take profit reached') || lower_message.includes(take_profit_msg);
         const is_sl =
             lower_message.includes('maximum loss amount reached') ||
             lower_message.includes(max_loss_msg) ||

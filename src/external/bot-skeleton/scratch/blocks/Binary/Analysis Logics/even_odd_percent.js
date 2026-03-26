@@ -35,7 +35,9 @@ Blockly.Blocks.even_odd_percent = {
             description: localize('Returns percentage of even or odd digits in last N ticks'),
         };
     },
-    customContextMenu(menu) { modifyContextMenu(menu); },
+    customContextMenu(menu) {
+        modifyContextMenu(menu);
+    },
 };
 
 Blockly.JavaScript.javascriptGenerator.forBlock.even_odd_percent = block => {
@@ -44,4 +46,3 @@ Blockly.JavaScript.javascriptGenerator.forBlock.even_odd_percent = block => {
     const code = `Bot.getEvenOddPercent({ type: '${type}', n: ${n} })`;
     return [code, Blockly.JavaScript.javascriptGenerator.ORDER_ATOMIC];
 };
-

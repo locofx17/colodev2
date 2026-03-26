@@ -5,9 +5,7 @@ window.Blockly.Blocks.custom_prediction_setter = {
     init() {
         this.jsonInit({
             message0: localize('set custom prediction %1'),
-            args0: [
-                { type: 'field_number', name: 'PRED', value: 1, min: 0, max: 9, precision: 1 },
-            ],
+            args0: [{ type: 'field_number', name: 'PRED', value: 1, min: 0, max: 9, precision: 1 }],
             previousStatement: null,
             nextStatement: null,
             colour: window.Blockly.Colours.Special2.colour,
@@ -18,9 +16,14 @@ window.Blockly.Blocks.custom_prediction_setter = {
         });
     },
     meta() {
-        return { display_name: localize('Custom Prediction Setter'), description: localize('Set prediction digit for digits contracts dynamically.') };
+        return {
+            display_name: localize('Custom Prediction Setter'),
+            description: localize('Set prediction digit for digits contracts dynamically.'),
+        };
     },
-    customContextMenu(menu) { modifyContextMenu(menu); },
+    customContextMenu(menu) {
+        modifyContextMenu(menu);
+    },
 };
 
 window.Blockly.JavaScript.javascriptGenerator.forBlock.custom_prediction_setter = block => {
@@ -28,4 +31,3 @@ window.Blockly.JavaScript.javascriptGenerator.forBlock.custom_prediction_setter 
     const code = `window.BinaryBotCustomPrediction = ${p};\n`;
     return code;
 };
-

@@ -10,7 +10,13 @@ const isMobile = () => window.innerWidth <= 600;
 
 const DigitDistributionModal = observer(() => {
     const { dashboard } = useStore();
-    const { is_digit_dist_modal_visible, setDigitDistModalVisibility, bot_builder_symbol, digit_stats_settings, setDigitStatsSettings } = dashboard;
+    const {
+        is_digit_dist_modal_visible,
+        setDigitDistModalVisibility,
+        bot_builder_symbol,
+        digit_stats_settings,
+        setDigitStatsSettings,
+    } = dashboard;
 
     const [symbol, setSymbol] = useState(bot_builder_symbol || '1HZ10V');
     const [ticks, setTicks] = useState(() => parseInt(localStorage.getItem('dcircle_ticks') || '1000'));
@@ -20,15 +26,15 @@ const DigitDistributionModal = observer(() => {
         if (!window.Blockly?.derivWorkspace) return;
         const workspace = window.Blockly.derivWorkspace;
         const allBlocks = workspace.getAllBlocks();
-        
+
         const tradeOptionsBlock = allBlocks.find(b => b.type === 'trade_definition_tradeoptions');
         const tradeTypeBlock = allBlocks.find(b => b.type === 'trade_definition_tradetype');
         const marketBlock = allBlocks.find(b => b.type === 'trade_definition_market');
-        
+
         if (tradeOptionsBlock && tradeTypeBlock) {
             const tradeType = tradeTypeBlock.getFieldValue('TRADETYPE_LIST') || 'evenodd';
             let prediction = 0;
-            
+
             const predictionInput = tradeOptionsBlock.getInput('PREDICTION');
             if (predictionInput && predictionInput.connection && predictionInput.connection.targetBlock()) {
                 const targetBlock = predictionInput.connection.targetBlock();
@@ -37,9 +43,8 @@ const DigitDistributionModal = observer(() => {
                 } else if (targetBlock.type === 'variables_get') {
                     const varName = targetBlock.getFieldValue('VAR');
                     // Find the last 'set' block for this variable in the workspace
-                    const setBlock = allBlocks.find(b => 
-                        b.type === 'variables_set' && 
-                        b.getFieldValue('VAR') === varName
+                    const setBlock = allBlocks.find(
+                        b => b.type === 'variables_set' && b.getFieldValue('VAR') === varName
                     );
                     if (setBlock) {
                         const valInput = setBlock.getInput('VALUE');
@@ -50,11 +55,11 @@ const DigitDistributionModal = observer(() => {
                     }
                 }
             }
-            
+
             const currentSymbol = marketBlock?.getFieldValue('SYMBOL_LIST') || digit_stats_settings.symbol;
-            
+
             if (
-                tradeType !== digit_stats_settings.trade_type || 
+                tradeType !== digit_stats_settings.trade_type ||
                 prediction !== digit_stats_settings.prediction ||
                 currentSymbol !== digit_stats_settings.symbol
             ) {
@@ -100,14 +105,17 @@ const DigitDistributionModal = observer(() => {
         ticksRef.current = ticks;
     }, [ticks]);
 
-    const detectPrecision = useCallback((quote: number) => {
-        const str = quote.toString();
-        const p = str.includes('.') ? str.split('.')[1].length : 0;
-        if (!maxPrecRef.current[symbol] || p > maxPrecRef.current[symbol]) {
-            maxPrecRef.current[symbol] = p;
-        }
-        return maxPrecRef.current[symbol];
-    }, [symbol]);
+    const detectPrecision = useCallback(
+        (quote: number) => {
+            const str = quote.toString();
+            const p = str.includes('.') ? str.split('.')[1].length : 0;
+            if (!maxPrecRef.current[symbol] || p > maxPrecRef.current[symbol]) {
+                maxPrecRef.current[symbol] = p;
+            }
+            return maxPrecRef.current[symbol];
+        },
+        [symbol]
+    );
 
     const connect = useCallback(() => {
         if (ws.current) ws.current.close();
@@ -119,11 +127,13 @@ const DigitDistributionModal = observer(() => {
         ws.current.onopen = () => {
             setIsConnected(true);
             ws.current?.send(JSON.stringify({ forget_all: 'ticks' }));
-            ws.current?.send(JSON.stringify({ ticks_history: symbol, count: ticksRef.current, end: 'latest', style: 'ticks' }));
+            ws.current?.send(
+                JSON.stringify({ ticks_history: symbol, count: ticksRef.current, end: 'latest', style: 'ticks' })
+            );
             ws.current?.send(JSON.stringify({ ticks: symbol, subscribe: 1 }));
         };
 
-        ws.current.onmessage = (msg) => {
+        ws.current.onmessage = msg => {
             const data = JSON.parse(msg.data);
             if (data.history) {
                 const prices = data.history.prices;
@@ -194,14 +204,17 @@ const DigitDistributionModal = observer(() => {
             const draggable = header?.closest('[data-testid="dt_react_draggable"]') as HTMLElement | null;
             if (!header || !draggable) return undefined;
 
-            let startX = 0, startY = 0, origLeft = 0, origTop = 0;
+            let startX = 0,
+                startY = 0,
+                origLeft = 0,
+                origTop = 0;
 
             const onTouchStart = (e: TouchEvent) => {
                 const t = e.touches[0];
                 startX = t.clientX;
                 startY = t.clientY;
                 origLeft = parseInt(draggable.style.left) || 0;
-                origTop  = parseInt(draggable.style.top)  || 0;
+                origTop = parseInt(draggable.style.top) || 0;
             };
 
             const onTouchMove = (e: TouchEvent) => {
@@ -210,22 +223,22 @@ const DigitDistributionModal = observer(() => {
                 const dx = t.clientX - startX;
                 const dy = t.clientY - startY;
                 const rect = draggable.getBoundingClientRect();
-                const newLeft = Math.max(0, Math.min(window.innerWidth  - rect.width,  origLeft + dx));
-                const newTop  = Math.max(0, Math.min(window.innerHeight - rect.height, origTop  + dy));
+                const newLeft = Math.max(0, Math.min(window.innerWidth - rect.width, origLeft + dx));
+                const newTop = Math.max(0, Math.min(window.innerHeight - rect.height, origTop + dy));
                 draggable.style.left = `${newLeft}px`;
-                draggable.style.top  = `${newTop}px`;
+                draggable.style.top = `${newTop}px`;
             };
 
             const onTouchEnd = () => {};
 
             header.addEventListener('touchstart', onTouchStart, { passive: true });
-            header.addEventListener('touchmove',  onTouchMove,  { passive: false });
-            header.addEventListener('touchend',   onTouchEnd,   { passive: true });
+            header.addEventListener('touchmove', onTouchMove, { passive: false });
+            header.addEventListener('touchend', onTouchEnd, { passive: true });
 
             return () => {
                 header.removeEventListener('touchstart', onTouchStart);
-                header.removeEventListener('touchmove',  onTouchMove);
-                header.removeEventListener('touchend',   onTouchEnd);
+                header.removeEventListener('touchmove', onTouchMove);
+                header.removeEventListener('touchend', onTouchEnd);
             };
         };
 
@@ -249,60 +262,67 @@ const DigitDistributionModal = observer(() => {
     if (!is_digit_dist_modal_visible) return null;
 
     const total = history.length || 1;
-    let even = 0, odd = 0, over4 = 0, under5 = 0, rise = 0, fall = 0;
+    let even = 0,
+        odd = 0,
+        over4 = 0,
+        under5 = 0,
+        rise = 0,
+        fall = 0;
 
     history.forEach((h, i) => {
-        if (h.digit % 2 === 0) even++; else odd++;
-        if (h.digit > 4) over4++; else under5++;
+        if (h.digit % 2 === 0) even++;
+        else odd++;
+        if (h.digit > 4) over4++;
+        else under5++;
         if (i > 0) {
             if (h.quote > history[i - 1].quote) rise++;
             else if (h.quote < history[i - 1].quote) fall++;
         }
     });
 
-    const pricePrefix  = price.slice(0, -1);
+    const pricePrefix = price.slice(0, -1);
     const priceLastChar = price.slice(-1);
     const maxCount = Math.max(...digitFreq);
     const minCount = Math.min(...digitFreq);
 
     const symbolMap: { [key: string]: string } = {
-        '1HZ10V':  'Volatility 10 (1s) Index',
-        '1HZ15V':  'Volatility 15 (1s) Index',
-        '1HZ25V':  'Volatility 25 (1s) Index',
-        '1HZ30V':  'Volatility 30 (1s) Index',
-        '1HZ50V':  'Volatility 50 (1s) Index',
-        '1HZ75V':  'Volatility 75 (1s) Index',
-        '1HZ90V':  'Volatility 90 (1s) Index',
+        '1HZ10V': 'Volatility 10 (1s) Index',
+        '1HZ15V': 'Volatility 15 (1s) Index',
+        '1HZ25V': 'Volatility 25 (1s) Index',
+        '1HZ30V': 'Volatility 30 (1s) Index',
+        '1HZ50V': 'Volatility 50 (1s) Index',
+        '1HZ75V': 'Volatility 75 (1s) Index',
+        '1HZ90V': 'Volatility 90 (1s) Index',
         '1HZ100V': 'Volatility 100 (1s) Index',
-        'R_10':    'Volatility 10 Index',
-        'R_25':    'Volatility 25 Index',
-        'R_50':    'Volatility 50 Index',
-        'R_75':    'Volatility 75 Index',
-        'R_100':   'Volatility 100 Index',
-        'RDBULL':  'Bull Market Index',
-        'RDBEAR':  'Bear Market Index',
-        'JD10':    'Jump 10 Index',
-        'JD25':    'Jump 25 Index',
-        'JD50':    'Jump 50 Index',
-        'JD75':    'Jump 75 Index',
-        'JD100':   'Jump 100 Index',
+        R_10: 'Volatility 10 Index',
+        R_25: 'Volatility 25 Index',
+        R_50: 'Volatility 50 Index',
+        R_75: 'Volatility 75 Index',
+        R_100: 'Volatility 100 Index',
+        RDBULL: 'Bull Market Index',
+        RDBEAR: 'Bear Market Index',
+        JD10: 'Jump 10 Index',
+        JD25: 'Jump 25 Index',
+        JD50: 'Jump 50 Index',
+        JD75: 'Jump 75 Index',
+        JD100: 'Jump 100 Index',
     };
 
     const displayName = symbolMap[symbol] || symbol;
 
     // On mobile: full-width modal starting just below the top nav
-    const mobile     = isMobile();
+    const mobile = isMobile();
     const modalWidth = mobile ? Math.floor(window.innerWidth - 16) : 600;
-    const modalX     = mobile ? 8 : Math.max(8, window.innerWidth / 2 - 300);
-    const modalY     = mobile ? 60 : 100;
+    const modalX = mobile ? 8 : Math.max(8, window.innerWidth / 2 - 300);
+    const modalY = mobile ? 60 : 100;
 
     return (
         <Draggable
             initialValues={{
-                width:  modalWidth,
+                width: modalWidth,
                 height: 560,
-                xAxis:  modalX,
-                yAxis:  modalY,
+                xAxis: modalX,
+                yAxis: modalY,
             }}
             enableDragging={true}
             header={localize('Digit Distribution')}
@@ -316,7 +336,7 @@ const DigitDistributionModal = observer(() => {
                             <input
                                 type='number'
                                 value={ticks}
-                                onChange={(e) => setTicks(parseInt(e.target.value) || 1)}
+                                onChange={e => setTicks(parseInt(e.target.value) || 1)}
                                 min='1'
                                 max='10000'
                                 className='digit-dist-modal__ticks-input'
@@ -327,7 +347,8 @@ const DigitDistributionModal = observer(() => {
                     <div className='digit-dist-modal__price-info'>
                         <span className='digit-dist-modal__price-label'>{localize('CURRENT PRICE')}</span>
                         <div className='digit-dist-modal__price-value'>
-                            {pricePrefix}<span className='digit-dist-modal__price-last'>{priceLastChar}</span>
+                            {pricePrefix}
+                            <span className='digit-dist-modal__price-last'>{priceLastChar}</span>
                         </div>
                     </div>
                 </div>
@@ -339,7 +360,8 @@ const DigitDistributionModal = observer(() => {
                         let highlightClass = '';
 
                         if (trade_type === 'evenodd') {
-                            if (h.digit % 2 === 0) highlightClass = 'is-even'; // Green for even, Blue for odd? User specified "focus with that"
+                            if (h.digit % 2 === 0)
+                                highlightClass = 'is-even'; // Green for even, Blue for odd? User specified "focus with that"
                             else highlightClass = 'is-odd';
                         } else if (trade_type === 'overunder') {
                             if (h.digit > prediction) highlightClass = 'is-over';
@@ -356,7 +378,10 @@ const DigitDistributionModal = observer(() => {
                         }
 
                         return (
-                            <div key={i} className={`digit-dist-modal__tick ${isLatest ? 'latest' : ''} ${highlightClass}`}>
+                            <div
+                                key={i}
+                                className={`digit-dist-modal__tick ${isLatest ? 'latest' : ''} ${highlightClass}`}
+                            >
                                 {h.digit}
                             </div>
                         );
@@ -400,14 +425,14 @@ const DigitDistributionModal = observer(() => {
 
                 <div className='digit-dist-modal__stats'>
                     {[
-                        { label: 'Even',    val: formatPercent(even,   total),                    compare: odd   },
-                        { label: 'Odd',     val: formatPercent(odd,    total),                    compare: even  },
-                        { label: 'Rise',    val: formatPercent(rise,   history.length - 1 || 1),  compare: fall  },
-                        { label: 'Fall',    val: formatPercent(fall,   history.length - 1 || 1),  compare: rise  },
-                        { label: 'Over 4',  val: formatPercent(over4,  total),                    compare: under5 },
-                        { label: 'Under 5', val: formatPercent(under5, total),                    compare: over4  },
+                        { label: 'Even', val: formatPercent(even, total), compare: odd },
+                        { label: 'Odd', val: formatPercent(odd, total), compare: even },
+                        { label: 'Rise', val: formatPercent(rise, history.length - 1 || 1), compare: fall },
+                        { label: 'Fall', val: formatPercent(fall, history.length - 1 || 1), compare: rise },
+                        { label: 'Over 4', val: formatPercent(over4, total), compare: under5 },
+                        { label: 'Under 5', val: formatPercent(under5, total), compare: over4 },
                     ].map((s, i) => {
-                        const isGreen = parseFloat(s.val) >= (s.compare / total * 100);
+                        const isGreen = parseFloat(s.val) >= (s.compare / total) * 100;
                         return (
                             <div key={i} className={`digit-dist-modal__stat-box ${isGreen ? 'green' : 'red'}`}>
                                 <span className='digit-dist-modal__stat-label'>{localize(s.label)}</span>

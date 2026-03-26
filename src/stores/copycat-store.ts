@@ -135,30 +135,36 @@ export default class CopycatStore {
         const token = client.getToken();
         if (!token) return;
 
-        const existingMaster = this.accounts.find(a => a.type === 'master');
-        
-        // If already linked to the CORRECT account, do nothing
-        if (existingMaster && existingMaster.loginId === client.loginid) {
-            return;
+        const accountsList = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
+        const newAccounts = [...this.accounts];
+        let hasChanges = false;
+
+        const existingMasterIndex = newAccounts.findIndex(a => a.type === 'master');
+        if (existingMasterIndex === -1 || newAccounts[existingMasterIndex].loginId !== client.loginid) {
+            const masterAcc: DerivAccount = {
+                id: Math.random().toString(36).substr(2, 9),
+                name: client.loginid,
+                token,
+                type: 'master',
+                accountType: client.loginid.startsWith('VRTC') ? 'demo' : 'real',
+                balance: 0,
+                currency: 'USD',
+                loginId: client.loginid,
+                isActive: true,
+                connectionStatus: 'connecting',
+                totalProfit: 0
+            };
+
+            if (existingMasterIndex !== -1) {
+                newAccounts.splice(existingMasterIndex, 1);
+            }
+            newAccounts.unshift(masterAcc);
+            hasChanges = true;
         }
 
-        const id = Math.random().toString(36).substr(2, 9);
-        const masterAcc: DerivAccount = {
-            id,
-            name: client.loginid,
-            token,
-            type: 'master',
-            accountType: 'real', // Will be updated to demo if true upon websocket auth
-            balance: 0,
-            currency: 'USD',
-            loginId: client.loginid,
-            isActive: true,
-            connectionStatus: 'connecting',
-            totalProfit: 0
-        };
-
-        // Replace the old master with the new one, keeping all clients
-        this.setAccounts([masterAcc, ...this.accounts.filter(a => a.type !== 'master')]);
+        if (hasChanges) {
+            this.setAccounts(newAccounts);
+        }
     };
 
     handleApiMessage = (accountId: string, data: any) => {
@@ -213,13 +219,16 @@ export default class CopycatStore {
             if (contract.status === 'won' || contract.status === 'lost') {
                 const profit = contract.profit;
 
-                this.setSessionPL(this.sessionPL + profit);
+                let isNewResolution = false;
                 
                 this.setLogs(this.logs.map(log => {
                     const isMasterLog = log.masterAccountId === accountId && log.masterTradeId === contract.contract_id;
                     const isCopierLog = log.copierAccountId === accountId && log.copierTradeId === contract.contract_id;
                     
                     if (isMasterLog || isCopierLog) {
+                        if (log.status !== 'WON' && log.status !== 'LOST') {
+                            isNewResolution = true;
+                        }
                         return { 
                             ...log, 
                             status: contract.status.toUpperCase() as 'WON' | 'LOST', 
@@ -229,10 +238,17 @@ export default class CopycatStore {
                     return log;
                 }));
 
-                this.setAccounts(this.accounts.map(a => a.id === accountId ? {
-                    ...a,
-                    totalProfit: (a.totalProfit || 0) + profit
-                } : a));
+                // Only add the profit if it hasn't been added yet for this specific copier log
+                if (isNewResolution && account?.type === 'copier') {
+                    this.setSessionPL(this.sessionPL + profit);
+                }
+
+                if (isNewResolution) {
+                    this.setAccounts(this.accounts.map(a => a.id === accountId ? {
+                        ...a,
+                        totalProfit: (a.totalProfit || 0) + profit
+                    } : a));
+                }
             }
         }
 
@@ -264,7 +280,22 @@ export default class CopycatStore {
                 const amount = contract.buy_price;
                 const type = contract.contract_type;
 
-                api.buy(symbol, amount, type);
+                const parameters: any = {
+                    amount: amount,
+                    basis: 'stake',
+                    contract_type: type,
+                    currency: copier.currency || 'USD',
+                    symbol: symbol,
+                };
+                
+                if (contract.duration) parameters.duration = contract.duration;
+                if (contract.duration_unit) parameters.duration_unit = contract.duration_unit;
+                if (contract.date_expiry) parameters.date_expiry = contract.date_expiry;
+                if (contract.barrier) parameters.barrier = contract.barrier;
+                if (contract.high_barrier || contract.barrier2) parameters.barrier2 = contract.high_barrier || contract.barrier2;
+                if (contract.low_barrier) parameters.barrier = contract.low_barrier;
+
+                api.buy(amount, parameters);
                 
                 const newLog: TradeLog = {
                     id: Math.random().toString(36).substr(2, 9),
@@ -328,10 +359,69 @@ export default class CopycatStore {
         setTimeout(() => this.setIsSyncing(false), 2000);
     };
 
+    autoLinkCopiers = () => {
+        const { client } = this.root_store;
+        // ONLY link copiers automatically if we are on a Demo account
+        if (!client.loginid || !client.loginid.startsWith('VRTC')) return;
+        
+        const accountsList = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
+        const newAccounts = [...this.accounts];
+        let hasChanges = false;
+
+        // Setup Auto Copiers for other valid accounts automatically
+        Object.keys(accountsList).forEach(loginId => {
+            if (loginId.startsWith('CR') || loginId.startsWith('VRTC') || loginId.startsWith('MF')) {
+                if (loginId !== client.loginid) {
+                    if (!newAccounts.some(a => a.loginId === loginId)) {
+                        const accToken = accountsList[loginId];
+                        const isDemo = loginId.startsWith('VRTC');
+                        const copierAcc: DerivAccount = {
+                            id: Math.random().toString(36).substr(2, 9),
+                            name: `${isDemo ? 'Demo' : 'Real'} ${loginId}`,
+                            token: accToken,
+                            type: 'copier',
+                            accountType: isDemo ? 'demo' : 'real',
+                            balance: 0,
+                            currency: 'USD',
+                            loginId: loginId,
+                            isActive: true, // Auto-copier active by default
+                            connectionStatus: 'connecting',
+                            totalProfit: 0
+                        };
+                        newAccounts.push(copierAcc);
+                        hasChanges = true;
+                    }
+                }
+            }
+        });
+
+        if (hasChanges) {
+            this.setAccounts(newAccounts);
+        }
+    };
+
     handleToggleReplication = () => {
         const next = !this.isReplicating;
-        this.setIsReplicating(next);
-        this.setAccounts(this.accounts.map(a => ({ ...a, isActive: next })));
+        
+        if (next) {
+            this.autoLinkCopiers();
+            this.setIsReplicating(next);
+            this.setAccounts(this.accounts.map(a => ({ ...a, isActive: next })));
+        } else {
+            this.setIsReplicating(next);
+            const accountsList = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
+            const autoLoginIds = Object.keys(accountsList);
+
+            // Remove automatically linked copiers when replication is stopped
+            const remainingAccounts = this.accounts.filter(a => {
+                if (a.type === 'master') return true;
+                // If it's a copier and its loginId matches an owned account loginId, remove it
+                if (a.loginId && autoLoginIds.includes(a.loginId)) return false;
+                return true;
+            });
+
+            this.setAccounts(remainingAccounts.map(a => ({ ...a, isActive: false })));
+        }
     };
 
     removeAccount = (id: string) => {

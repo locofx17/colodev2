@@ -1,4 +1,3 @@
-
 .risk-calculator-wrapper {
     min-height: 100%;
     background: linear-gradient(145deg, #0b1f2f 0%, #1d384e 100%);
@@ -66,8 +65,8 @@
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        background: #4CAF50;
-        box-shadow: 0 0 8px #4CAF50;
+        background: #4caf50;
+        box-shadow: 0 0 8px #4caf50;
     }
     .status-indicator.disconnected {
         background: #f44336;
@@ -211,7 +210,8 @@
         align-items: center;
         gap: 4px;
     }
-    .field input, .field select {
+    .field input,
+    .field select {
         background: var(--fill-normal);
         border: 2px solid var(--border-normal);
         border-radius: 18px;
@@ -220,7 +220,8 @@
         width: 100%;
         color: var(--text-prominent);
     }
-    .field input:focus, .field select:focus {
+    .field input:focus,
+    .field select:focus {
         border-color: #ff784b;
         outline: none;
     }
@@ -300,7 +301,7 @@
         margin: 0.5rem 0 0.8rem;
         border: 1px solid #ffba91;
 
-        input[type="checkbox"] {
+        input[type='checkbox'] {
             width: 1.3rem;
             height: 1.3rem;
             accent-color: #ff784b;
@@ -370,8 +371,13 @@
         font-size: 0.9rem;
         margin-top: 0.5rem;
 
-        span:first-child { color: var(--text-less-prominent); }
-        span:last-child { font-weight: 700; color: var(--text-prominent); }
+        span:first-child {
+            color: var(--text-less-prominent);
+        }
+        span:last-child {
+            font-weight: 700;
+            color: var(--text-prominent);
+        }
     }
     .actions {
         display: flex;

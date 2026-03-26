@@ -24,8 +24,15 @@ window.Blockly.Blocks.market_symbol_changer = {
             category: window.Blockly.Categories.Miscellaneous,
         });
     },
-    meta() { return { display_name: localize('Market Symbol Changer'), description: localize('Toggle symbol change capability.') }; },
-    customContextMenu(menu) { modifyContextMenu(menu); },
+    meta() {
+        return {
+            display_name: localize('Market Symbol Changer'),
+            description: localize('Toggle symbol change capability.'),
+        };
+    },
+    customContextMenu(menu) {
+        modifyContextMenu(menu);
+    },
 };
 
 window.Blockly.JavaScript.javascriptGenerator.forBlock.market_symbol_changer = block => {
@@ -33,4 +40,3 @@ window.Blockly.JavaScript.javascriptGenerator.forBlock.market_symbol_changer = b
     const code = `window.BinaryBotMarketSymbolChanger = '${status}';\n`;
     return code;
 };
-

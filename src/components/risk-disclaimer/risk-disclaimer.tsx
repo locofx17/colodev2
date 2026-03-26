@@ -24,12 +24,7 @@ const RiskDisclaimer = () => {
         <>
             {/* Floating Risk Disclaimer Button */}
             <div className='risk-disclaimer-button'>
-                <Button
-                    className='risk-disclaimer-button__btn'
-                    onClick={handleOpenModal}
-                    secondary
-                    small
-                >
+                <Button className='risk-disclaimer-button__btn' onClick={handleOpenModal} secondary small>
                     {localize('Risk Disclaimer')}
                 </Button>
             </div>
@@ -66,11 +61,7 @@ const RiskDisclaimer = () => {
                     </Text>
 
                     <div className='risk-disclaimer-modal__actions'>
-                        <Button
-                            className='risk-disclaimer-modal__understand-btn'
-                            onClick={handleUnderstand}
-                            primary
-                        >
+                        <Button className='risk-disclaimer-modal__understand-btn' onClick={handleUnderstand} primary>
                             {localize('I Understand')}
                         </Button>
                     </div>

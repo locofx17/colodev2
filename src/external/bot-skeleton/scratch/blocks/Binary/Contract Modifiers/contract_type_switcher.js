@@ -20,9 +20,7 @@ window.Blockly.Blocks.contract_type_switcher = {
             colour: window.Blockly.Colours.Special2.colour,
             colourSecondary: window.Blockly.Colours.Special2.colourSecondary,
             colourTertiary: window.Blockly.Colours.Special2.colourTertiary,
-            tooltip: localize(
-                'This block makes your bot hybrid, allowing it to change to any contract type available'
-            ),
+            tooltip: localize('This block makes your bot hybrid, allowing it to change to any contract type available'),
             category: window.Blockly.Categories.Miscellaneous,
         });
     },
@@ -43,4 +41,3 @@ window.Blockly.JavaScript.javascriptGenerator.forBlock.contract_type_switcher = 
     const code = `window.BinaryBotContractTypeSwitcher = '${status}';\n`;
     return code;
 };
-

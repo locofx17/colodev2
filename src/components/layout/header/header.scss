@@ -10,7 +10,6 @@
         border-inline-end: 0.1rem solid rgba(255, 255, 255, 0.1);
     }
 
-
     &__account-settings,
     .notifications__wrapper,
     &__menu {
@@ -178,7 +177,6 @@
         .deriv-account-switcher__balance + svg > path {
             fill: #ffffff !important; // White chevron
         }
-
 
         &:hover {
             background-color: unset;
@@ -350,7 +348,7 @@
 
 .auth-signup-button {
     background: #2563eb !important; // Primary Blue
-    color: #FFFFFF !important;
+    color: #ffffff !important;
     border: 1px solid #2563eb !important;
 
     &:hover:not([disabled]) {
@@ -359,7 +357,7 @@
     }
 
     .dc-btn__text {
-        color: #FFFFFF !important;
+        color: #ffffff !important;
     }
 }
 

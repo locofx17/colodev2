@@ -23,7 +23,6 @@ const Footer = () => {
 
     const openLanguageSettingModal = () => showModal('DesktopLanguagesModal');
 
-
     return (
         <footer className='app-footer'>
             <FullScreen />
