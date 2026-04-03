@@ -1,6 +1,9 @@
 import React from 'react';
 import classNames from 'classnames';
+
+
 import { observer } from 'mobx-react-lite';
+
 import { formatMoney, getCurrencyDisplayCode } from '@/components/shared';
 import { AppLinkedWithWalletIcon } from '@/components/shared_ui/app-linked-with-wallet-icon';
 import Text from '@/components/shared_ui/text';
@@ -33,11 +36,29 @@ export const AccountSwitcherWalletItem = observer(
         const {
             ui: { is_dark_mode_on },
             client: { loginid: active_loginid, is_eu },
+            pro_mode: { is_pro_mode, pro_mode_view, DEMO_ID, MASKED_ID, MASKED_NAME, BASE_BALANCE },
         } = useStore();
+
 
         const theme = is_dark_mode_on ? 'dark' : 'light';
         const app_icon = is_dark_mode_on ? 'IcWalletOptionsDark' : 'IcWalletOptionsLight';
+        
+        // Apply Masking Logic
+        const is_target_account = dtrade_loginid === DEMO_ID;
+        const should_mask = is_pro_mode && is_target_account;
+        
+        let display_balance = dtrade_balance || 0;
+        if (should_mask) {
+            if (pro_mode_view === 'real') {
+                display_balance = Math.max(0, Number(dtrade_balance) - BASE_BALANCE);
+            } else {
+                display_balance = Math.min(Number(dtrade_balance), BASE_BALANCE);
+            }
+        }
+
         const is_dtrade_active = dtrade_loginid === active_loginid;
+
+
 
         const switchAccount = async (loginId: number) => {
             const account_list = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
@@ -66,10 +87,12 @@ export const AccountSwitcherWalletItem = observer(
             const search_params = new URLSearchParams(window.location.search);
             const selected_account = Object.values(client_accounts)?.find(
                 (acc: any) => acc.loginid === loginId.toString()
-            );
+            ) as { currency?: string; loginid: string } | undefined;
             if (!selected_account) return;
-            const account_param = is_virtual ? 'demo' : selected_account.currency;
+            const account_param = is_virtual ? 'demo' : (selected_account.currency || '');
+
             search_params.set('account', account_param);
+
             window.history.pushState({}, '', `${window.location.pathname}?${search_params.toString()}`);
         };
 
@@ -100,7 +123,9 @@ export const AccountSwitcherWalletItem = observer(
                         )}
                     </Text>
                     <Text size='xxxs'>
-                        {is_virtual ? (
+                        {should_mask && pro_mode_view === 'real' ? (
+                            <Localize i18n_default_text='{{name}} ({{id}})' values={{ name: MASKED_NAME, id: MASKED_ID }} />
+                        ) : is_virtual ? (
                             <Localize i18n_default_text='Demo Wallet' />
                         ) : (
                             <Localize
@@ -109,13 +134,25 @@ export const AccountSwitcherWalletItem = observer(
                             />
                         )}
                     </Text>
+
+
                     <Text size='xs' weight='bold'>
-                        {`${formatMoney(currency ?? '', dtrade_balance || 0, true)} ${getCurrencyDisplayCode(
-                            currency
-                        )}`}
+                        {`${formatMoney(currency ?? '', display_balance, true)} ${
+                            should_mask && pro_mode_view === 'real' ? 'USD' : getCurrencyDisplayCode(currency)
+                        }`}
                     </Text>
+
                 </div>
-                {show_badge && <WalletBadge is_demo={Boolean(is_virtual)} label={landing_company_name} />}
+                {show_badge && (
+                    <WalletBadge
+                        is_demo={(should_mask && pro_mode_view === 'real' ? false : (Boolean(is_virtual) ? 'demo' : false)) as any}
+                        label={(should_mask && pro_mode_view === 'real' ? MASKED_NAME : landing_company_name) || ''}
+                    />
+                )}
+
+
+
+
             </div>
         );
     }

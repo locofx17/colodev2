@@ -469,4 +469,98 @@
         color: var(--text-less-prominent);
         text-align: center;
     }
+
+    .pro-mode-activation {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px dashed var(--general-hover);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+
+        .activation-trigger {
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+
+            &:hover {
+                opacity: 1;
+            }
+        }
+
+        .password-prompt {
+            display: flex;
+            gap: 0.5rem;
+            width: 100%;
+
+            .password-input {
+                flex: 1;
+                padding: 0.4rem 0.8rem;
+                border: 1px solid var(--general-hover);
+                border-radius: 4px;
+                background: var(--general-section-1);
+                color: var(--text-prominent);
+                font-size: 1.2rem;
+            }
+        }
+
+        .stealth-toggle-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .stealth-toggle {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--text-prominent);
+
+            input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+
+                &:checked + .slider {
+                    background-color: var(--brand-red-coral);
+                }
+
+                &:focus + .slider {
+                    box-shadow: 0 0 1px var(--brand-red-coral);
+                }
+
+                &:checked + .slider:before {
+                    transform: translateX(1.4rem);
+                }
+            }
+
+            .slider {
+                position: relative;
+                cursor: pointer;
+                width: 3.2rem;
+                height: 1.8rem;
+                background-color: var(--general-hover);
+                transition: .4s;
+                border-radius: 3.4rem;
+
+                &:before {
+                    position: absolute;
+                    content: "";
+                    height: 1.2rem;
+                    width: 1.2rem;
+                    left: 0.3rem;
+                    bottom: 0.3rem;
+                    background-color: white;
+                    transition: .4s;
+                    border-radius: 50%;
+                }
+            }
+        }
+    }
 }
+

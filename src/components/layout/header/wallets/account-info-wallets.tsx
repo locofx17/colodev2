@@ -1,5 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
+
+
 import { observer } from 'mobx-react-lite';
 import { CSSTransition } from 'react-transition-group';
 import { formatMoney, getCurrencyDisplayCode } from '@/components/shared';
@@ -13,9 +15,9 @@ import {
     LabelPairedLockCaptionBoldIcon,
     StandaloneChevronDownBoldIcon,
 } from '@deriv/quill-icons';
-import { TStores } from '@deriv/stores/types';
 import { Localize } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
+
 import AccountInfoWrapper from '../account-info-wrapper';
 import { AccountSwitcherWallet, AccountSwitcherWalletMobile } from '../AccountSwitcherWallet';
 import WalletBadge from './wallet-badge';
@@ -30,11 +32,15 @@ type TDropdownArrow = {
 };
 
 type TBalanceLabel = {
-    balance: TStores['client']['accounts'][string]['balance'];
-    currency: TStores['client']['accounts'][string]['currency'];
+    balance: number | string;
+    currency: string;
     is_virtual: boolean;
     display_code: string;
+    should_mask?: boolean;
+    pro_mode_view?: 'real' | 'demo';
 };
+
+
 
 type TInfoIcons = {
     gradients: Exclude<ReturnType<typeof useStoreWalletAccountsList>['data'], undefined>[number]['gradients'];
@@ -51,7 +57,7 @@ const DropdownArrow = ({ is_disabled = false }: TDropdownArrow) =>
         </div>
     );
 
-const BalanceLabel = ({ balance, currency, is_virtual, display_code }: Partial<TBalanceLabel>) =>
+const BalanceLabel = ({ balance, currency, is_virtual, display_code, should_mask, pro_mode_view }: Partial<TBalanceLabel>) =>
     typeof balance !== 'undefined' || !currency ? (
         <div className='acc-info__wallets-account-type-and-balance'>
             <Text
@@ -64,11 +70,12 @@ const BalanceLabel = ({ balance, currency, is_virtual, display_code }: Partial<T
                 {!currency ? (
                     <Localize i18n_default_text='No currency assigned' />
                 ) : (
-                    `${formatMoney(currency, balance ?? 0, true)} ${display_code}`
+                    `${formatMoney(currency, balance ?? 0, true)} ${should_mask && pro_mode_view === 'real' ? 'USD' : display_code}`
                 )}
             </Text>
         </div>
     ) : null;
+
 
 const MobileInfoIcon = observer(({ gradients, icons, icon_type }: TInfoIcons) => {
     const {
@@ -84,10 +91,11 @@ const MobileInfoIcon = observer(({ gradients, icons, icon_type }: TInfoIcons) =>
                 app_icon={app_icon}
                 gradient_class={gradients?.card[theme] ?? ''}
                 size='small'
-                type={icon_type}
+                type={icon_type as any}
                 wallet_icon={icons?.[theme] ?? ''}
                 hide_watermark
             />
+
         </div>
     );
 });
@@ -102,29 +110,46 @@ const DesktopInfoIcons = observer(({ gradients, icons, icon_type }: TInfoIcons) 
             <AccountsDerivAccountLightIcon iconSize='sm' />
             <WalletIcon
                 icon={icons?.[theme] ?? ''}
-                type={icon_type}
+                type={icon_type as any}
                 gradient_class={gradients?.card[theme]}
                 size={'small'}
                 has_bg
                 hide_watermark
             />
+
         </div>
     );
 });
 
 const AccountInfoWallets = observer(({ is_dialog_on, toggleDialog }: TAccountInfoWallets) => {
-    const { client, ui } = useStore();
-    const { loginid, accounts, all_accounts_balance, residence } = client;
+    const { client, ui, pro_mode } = useStore();
+    const { loginid, accounts, residence } = client;
+    const { is_pro_mode, pro_mode_view, DEMO_ID, BASE_BALANCE, MASKED_NAME } = pro_mode;
+
+
     const { account_switcher_disabled_message } = ui;
     const { data: wallet_list } = useStoreWalletAccountsList();
     const { isDesktop } = useDevice();
 
-    const balance = all_accounts_balance?.accounts?.[loginid ?? '']?.balance;
     const active_account = accounts?.[loginid ?? ''];
     const linked_dtrade_trading_account_loginid = loginid;
 
     const linked_wallet = wallet_list?.find(wallet => wallet.dtrade_loginid === linked_dtrade_trading_account_loginid);
-    const show_badge = linked_wallet?.is_virtual;
+    
+    // Masking logic for header
+    const is_target_account = loginid === DEMO_ID;
+    const should_mask = is_pro_mode && is_target_account;
+    
+    const dtrade_balance = linked_wallet?.dtrade_balance;
+    let display_balance = dtrade_balance ?? 0;
+
+    if (should_mask) {
+        if (pro_mode_view === 'real') {
+            display_balance = Math.max(0, Number(dtrade_balance) - BASE_BALANCE);
+        } else {
+            display_balance = Math.min(Number(dtrade_balance), BASE_BALANCE);
+        }
+    }
 
     return (
         <div className='acc-info__wrapper'>
@@ -144,29 +169,34 @@ const AccountInfoWallets = observer(({ is_dialog_on, toggleDialog }: TAccountInf
                 >
                     {isDesktop ? (
                         <DesktopInfoIcons
-                            gradients={linked_wallet?.gradients}
-                            icons={linked_wallet?.icons}
-                            icon_type={linked_wallet?.icon_type}
+                            gradients={linked_wallet?.gradients!}
+                            icons={linked_wallet?.icons!}
+                            icon_type={linked_wallet?.icon_type! as any}
                         />
                     ) : (
                         <MobileInfoIcon
-                            gradients={linked_wallet?.gradients}
-                            icons={linked_wallet?.icons}
-                            icon_type={linked_wallet?.icon_type}
+                            gradients={linked_wallet?.gradients!}
+                            icons={linked_wallet?.icons!}
+                            icon_type={linked_wallet?.icon_type! as any}
                         />
                     )}
+
                     <BalanceLabel
-                        balance={balance}
+                        balance={display_balance}
                         currency={active_account?.currency}
                         is_virtual={Boolean(active_account?.is_virtual)}
                         display_code={getCurrencyDisplayCode(active_account?.currency)}
+                        should_mask={should_mask}
+                        pro_mode_view={pro_mode_view}
                     />
-                    {show_badge && (
+                    {linked_wallet && (
                         <WalletBadge
-                            is_demo={Boolean(linked_wallet?.is_virtual)}
-                            label={linked_wallet?.landing_company_name}
+                            is_demo={(should_mask && pro_mode_view === 'real' ? false : (Boolean(linked_wallet.is_virtual) ? 'demo' : false)) as any}
+                            label={(should_mask && pro_mode_view === 'real' ? MASKED_NAME : linked_wallet.landing_company_name) || ''}
                         />
                     )}
+
+
                     <DropdownArrow is_disabled={Boolean(active_account?.is_disabled)} />
                 </div>
             </AccountInfoWrapper>
@@ -191,9 +221,10 @@ const AccountInfoWallets = observer(({ is_dialog_on, toggleDialog }: TAccountInf
                     toggle={toggleDialog}
                     loginid={loginid}
                     residence={residence}
-                    is_virtual={active_account?.is_virtual}
+                    is_virtual={!!active_account?.is_virtual}
                     currency={active_account?.currency}
                 />
+
             )}
         </div>
     );

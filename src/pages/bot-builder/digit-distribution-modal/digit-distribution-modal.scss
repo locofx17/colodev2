@@ -171,26 +171,21 @@
         padding: 2px 4px;
         border-radius: 4px;
 
-        &.rise,
-        &.is-rise {
-            color: #4cd964;
-        }
-        &.fall,
-        &.is-fall {
-            color: #ff3b30;
-        }
-
-        &.is-even,
-        &.is-over,
-        &.is-diff {
+        &.is-green {
             color: #4cd964;
             background: rgba(76, 217, 100, 0.1);
         }
-        &.is-odd,
-        &.is-under,
-        &.is-match {
+        &.is-red {
             color: #ff3b30;
             background: rgba(255, 59, 48, 0.1);
+        }
+        &.is-blue {
+            color: #007aff;
+            background: rgba(0, 122, 255, 0.1);
+        }
+        &.is-yellow {
+            color: #ffcc00;
+            background: rgba(255, 204, 0, 0.1);
         }
 
         &.latest {
@@ -242,15 +237,44 @@
         }
 
         &.active {
-            transform: scale(1.05);
-            box-shadow: 0 0 15px var(--button-primary-default);
-            z-index: 1;
+            transform: scale(1.1);
+            z-index: 2;
         }
 
-        &.highlighted {
-            background: var(--button-primary-default) !important;
+        &.is-green {
+            background: #4cd964 !important;
             .digit-dist-modal__circle-inner {
-                background: var(--button-primary-default);
+                background: #4cd964;
+                .digit-dist-modal__digit,
+                .digit-dist-modal__pct {
+                    color: white;
+                }
+            }
+        }
+        &.is-red {
+            background: #ff3b30 !important;
+            .digit-dist-modal__circle-inner {
+                background: #ff3b30;
+                .digit-dist-modal__digit,
+                .digit-dist-modal__pct {
+                    color: white;
+                }
+            }
+        }
+        &.is-blue {
+            background: #007aff !important;
+            .digit-dist-modal__circle-inner {
+                background: #007aff;
+                .digit-dist-modal__digit,
+                .digit-dist-modal__pct {
+                    color: white;
+                }
+            }
+        }
+        &.is-yellow {
+            background: #ffcc00 !important;
+            .digit-dist-modal__circle-inner {
+                background: #ffcc00;
                 .digit-dist-modal__digit,
                 .digit-dist-modal__pct {
                     color: white;
@@ -259,7 +283,7 @@
         }
 
         &-inner {
-            background: #ffffff;
+            background: var(--general-section-1);
             width: 100%;
             height: 100%;
             border-radius: 50%;
@@ -267,14 +291,14 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
         }
     }
 
     &__digit {
         font-size: 20px;
         font-weight: 800;
-        color: #1a1e23;
+        color: var(--text-prominent);
 
         @media (max-width: 600px) {
             font-size: 14px;
@@ -284,7 +308,7 @@
     &__pct {
         font-size: 10px;
         font-weight: 600;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--text-general);
 
         @media (max-width: 600px) {
             font-size: 8px;
@@ -321,6 +345,18 @@
             border-color: #ff3b30;
             color: #ff3b30;
             background: rgba(255, 59, 48, 0.05);
+        }
+
+        &.is-blue {
+            border-color: #007aff;
+            color: #007aff;
+            background: rgba(0, 122, 255, 0.05);
+        }
+
+        &.is-yellow {
+            border-color: #ffcc00;
+            color: #ffcc00;
+            background: rgba(255, 204, 0, 0.05);
         }
     }
 

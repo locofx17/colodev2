@@ -10,6 +10,28 @@
         border-bottom: 1px solid var(--general-hover);
     }
 
+    &__tabs {
+        display: flex;
+        justify-content: space-around;
+        padding-bottom: 0.5rem;
+    }
+
+    &__tab {
+        padding: 0.8rem 1.6rem;
+        cursor: pointer;
+        border-radius: 0.4rem;
+        transition: background 0.2s;
+
+        &:hover {
+            background: var(--general-hover);
+        }
+
+        &--active {
+            border-bottom: 2px solid var(--brand-red-coral);
+        }
+    }
+
+
     &__list {
         padding: 0.4rem 0.8rem;
     }

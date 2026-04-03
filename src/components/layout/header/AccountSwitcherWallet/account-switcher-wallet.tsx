@@ -8,7 +8,9 @@ import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 import useStoreWalletAccountsList from '@/hooks/useStoreWalletAccountsList';
 import { handleTraderHubRedirect } from '@/utils/traders-hub-redirect';
 import { StandaloneChevronDownBoldIcon } from '@deriv/quill-icons';
-import { Localize } from '@deriv-com/translations';
+import { Localize, localize } from '@deriv-com/translations';
+import { useStore } from '@/hooks/useStore';
+
 import { AccountSwitcherWalletList } from './account-switcher-wallet-list';
 import './account-switcher-wallet.scss';
 import '../wallets/wallet.scss';
@@ -20,9 +22,12 @@ type TAccountSwitcherWalletProps = {
 };
 
 export const AccountSwitcherWallet = observer(({ is_visible, toggle, residence }: TAccountSwitcherWalletProps) => {
+    const { pro_mode } = useStore();
+    const { is_pro_mode, pro_mode_view, setProModeView } = pro_mode;
     const { data: wallet_list, has_wallet = false } = useStoreWalletAccountsList() || {};
     const { hubEnabledCountryList } = useFirebaseCountriesConfig();
     const dtrade_account_wallets = wallet_list?.filter(wallet => wallet.dtrade_loginid);
+
 
     const wrapper_ref = React.useRef<HTMLDivElement>(null);
 
@@ -87,10 +92,32 @@ export const AccountSwitcherWallet = observer(({ is_visible, toggle, residence }
     return (
         <div className='account-switcher-wallet' ref={wrapper_ref}>
             <div className='account-switcher-wallet__header'>
-                <Text as='h4' weight='bold' size='xs'>
-                    <Localize i18n_default_text='Options accounts' />
-                </Text>
+                {is_pro_mode ? (
+                    <div className='account-switcher-wallet__tabs'>
+                        <div
+                            className={`account-switcher-wallet__tab ${pro_mode_view === 'real' ? 'account-switcher-wallet__tab--active' : ''}`}
+                            onClick={() => setProModeView('real')}
+                        >
+                            <Text size='xs' weight={pro_mode_view === 'real' ? 'bold' : 'normal'}>
+                                {localize('Real')}
+                            </Text>
+                        </div>
+                        <div
+                            className={`account-switcher-wallet__tab ${pro_mode_view === 'demo' ? 'account-switcher-wallet__tab--active' : ''}`}
+                            onClick={() => setProModeView('demo')}
+                        >
+                            <Text size='xs' weight={pro_mode_view === 'demo' ? 'bold' : 'normal'}>
+                                {localize('Demo')}
+                            </Text>
+                        </div>
+                    </div>
+                ) : (
+                    <Text as='h4' weight='bold' size='xs'>
+                        <Localize i18n_default_text='Options accounts' />
+                    </Text>
+                )}
             </div>
+
             <ThemedScrollbars height={450}>
                 <AccountSwitcherWalletList wallets={dtrade_account_wallets} closeAccountsDialog={closeAccountsDialog} />
             </ThemedScrollbars>

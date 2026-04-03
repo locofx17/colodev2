@@ -1,8 +1,6 @@
-import { action, makeObservable, observable, computed } from 'mobx';
+import { action, makeObservable, observable } from 'mobx';
 import RootStore from '@/stores/root-store';
 import { DerivAPI } from '../services/deriv-api';
-
-import { DBOT_TABS } from '@/constants/bot-contents';
 
 export interface Tick {
     quote: number;
@@ -19,6 +17,14 @@ export interface StrategyResult {
     digitDistribution: number[];
 }
 
+export type SBV1State = 'IDLE' | 'HIT_GREEN' | 'EXIT_DIGIT_MATCH' | 'TRIGGER';
+
+export interface SBV1Setup {
+    type: 'ODD' | 'EVEN';
+    greenDigit: number;
+    symbol: string;
+}
+
 export default class SniperStore {
     root_store: RootStore;
 
@@ -31,6 +37,9 @@ export default class SniperStore {
 
     signals: StrategyResult[] = [];
     logs: string[] = [];
+
+    sbV1State: Record<string, SBV1State> = {};
+    sbV1Setup: Record<string, SBV1Setup | null> = {};
 
     ticks: Record<string, Tick[]> = {};
     subscribers: Record<string, any> = {};
@@ -59,6 +68,8 @@ export default class SniperStore {
             clearLogs: action,
             updateTicks: action,
             setSignals: action,
+            setSbV1State: action,
+            setSbV1Setup: action,
 
             startScan: action,
             stopScan: action,
@@ -99,17 +110,91 @@ export default class SniperStore {
         this.signals = signals;
     };
 
+    setSbV1State = (symbol: string, state: SBV1State) => {
+        this.sbV1State[symbol] = state;
+    };
+
+    setSbV1Setup = (symbol: string, setup: SBV1Setup | null) => {
+        this.sbV1Setup[symbol] = setup;
+    };
+
     updateTicks = (symbol: string, tick: Tick) => {
         if (!this.ticks[symbol]) this.ticks[symbol] = [];
         this.ticks[symbol] = [tick, ...this.ticks[symbol]].slice(0, this.MAX_TICKS);
 
         // Analyze after update
         const results = this.analyzeMarket(symbol, this.ticks[symbol]);
+        
+        // Handle SB V1 State Machine
+        this.processSBV1Entry(symbol, tick, results);
+
         results.forEach(result => {
             if (result && result.match) {
                 this.handleSignalFound(symbol, result);
             }
         });
+    };
+
+    processSBV1Entry = (symbol: string, tick: Tick, results: StrategyResult[]) => {
+        const state = this.sbV1State[symbol] || 'IDLE';
+        const setup = this.sbV1Setup[symbol];
+
+        // 1. Detect setup
+        const sbV1Result = results.find(r => r.strategyId === 'SB_V1');
+        if (sbV1Result && sbV1Result.match) {
+            if (state === 'IDLE') {
+                const type = sbV1Result.entry === 'ODD' ? 'ODD' : 'EVEN';
+                const dist = sbV1Result.digitDistribution;
+                const greenDigit = dist.indexOf(Math.max(...dist));
+                
+                this.setSbV1Setup(symbol, { type, greenDigit, symbol });
+                this.setSbV1State(symbol, 'IDLE'); // Setup found, start sequence
+                this.addLog(`SB V1 ${type} Setup Found. Waiting for Green Bar (${greenDigit})...`);
+            }
+        } else if (state !== 'IDLE') {
+            // Setup lost, reset
+            this.setSbV1State(symbol, 'IDLE');
+            this.setSbV1Setup(symbol, null);
+            this.addLog('SB V1 Setup Lost. Resetting...');
+            return;
+        }
+
+        if (!setup) return;
+
+        switch (state) {
+            case 'IDLE':
+                if (tick.digit === setup.greenDigit) {
+                    this.setSbV1State(symbol, 'HIT_GREEN');
+                    this.addLog(`SB V1: Green Bar (${tick.digit}) Hit. Waiting for Exit Digit (${setup.type === 'ODD' ? 'Even' : 'Odd'})...`);
+                }
+                break;
+            case 'HIT_GREEN':
+                const isExitMatch = setup.type === 'ODD' ? tick.digit % 2 === 0 : tick.digit % 2 !== 0;
+                if (isExitMatch) {
+                    this.setSbV1State(symbol, 'EXIT_DIGIT_MATCH');
+                    this.addLog(`SB V1: Exit Digit Match (${tick.digit}). Waiting for Green Bar (${setup.greenDigit}) to trigger...`);
+                } else if (tick.digit === setup.greenDigit) {
+                    // Stay in HIT_GREEN or reset if it hits green again? 
+                    // Note says "exit to be [even/odd]... then click when touches green again".
+                    // So we wait for exit after green.
+                }
+                break;
+            case 'EXIT_DIGIT_MATCH':
+                if (tick.digit === setup.greenDigit) {
+                    this.setSbV1State(symbol, 'TRIGGER');
+                    this.addLog(`SB V1: TRIGGERED! Green Bar (${tick.digit}) reached again.`);
+                    this.executeTrade({
+                        marketId: symbol,
+                        entry: setup.type,
+                        entryDigit: setup.greenDigit,
+                        botName: 'SB V1',
+                    });
+                    // Reset after trade
+                    this.setSbV1State(symbol, 'IDLE');
+                    this.setSbV1Setup(symbol, null);
+                }
+                break;
+        }
     };
 
     startScan = (markets: string[]) => {
@@ -118,15 +203,16 @@ export default class SniperStore {
         this.addLog(`Starting scan on ${markets.length} markets...`);
 
         markets.forEach(mId => {
-            const api = new DerivAPI(data => {
+            const api = new DerivAPI((data: any) => {
                 if (data.msg_type === 'tick') {
                     const t = data.tick;
+                    if (!t) return;
                     const quote = t.quote;
                     const digit = parseInt(quote.toString().slice(-1));
                     this.updateTicks(mId, { quote, digit, epoch: t.epoch });
                 }
                 if (data.history && !data.tick) {
-                    const history = (data as any).history;
+                    const history = data.history;
                     const ticks = history.prices.map((p: number, i: number) => ({
                         quote: p,
                         digit: parseInt(p.toString().slice(-1)),
@@ -160,7 +246,7 @@ export default class SniperStore {
         this.addLog('Scanner stopped.');
     };
 
-    handleSignalFound = (symbol: string, result: StrategyResult) => {
+    handleSignalFound = (_symbol: string, result: StrategyResult) => {
         if (this.strategyLock !== 'none' && result.strategyId.toLowerCase() !== this.strategyLock.toLowerCase()) {
             return;
         }
@@ -229,7 +315,7 @@ export default class SniperStore {
         return bestDigit;
     };
 
-    analyzeMarket = (marketId: string, ticks: Tick[]): StrategyResult[] => {
+    analyzeMarket = (_marketId: string, ticks: Tick[]): StrategyResult[] => {
         if (ticks.length < this.MIN_TICKS_FOR_SIGNAL) return [];
 
         const lastDigits = ticks.map(t => t.digit);
@@ -312,6 +398,10 @@ export default class SniperStore {
             digitDistribution,
         });
 
+        // SB V1 Strategy
+        const sbV1Result = this.analyzeSBV1(lastDigits, digitDistribution, sortedDigits);
+        if (sbV1Result) results.push(sbV1Result);
+
         // RSI
         const rsi = this.calculateRSI(ticks);
         let rsiMatch = false;
@@ -342,13 +432,73 @@ export default class SniperStore {
         return finalResults.filter(r => r.match);
     };
 
+    analyzeSBV1 = (lastDigits: number[], distribution: number[], sortedRank: any[]): StrategyResult | null => {
+        const recent20 = lastDigits.slice(-20);
+        
+        const getFreq = (digits: number[], target: number) => digits.filter(d => d === target).length / digits.length;
+
+        const isDecreasing = (digit: number) => {
+            const currentFreq = getFreq(recent20, digit);
+            const overallFreq = distribution[digit];
+            return currentFreq < overallFreq;
+        };
+
+        const green = sortedRank[0].digit;
+        const yellow = sortedRank[8].digit; // Rank 9 is index 8 (since ranking starts at 1, Green=1, Blue=2, ..., Yellow=9, Red=10)
+        
+        const oddDigits = [1, 3, 5, 7, 9];
+        const evenDigits = [0, 2, 4, 6, 8];
+
+        const oddsAbove102 = oddDigits.filter(d => distribution[d] > 0.102).length;
+        const evensBelow102 = evenDigits.filter(d => distribution[d] < 0.102).length;
+        const evensDecreasing = evenDigits.filter(d => distribution[d] < 0.102 && isDecreasing(d)).length;
+
+        const evensAbove102 = evenDigits.filter(d => distribution[d] >= 0.102).length;
+        const oddsBelow102 = oddDigits.filter(d => distribution[d] < 0.102).length;
+        const oddsDecreasing = oddDigits.filter(d => distribution[d] < 0.102 && isDecreasing(d)).length;
+
+        // ODD Setup
+        const isOddMatch = (
+            green % 2 !== 0 && 
+            yellow % 2 === 0 && 
+            oddsAbove102 >= 3 && 
+            evensBelow102 >= 3 && 
+            evensDecreasing >= 1 // interpreting "decreasing" as at least one indicator
+        );
+
+        // EVEN Setup
+        const isEvenMatch = (
+            green % 2 === 0 && 
+            yellow % 2 !== 0 && 
+            evensAbove102 >= 3 && 
+            oddsBelow102 >= 3 && 
+            oddsDecreasing >= 1
+        );
+
+        if (isOddMatch || isEvenMatch) {
+            return {
+                strategyId: 'SB_V1',
+                match: true,
+                confidence: 0.8,
+                entry: isOddMatch ? 'ODD' : 'EVEN',
+                entryDigit: green,
+                digitDistribution: distribution,
+            };
+        }
+
+        return null;
+    };
+
     executeTrade = async (signal: any) => {
         if (!signal) return;
 
-        this.addLog(`Loading Bot for ${signal.marketId} @ ${signal.entry}...`);
+        const botName = signal.botName || 'Entry Point Bot';
+        const botFile = signal.botName === 'SB V1' ? 'SB V1.xml' : 'Entry point Bot over 2.xml';
+
+        this.addLog(`Loading ${botName} for ${signal.marketId} @ ${signal.entry}...`);
 
         try {
-            const response = await fetch('/xml/Entry point Bot over 2.xml');
+            const response = await fetch(`/xml/${botFile}`);
             const xml = await response.text();
 
             // Patch XML with signal data
@@ -466,7 +616,7 @@ export default class SniperStore {
             }
 
             this.root_store.dashboard.setPendingFreeBot({
-                name: 'Entry Point Bot',
+                name: botName,
                 xml: modifiedXml,
                 should_auto_run: true,
             });

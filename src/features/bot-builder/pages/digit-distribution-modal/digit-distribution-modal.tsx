@@ -316,6 +316,23 @@ const DigitDistributionModal = observer(() => {
     const modalX = mobile ? 8 : Math.max(8, window.innerWidth / 2 - 300);
     const modalY = mobile ? 60 : 100;
 
+    const sortedFreq = [...digitFreq].map((val, idx) => ({ val, idx })).sort((a, b) => b.val - a.val);
+    const ranks = Array(10).fill(0);
+    sortedFreq.forEach((item, index) => {
+        ranks[item.idx] = index + 1;
+    });
+
+    const getRankClass = (digit: number) => {
+        const f = digitFreq[digit];
+        if (f === 0) return '';
+        const r = ranks[digit];
+        if (r === 1) return 'is-green';
+        if (r === 2) return 'is-blue';
+        if (r === 9) return 'is-yellow';
+        if (r === 10) return 'is-red';
+        return '';
+    };
+
     return (
         <Draggable
             initialValues={{
@@ -356,31 +373,12 @@ const DigitDistributionModal = observer(() => {
                 <div className='digit-dist-modal__recent-ticks'>
                     {history.slice(-10).map((h, i) => {
                         const isLatest = i === 9;
-                        const { trade_type, prediction } = digit_stats_settings;
-                        let highlightClass = '';
-
-                        if (trade_type === 'evenodd') {
-                            if (h.digit % 2 === 0)
-                                highlightClass = 'is-even'; // Green for even, Blue for odd? User specified "focus with that"
-                            else highlightClass = 'is-odd';
-                        } else if (trade_type === 'overunder') {
-                            if (h.digit > prediction) highlightClass = 'is-over';
-                            else highlightClass = 'is-under';
-                        } else if (trade_type === 'matchdiff') {
-                            if (h.digit === prediction) highlightClass = 'is-match';
-                            else highlightClass = 'is-diff';
-                        } else if (trade_type === 'risefall') {
-                            const prevQuote = history[history.length - 10 + i - 1]?.quote;
-                            if (prevQuote) {
-                                if (h.quote > prevQuote) highlightClass = 'is-rise';
-                                else if (h.quote < prevQuote) highlightClass = 'is-fall';
-                            }
-                        }
+                        const rankClass = getRankClass(h.digit);
 
                         return (
                             <div
                                 key={i}
-                                className={`digit-dist-modal__tick ${isLatest ? 'latest' : ''} ${highlightClass}`}
+                                className={`digit-dist-modal__tick ${isLatest ? 'latest' : ''} ${rankClass}`}
                             >
                                 {h.digit}
                             </div>
@@ -391,25 +389,19 @@ const DigitDistributionModal = observer(() => {
                 <div className='digit-dist-modal__circles'>
                     {digitFreq.map((f, i) => {
                         const pctStr = formatPercent(f, total);
-                        const { trade_type, prediction } = digit_stats_settings;
-                        let isHighlighted = false;
-
-                        if (trade_type === 'evenodd') {
-                            isHighlighted = i % 2 === 0; // Highlight even by default if even/odd
-                        } else if (trade_type === 'overunder') {
-                            isHighlighted = i > prediction;
-                        } else if (trade_type === 'matchdiff') {
-                            isHighlighted = i === prediction;
-                        }
+                        const rankClass = getRankClass(i);
 
                         let ringCol = 'var(--border-normal)';
-                        if (f === maxCount && f > 0) ringCol = '#2ea043';
-                        else if (f === minCount && f > 0) ringCol = '#f85149';
+                        const r = ranks[i];
+                        if (f > 0) {
+                            if (r === 1) ringCol = '#4cd964';
+                            else if (r === 10) ringCol = '#ff3b30';
+                        }
 
                         return (
                             <div
                                 key={i}
-                                className={`digit-dist-modal__circle ${i === lastDigit ? 'active' : ''} ${isHighlighted ? 'highlighted' : ''}`}
+                                className={`digit-dist-modal__circle ${i === lastDigit ? 'active' : ''} ${rankClass}`}
                                 style={{
                                     background: `conic-gradient(from 0deg, ${ringCol} 0% ${parseFloat(pctStr)}%, var(--fill-normal) ${parseFloat(pctStr)}% 100%)`,
                                 }}
@@ -432,9 +424,16 @@ const DigitDistributionModal = observer(() => {
                         { label: 'Over 4', val: formatPercent(over4, total), compare: under5 },
                         { label: 'Under 5', val: formatPercent(under5, total), compare: over4 },
                     ].map((s, i) => {
-                        const isGreen = parseFloat(s.val) >= (s.compare / total) * 100;
+                        const isWinner = parseFloat(s.val) >= (s.compare / total) * 100;
+                        let statClass = isWinner ? 'green' : 'red';
+                        
+                        // Use blue/yellow for Over/Under to meet the "only 4 colors" requirement
+                        if (s.label === 'Over 4' || s.label === 'Under 5') {
+                            statClass = isWinner ? 'is-blue' : 'is-yellow';
+                        }
+
                         return (
-                            <div key={i} className={`digit-dist-modal__stat-box ${isGreen ? 'green' : 'red'}`}>
+                            <div key={i} className={`digit-dist-modal__stat-box ${statClass}`}>
                                 <span className='digit-dist-modal__stat-label'>{localize(s.label)}</span>
                                 <span className='digit-dist-modal__stat-val'>{s.val}</span>
                             </div>

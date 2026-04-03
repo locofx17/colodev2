@@ -3,6 +3,7 @@ import { DerivAccount, TradeLog } from '../pages/copycat/types';
 import { DerivAPI } from '../pages/copycat/services/derivApi';
 import { transaction_elements } from '../constants/transactions';
 import RootStore from './root-store';
+import { observer as globalObserver } from '../external/bot-skeleton/utils/observer';
 
 export default class CopycatStore {
     root_store: RootStore;
@@ -18,6 +19,7 @@ export default class CopycatStore {
 
     apiRefs: { [key: string]: DerivAPI } = {};
     copiedTrades = new Set<string>();
+    copiedReferences = new Set<string>();
 
     constructor(root_store: RootStore) {
         makeObservable(this, {
@@ -44,6 +46,7 @@ export default class CopycatStore {
             toggleAccount: action,
             clearLogs: action,
             autoLinkMaster: action,
+            handleReplicatorPurchase: action,
         });
 
         this.root_store = root_store;
@@ -102,14 +105,23 @@ export default class CopycatStore {
                 const lastTrx = this.root_store.transactions.transactions[0];
                 if (lastTrx?.type === transaction_elements.CONTRACT && typeof lastTrx.data === 'object') {
                     const contract = lastTrx.data;
+                    const purchaseRef = contract.purchase_reference || contract.passthrough?.purchase_reference;
+                    
                     // Ensure it's an open contract and hasn't been copied yet
-                    if (contract.contract_id && !this.copiedTrades.has(String(contract.contract_id))) {
-                        this.copiedTrades.add(String(contract.contract_id));
+                    const isNewContract = contract.contract_id && !this.copiedTrades.has(String(contract.contract_id));
+                    const isNewReference = !purchaseRef || !this.copiedReferences.has(purchaseRef);
+
+                    if (isNewContract && isNewReference) {
+                        if (contract.contract_id) this.copiedTrades.add(String(contract.contract_id));
+                        if (purchaseRef) this.copiedReferences.add(purchaseRef);
                         this.copyTrade(masterAccount, contract);
                     }
                 }
             }
         );
+
+        // Register for Proactive Precision Sync (The Replicator)
+        globalObserver.register('replicator.purchase', (data: any) => this.handleReplicatorPurchase(data));
     }
 
     setAccounts = (accounts: DerivAccount[]) => {
@@ -157,7 +169,6 @@ export default class CopycatStore {
         const token = client.getToken();
         if (!token) return;
 
-        const accountsList = JSON.parse(localStorage.getItem('accountsList') ?? '{}');
         const newAccounts = [...this.accounts];
         let hasChanges = false;
 
@@ -187,6 +198,69 @@ export default class CopycatStore {
         if (hasChanges) {
             this.setAccounts(newAccounts);
         }
+    };
+
+    handleReplicatorPurchase = (data: any) => {
+        if (!this.isReplicating) return;
+        
+        const { request, tradeOptions, account_id } = data;
+        const masterAccount = this.accounts.find(a => a.type === 'master');
+        
+        if (!masterAccount || !masterAccount.isActive) return;
+        if (masterAccount.loginId !== account_id) return;
+
+        const upcomingTick = Math.floor(Date.now() / 1000) + 1;
+        
+        // Deduplication: Track purchase reference
+        const masterRef = request.purchase_reference || tradeOptions?.purchase_reference;
+        if (masterRef && this.copiedReferences.has(masterRef)) return;
+        if (masterRef) this.copiedReferences.add(masterRef);
+
+        // Inject date_start into Master's request (modifies the object by reference)
+        if (request && typeof request === 'object') {
+            if (request.parameters) {
+                request.parameters.date_start = upcomingTick;
+            } else if (data.mode === 'parameters') {
+                request.date_start = upcomingTick;
+            }
+        }
+
+        // Replicate to Copiers
+        const copiers = this.accounts.filter(a => a.type === 'copier' && a.isActive);
+        
+        copiers.forEach(copier => {
+            const api = this.apiRefs[copier.id];
+            if (api) {
+                // Clone parameters to avoid cross-influence
+                const copierParams = JSON.parse(JSON.stringify(request.parameters || request));
+                
+                // Ensure same sync timestamp
+                copierParams.date_start = upcomingTick;
+                
+                // Deduplication: Use master reference or generate unique one
+                const purchaseRef = masterRef || `cp-${Math.random().toString(36).substr(2, 9)}`;
+                copierParams.purchase_reference = purchaseRef;
+                this.copiedReferences.add(purchaseRef);
+
+                // Amount adjustment
+                const amount = tradeOptions?.amount || copierParams.amount || 1;
+
+                api.buy(amount, copierParams);
+                
+                const newLog: TradeLog = {
+                    id: Math.random().toString(36).substr(2, 9),
+                    masterAccountId: masterAccount.id,
+                    copierAccountId: copier.id,
+                    symbol: copierParams.symbol,
+                    action: copierParams.contract_type === 'CALL' ? 'BUY' : 'SELL',
+                    amount: amount,
+                    status: 'PENDING',
+                    timestamp: Date.now(),
+                    masterTradeId: undefined
+                };
+                this.setLogs([newLog, ...this.logs].slice(0, 100));
+            }
+        });
     };
 
     handleApiMessage = (accountId: string, data: any) => {
@@ -232,8 +306,13 @@ export default class CopycatStore {
             const account = this.accounts.find(a => a.id === accountId);
             
             if (contract.status === 'open' && account?.type === 'master' && this.isReplicating) {
-                if (!this.copiedTrades.has(contract.contract_id)) {
+                const purchaseRef = contract.purchase_reference || contract.passthrough?.purchase_reference;
+                const isNewContract = !this.copiedTrades.has(contract.contract_id);
+                const isNewReference = !purchaseRef || !this.copiedReferences.has(purchaseRef);
+
+                if (isNewContract && isNewReference) {
                     this.copiedTrades.add(contract.contract_id);
+                    if (purchaseRef) this.copiedReferences.add(purchaseRef);
                     this.copyTrade(account, contract);
                 }
             }
@@ -392,21 +471,23 @@ export default class CopycatStore {
 
         // Setup Auto Copiers for other valid accounts automatically
         Object.keys(accountsList).forEach(loginId => {
-            if (loginId.startsWith('CR') || loginId.startsWith('VRTC') || loginId.startsWith('MF')) {
+            const isReal = loginId.startsWith('CR') || loginId.startsWith('MF');
+            const isDemo = loginId.startsWith('VRTC');
+            
+            if (isReal || isDemo) {
                 if (loginId !== client.loginid) {
                     if (!newAccounts.some(a => a.loginId === loginId)) {
                         const accToken = accountsList[loginId];
-                        const isDemo = loginId.startsWith('VRTC');
                         const copierAcc: DerivAccount = {
                             id: Math.random().toString(36).substr(2, 9),
-                            name: `${isDemo ? 'Demo' : 'Real'} ${loginId}`,
+                            name: `${isReal ? 'Real' : 'Demo'} Account (${loginId})`,
                             token: accToken,
                             type: 'copier',
-                            accountType: isDemo ? 'demo' : 'real',
+                            accountType: isReal ? 'real' : 'demo',
                             balance: 0,
                             currency: 'USD',
                             loginId: loginId,
-                            isActive: true, // Auto-copier active by default
+                            isActive: isReal, // Automatically activate Real accounts
                             connectionStatus: 'connecting',
                             totalProfit: 0
                         };
