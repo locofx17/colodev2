@@ -124,7 +124,7 @@ const DesktopInfoIcons = observer(({ gradients, icons, icon_type }: TInfoIcons) 
 const AccountInfoWallets = observer(({ is_dialog_on, toggleDialog }: TAccountInfoWallets) => {
     const { client, ui, pro_mode } = useStore();
     const { loginid, accounts, residence } = client;
-    const { is_pro_mode, pro_mode_view, DEMO_ID, BASE_BALANCE, MASKED_NAME } = pro_mode;
+    const { is_pro_mode, pro_mode_view, BASE_BALANCE, MASKED_NAME } = pro_mode;
 
 
     const { account_switcher_disabled_message } = ui;
@@ -137,7 +137,8 @@ const AccountInfoWallets = observer(({ is_dialog_on, toggleDialog }: TAccountInf
     const linked_wallet = wallet_list?.find(wallet => wallet.dtrade_loginid === linked_dtrade_trading_account_loginid);
     
     // Masking logic for header
-    const is_target_account = loginid === DEMO_ID;
+    // Masking logic for header
+    const is_target_account = !!active_account?.is_virtual;
     const should_mask = is_pro_mode && is_target_account;
     
     const dtrade_balance = linked_wallet?.dtrade_balance;
@@ -191,7 +192,7 @@ const AccountInfoWallets = observer(({ is_dialog_on, toggleDialog }: TAccountInf
                     />
                     {linked_wallet && (
                         <WalletBadge
-                            is_demo={(should_mask && pro_mode_view === 'real' ? false : (Boolean(linked_wallet.is_virtual) ? 'demo' : false)) as any}
+                            is_demo={(should_mask && pro_mode_view === 'real' ? undefined : (Boolean(linked_wallet.is_virtual) ? 'demo' : undefined)) as any}
                             label={(should_mask && pro_mode_view === 'real' ? MASKED_NAME : linked_wallet.landing_company_name) || ''}
                         />
                     )}

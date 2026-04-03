@@ -1,4 +1,3 @@
-import React from 'react';
 import { observer } from 'mobx-react-lite';
 
 import { useStore } from '@/hooks/useStore';
@@ -12,13 +11,13 @@ type TAccountSwitcherWalletListProps = {
 
 export const AccountSwitcherWalletList = observer(({ wallets, closeAccountsDialog }: TAccountSwitcherWalletListProps) => {
     const { pro_mode } = useStore();
-    const { is_pro_mode, pro_mode_view, DEMO_ID } = pro_mode;
+    const { is_pro_mode, pro_mode_view } = pro_mode;
 
     const filteredWallets = wallets.filter(account => {
         if (account.is_dtrader_account_disabled) return false;
         
         if (is_pro_mode) {
-            const is_target = account.dtrade_loginid === DEMO_ID;
+            const is_target = account.is_virtual;
             if (pro_mode_view === 'real') {
                 return !account.is_virtual || is_target;
             } else {

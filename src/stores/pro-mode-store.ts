@@ -8,7 +8,8 @@ export class ProModeStore {
     is_activated = false;
     
     // Hardcoded IDs according to requirements
-    public readonly DEMO_ID = 'VRTC12822962';
+    public DEMO_ID = ''; // Will be set dynamically by the UI if needed
+
     public readonly MASKED_ID = 'CR8606511';
     public readonly MASKED_NAME = 'US Dollar';
     public readonly BASE_BALANCE = 10000;

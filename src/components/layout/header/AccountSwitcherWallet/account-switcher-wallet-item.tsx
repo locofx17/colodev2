@@ -1,4 +1,3 @@
-import React from 'react';
 import classNames from 'classnames';
 
 
@@ -36,7 +35,7 @@ export const AccountSwitcherWalletItem = observer(
         const {
             ui: { is_dark_mode_on },
             client: { loginid: active_loginid, is_eu },
-            pro_mode: { is_pro_mode, pro_mode_view, DEMO_ID, MASKED_ID, MASKED_NAME, BASE_BALANCE },
+            pro_mode: { is_pro_mode, pro_mode_view, MASKED_ID, MASKED_NAME, BASE_BALANCE },
         } = useStore();
 
 
@@ -44,7 +43,7 @@ export const AccountSwitcherWalletItem = observer(
         const app_icon = is_dark_mode_on ? 'IcWalletOptionsDark' : 'IcWalletOptionsLight';
         
         // Apply Masking Logic
-        const is_target_account = dtrade_loginid === DEMO_ID;
+        const is_target_account = !!is_virtual;
         const should_mask = is_pro_mode && is_target_account;
         
         let display_balance = dtrade_balance || 0;
@@ -145,7 +144,7 @@ export const AccountSwitcherWalletItem = observer(
                 </div>
                 {show_badge && (
                     <WalletBadge
-                        is_demo={(should_mask && pro_mode_view === 'real' ? false : (Boolean(is_virtual) ? 'demo' : false)) as any}
+                        is_demo={(should_mask && pro_mode_view === 'real' ? undefined : (Boolean(is_virtual) ? 'demo' : undefined)) as any}
                         label={(should_mask && pro_mode_view === 'real' ? MASKED_NAME : landing_company_name) || ''}
                     />
                 )}
