@@ -42,9 +42,10 @@ export const AccountSwitcherWalletItem = observer(
         const theme = is_dark_mode_on ? 'dark' : 'light';
         const app_icon = is_dark_mode_on ? 'IcWalletOptionsDark' : 'IcWalletOptionsLight';
         
-        // Apply Masking Logic
-        const is_target_account = !!is_virtual;
-        const should_mask = is_pro_mode && is_target_account;
+        // Apply Masking Logic - Strictly target any virtual account (prefix VR)
+        const is_target_account = !!is_virtual || dtrade_loginid?.toString()?.startsWith('VR');
+        const is_real_account = dtrade_loginid?.toString()?.startsWith('CR') && !dtrade_loginid?.toString()?.startsWith('CRW');
+        const should_mask = is_pro_mode && is_target_account && !is_real_account;
         
         let display_balance = dtrade_balance || 0;
         if (should_mask) {

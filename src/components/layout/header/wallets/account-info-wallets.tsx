@@ -138,8 +138,10 @@ const AccountInfoWallets = observer(({ is_dialog_on, toggleDialog }: TAccountInf
     
     // Masking logic for header
     // Masking logic for header
-    const is_target_account = !!active_account?.is_virtual;
-    const should_mask = is_pro_mode && is_target_account;
+    // Masking logic for header - Strictly target any virtual account (prefix VR)
+    const is_target_account = !!active_account?.is_virtual || loginid?.startsWith('VR');
+    const is_real_account = loginid?.startsWith('CR') && !loginid?.startsWith('CRW'); // CRW is a real wallet, but we'll exclude it from demo masking
+    const should_mask = is_pro_mode && is_target_account && !is_real_account;
     
     const dtrade_balance = linked_wallet?.dtrade_balance;
     let display_balance = dtrade_balance ?? 0;
