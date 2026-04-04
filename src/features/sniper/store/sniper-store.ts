@@ -44,7 +44,7 @@ export default class SniperStore {
     ticks: Record<string, Tick[]> = {};
     subscribers: Record<string, any> = {};
 
-    MAX_TICKS = 180;
+    MAX_TICKS = 1000;
     MIN_TICKS_FOR_SIGNAL = 20;
 
     constructor(root_store: RootStore) {
@@ -398,9 +398,7 @@ export default class SniperStore {
             digitDistribution,
         });
 
-        // SB V1 Strategy
-        const sbV1Result = this.analyzeSBV1(lastDigits, digitDistribution, sortedDigits);
-        if (sbV1Result) results.push(sbV1Result);
+        // SB V1 Strategy moved natively to XML.
 
         // RSI
         const rsi = this.calculateRSI(ticks);
@@ -432,62 +430,7 @@ export default class SniperStore {
         return finalResults.filter(r => r.match);
     };
 
-    analyzeSBV1 = (lastDigits: number[], distribution: number[], sortedRank: any[]): StrategyResult | null => {
-        const recent20 = lastDigits.slice(-20);
-        
-        const getFreq = (digits: number[], target: number) => digits.filter(d => d === target).length / digits.length;
 
-        const isDecreasing = (digit: number) => {
-            const currentFreq = getFreq(recent20, digit);
-            const overallFreq = distribution[digit];
-            return currentFreq < overallFreq;
-        };
-
-        const green = sortedRank[0].digit;
-        const yellow = sortedRank[8].digit; // Rank 9 is index 8 (since ranking starts at 1, Green=1, Blue=2, ..., Yellow=9, Red=10)
-        
-        const oddDigits = [1, 3, 5, 7, 9];
-        const evenDigits = [0, 2, 4, 6, 8];
-
-        const oddsAbove102 = oddDigits.filter(d => distribution[d] > 0.102).length;
-        const evensBelow102 = evenDigits.filter(d => distribution[d] < 0.102).length;
-        const evensDecreasing = evenDigits.filter(d => distribution[d] < 0.102 && isDecreasing(d)).length;
-
-        const evensAbove102 = evenDigits.filter(d => distribution[d] >= 0.102).length;
-        const oddsBelow102 = oddDigits.filter(d => distribution[d] < 0.102).length;
-        const oddsDecreasing = oddDigits.filter(d => distribution[d] < 0.102 && isDecreasing(d)).length;
-
-        // ODD Setup
-        const isOddMatch = (
-            green % 2 !== 0 && 
-            yellow % 2 === 0 && 
-            oddsAbove102 >= 3 && 
-            evensBelow102 >= 3 && 
-            evensDecreasing >= 1 // interpreting "decreasing" as at least one indicator
-        );
-
-        // EVEN Setup
-        const isEvenMatch = (
-            green % 2 === 0 && 
-            yellow % 2 !== 0 && 
-            evensAbove102 >= 3 && 
-            oddsBelow102 >= 3 && 
-            oddsDecreasing >= 1
-        );
-
-        if (isOddMatch || isEvenMatch) {
-            return {
-                strategyId: 'SB_V1',
-                match: true,
-                confidence: 0.8,
-                entry: isOddMatch ? 'ODD' : 'EVEN',
-                entryDigit: green,
-                digitDistribution: distribution,
-            };
-        }
-
-        return null;
-    };
 
     executeTrade = async (signal: any) => {
         if (!signal) return;
@@ -607,8 +550,11 @@ export default class SniperStore {
                     /<mutation xmlns="http:\/\/www\.w3\.org\/1999\/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="(true|false)"><\/mutation>/g,
                     '<mutation xmlns="http://www.w3.org/1999/xhtml" has_first_barrier="false" has_second_barrier="false" has_prediction="false"></mutation>'
                 );
+            }
 
-                // Bypass Entry Loop for Rise/Fall
+            // Bypass Entry Loop for SB V1 and Rise/Fall to ensure immediate execution
+            const shouldBypassLoop = signal.botName === 'SB V1' || !isDigitEntry;
+            if (shouldBypassLoop) {
                 modifiedXml = modifiedXml.replace(
                     /<field name="VAR" id="\$68\*z!dO\|ZT~V6#FW8XN">entry_loop<\/field>\s*<value name="VALUE">\s*<block type="logic_boolean" [^>]*>\s*<field name="BOOL">TRUE<\/field>/g,
                     '<field name="VAR" id="$68*z!dO|ZT~V6#FW8XN">entry_loop</field><value name="VALUE"><block type="logic_boolean" id="Wa-a/Bi/D`+:7$F(~)ZJ"><field name="BOOL">FALSE</field>'

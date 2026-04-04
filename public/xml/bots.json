@@ -1,10 +1,93 @@
 [
-  { "name": "SEBASTIAN BLOOD FX V2 MEGAMIND", "file": "LOCOFX V2 MEGAMIND.xml", "youtube_url": "https://www.youtube.com/@DBOTTRADERZ" },
-  { "name": "SEBASTIAN BLOOD SPEEDBOT", "file": "LOCO-SPEED-BOT.xml", "youtube_url": "https://www.youtube.com/@DBOTTRADERZ" },
-  { "name": "UNDER3 BOT V1", "file": "UNDER3 BOT V1.xml", "youtube_url": "https://www.youtube.com/@DBOTTRADERZ" },
-  { "name": "DIGIT PSYCHOLOGY BOT", "file": "Digit-Psychology-Bot.xml", "youtube_url": "https://www.youtube.com/@DBOTTRADERZ" },
-  { "name": "EVEN ODD BOT", "file": "even-odd-bot.xml", "youtube_url": "https://www.youtube.com/@DBOTTRADERZ" },
-  { "name": "SB V1", "file": "SB V1.xml", "youtube_url": "https://www.youtube.com/@DBOTTRADERZ" },
-  { "name": "ENTRY POINT BOT", "file": "Entry point Bot over 2.xml", "youtube_url": "https://www.youtube.com/@DBOTTRADERZ" }
+  {
+    "name": "SEBASTIAN BLOOD FX V2 MEGAMIND",
+    "file": "LOCOFX V2 MEGAMIND.xml",
+    "youtube_url": "https://www.youtube.com/@DBOTTRADERZ",
+    "market": "Volatility 25 (1s) Index",
+    "symbol": "1HZ25V",
+    "tradeType": "Digits – Over/Under",
+    "purchaseType": "Digit Over",
+    "prediction": "Dynamic (AI)",
+    "duration": "1 tick",
+    "difficulty": "Advanced",
+    "strategy": "Digit Over/Under"
+  },
+  {
+    "name": "SEBASTIAN BLOOD SPEEDBOT",
+    "file": "LOCO-SPEED-BOT.xml",
+    "youtube_url": "https://www.youtube.com/@DBOTTRADERZ",
+    "market": "Volatility 75 (1s) Index",
+    "symbol": "1HZ75V",
+    "tradeType": "Digits – Over/Under",
+    "purchaseType": "Digit Over",
+    "prediction": "Dynamic (Configurable)",
+    "duration": "1 tick",
+    "difficulty": "Intermediate",
+    "strategy": "High-Speed Digit Over"
+  },
+  {
+    "name": "UNDER3 BOT V1",
+    "file": "UNDER3 BOT V1.xml",
+    "youtube_url": "https://www.youtube.com/@DBOTTRADERZ",
+    "market": "Volatility 25 (1s) Index",
+    "symbol": "1HZ25V",
+    "tradeType": "Digits – Over/Under",
+    "purchaseType": "Digit Under",
+    "prediction": "3 (Under 3)",
+    "duration": "1 tick",
+    "difficulty": "Beginner",
+    "strategy": "Digit Under 3"
+  },
+  {
+    "name": "DIGIT PSYCHOLOGY BOT",
+    "file": "Digit-Psychology-Bot.xml",
+    "youtube_url": "https://www.youtube.com/@DBOTTRADERZ",
+    "market": "Volatility 10 (1s) Index",
+    "symbol": "1HZ10V",
+    "tradeType": "Digits – Over/Under",
+    "purchaseType": "Digit Over / Digit Under",
+    "prediction": "Dynamic (Psychology-based)",
+    "duration": "1 tick",
+    "difficulty": "Advanced",
+    "strategy": "Dual Over & Under"
+  },
+  {
+    "name": "EVEN ODD BOT",
+    "file": "even-odd-bot.xml",
+    "youtube_url": "https://www.youtube.com/@DBOTTRADERZ",
+    "market": "Volatility 25 (1s) Index",
+    "symbol": "1HZ25V",
+    "tradeType": "Digits – Even/Odd",
+    "purchaseType": "Digit Odd",
+    "prediction": "N/A",
+    "duration": "1 tick",
+    "difficulty": "Beginner",
+    "strategy": "Even/Odd"
+  },
+  {
+    "name": "SB V1",
+    "file": "SB V1.xml",
+    "youtube_url": "https://www.youtube.com/@DBOTTRADERZ",
+    "market": "Volatility 25 (1s) Index",
+    "symbol": "1HZ25V",
+    "tradeType": "Digits – Even/Odd",
+    "purchaseType": "Digit Even",
+    "prediction": "N/A",
+    "duration": "1 tick",
+    "difficulty": "Intermediate",
+    "strategy": "Digit Even"
+  },
+  {
+    "name": "ENTRY POINT BOT",
+    "file": "Entry point Bot over 2.xml",
+    "youtube_url": "https://www.youtube.com/@DBOTTRADERZ",
+    "market": "Volatility 25 (1s) Index",
+    "symbol": "1HZ25V",
+    "tradeType": "Digits – Over/Under",
+    "purchaseType": "Digit Over",
+    "prediction": "2 (Over 2)",
+    "duration": "1 tick",
+    "difficulty": "Beginner",
+    "strategy": "Entry Point Over 2"
+  }
 ]
-

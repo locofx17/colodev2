@@ -141,6 +141,106 @@ export default Engine =>
             return result.d;
         }
 
+        async getSbV1Signal({ n = 1000 } = {}) {
+            const list = await this.getLastDigitList();
+            const lastN = list.slice(-Number(n || 0));
+            if (lastN.length === 0) return 'NONE';
+
+            const freq = Array(10).fill(0);
+            lastN.forEach(val => {
+                const i = Number(val);
+                if (i >= 0 && i <= 9) freq[i]++;
+            });
+            const distribution = freq.map(c => c / Math.max(1, lastN.length));
+
+            const sortedRank = freq.map((c, i) => ({ digit: i, count: c })).sort((a, b) => b.count - a.count);
+
+            const recent20 = lastN.slice(-20);
+            const getFreq = (digits, target) => digits.filter(d => Number(d) === target).length / Math.max(1, digits.length);
+
+            const isDecreasing = (digit) => {
+                const currentFreq = getFreq(recent20, digit);
+                const overallFreq = distribution[digit];
+                return currentFreq < overallFreq;
+            };
+
+            const green = sortedRank[0].digit;
+            const yellow = sortedRank[8].digit; // 2nd least
+
+            const oddDigits = [1, 3, 5, 7, 9];
+            const evenDigits = [0, 2, 4, 6, 8];
+
+            const oddsAbove102 = oddDigits.filter(d => distribution[d] > 0.102).length;
+            const evensDecreasing = evenDigits.filter(d => distribution[d] < 0.102 && isDecreasing(d)).length;
+
+            const evensAbove102 = evenDigits.filter(d => distribution[d] >= 0.102).length;
+            const oddsDecreasing = oddDigits.filter(d => distribution[d] < 0.102 && isDecreasing(d)).length;
+
+            const isOddMatch = (
+                green % 2 !== 0 && 
+                yellow % 2 === 0 && 
+                oddsAbove102 >= 3 && 
+                evensDecreasing >= 3
+            );
+
+            const isEvenMatch = (
+                green % 2 === 0 && 
+                yellow % 2 !== 0 && 
+                evensAbove102 >= 3 && 
+                oddsDecreasing >= 3
+            );
+
+            // State Machine for Entry Point
+            if (!this._sbv1State) this._sbv1State = 'IDLE';
+            if (!this._sbv1Setup) this._sbv1Setup = null;
+
+            if (isOddMatch && this._sbv1State === 'IDLE') {
+                this._sbv1Setup = { type: 'ODD', greenDigit: green };
+            } else if (isEvenMatch && this._sbv1State === 'IDLE') {
+                this._sbv1Setup = { type: 'EVEN', greenDigit: green };
+            }
+
+            if (!this._sbv1Setup) {
+                this._sbv1State = 'IDLE';
+                return 'NONE';
+            }
+
+            // Check conditions lost
+            if (this._sbv1State === 'IDLE' && !isOddMatch && !isEvenMatch) {
+                this._sbv1Setup = null;
+                return 'NONE';
+            }
+
+            const currentTickDigit = Number(lastN[lastN.length - 1]);
+            const setup = this._sbv1Setup;
+
+            switch (this._sbv1State) {
+                case 'IDLE':
+                    if (currentTickDigit === setup.greenDigit) {
+                        this._sbv1State = 'HIT_GREEN';
+                    }
+                    break;
+                case 'HIT_GREEN':
+                    const isExitMatch = setup.type === 'ODD' ? currentTickDigit % 2 === 0 : currentTickDigit % 2 !== 0;
+                    if (isExitMatch) {
+                        this._sbv1State = 'EXIT_DIGIT_MATCH';
+                    }
+                    break;
+                case 'EXIT_DIGIT_MATCH':
+                    if (currentTickDigit === setup.greenDigit) {
+                        const trigger = setup.type;
+                        this._sbv1State = 'IDLE';
+                        this._sbv1Setup = null;
+                        return trigger;
+                    }
+                    break;
+                default: 
+                    this._sbv1State = 'IDLE';
+            }
+
+            return 'NONE';
+        }
+
         async getEvenOddPercent({ type = 'EVEN', n = 1000 } = {}) {
             const list = await this.getLastDigitList();
             const lastN = list.slice(-Number(n || 0));

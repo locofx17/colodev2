@@ -63,15 +63,12 @@ window.Blockly.Blocks.during_purchase = {
             event.type === window.Blockly.Events.BLOCK_CHANGE ||
             (event.type === window.Blockly.Events.BLOCK_DRAG && !event.isStart)
         ) {
-            if (!this.isCollapsed()) {
-                this.setCollapsed(true);
+            if (this.isCollapsed()) {
+                appendCollapsedMainBlocksFields(this, true);
             }
-            appendCollapsedMainBlocksFields(this, true);
         }
     },
     customContextMenu(menu) {
-        const menu_items = [localize('Expand Block'), localize('Collapse Block')];
-        excludeOptionFromContextMenu(menu, menu_items);
         modifyContextMenu(menu);
     },
 };

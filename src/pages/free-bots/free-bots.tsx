@@ -1,4 +1,4 @@
-import { ArrowUp, ArrowDown, Hash, Sigma, Dice5, Youtube } from 'lucide-react';
+import { ArrowUp, ArrowDown, Hash, Sigma, Dice5, Youtube, ChevronDown, ChevronUp } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import Button from '@/components/shared_ui/button';
@@ -17,7 +17,120 @@ interface BotData {
     features: string[];
     xml: string;
     youtube_url?: string;
+    // Purchase / trade conditions
+    market?: string;
+    symbol?: string;
+    tradeType?: string;
+    purchaseType?: string;
+    prediction?: string;
+    duration?: string;
 }
+
+const FreeBotCard = ({ bot, onLoad }: { bot: BotData; onLoad: (bot: BotData) => void }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    return (
+        <div className='free-bot-card'>
+            <div className='free-bot-card__header'>
+                <div className='free-bot-card__title-row'>
+                    <Text size='s' weight='bold' className='free-bot-card__title'>
+                        {bot.name}
+                    </Text>
+                    {bot.youtube_url && (
+                        <a
+                            href={bot.youtube_url}
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='free-bot-card__youtube-link'
+                            title={localize('Watch Guide')}
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <Youtube size={18} color='#FF0000' />
+                        </a>
+                    )}
+                </div>
+                <div className='free-bot-card__badges'>
+                    <span className={`free-bot-card__badge free-bot-card__badge--${bot.difficulty.toLowerCase()}`}>
+                        {bot.difficulty}
+                    </span>
+                    <span className='free-bot-card__badge free-bot-card__badge--strategy'>
+                        {bot.strategy}
+                    </span>
+                </div>
+            </div>
+
+            <Text size='xs' color='general' className='free-bot-card__description'>
+                {bot.description}
+            </Text>
+
+            {/* Purchase Conditions */}
+            {(bot.market || bot.purchaseType) && (
+                <div className='free-bot-card__conditions'>
+                    <div 
+                        className='free-bot-card__conditions-title' 
+                        onClick={() => setIsExpanded(!isExpanded)}
+                    >
+                        {localize('Purchase Conditions')}
+                        {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </div>
+                    {isExpanded && (
+                        <div className='free-bot-card__conditions-grid'>
+                            {bot.market && (
+                                <div className='free-bot-card__condition-item'>
+                                    <span className='free-bot-card__condition-label'>Market</span>
+                                    <span className='free-bot-card__condition-value'>{bot.market}</span>
+                                </div>
+                            )}
+                            {bot.tradeType && (
+                                <div className='free-bot-card__condition-item'>
+                                    <span className='free-bot-card__condition-label'>Trade Type</span>
+                                    <span className='free-bot-card__condition-value'>{bot.tradeType}</span>
+                                </div>
+                            )}
+                            {bot.purchaseType && (
+                                <div className='free-bot-card__condition-item'>
+                                    <span className='free-bot-card__condition-label'>Purchase</span>
+                                    <span className='free-bot-card__condition-value free-bot-card__condition-value--purchase'>{bot.purchaseType}</span>
+                                </div>
+                            )}
+                            {bot.prediction && bot.prediction !== 'N/A' && (
+                                <div className='free-bot-card__condition-item'>
+                                    <span className='free-bot-card__condition-label'>Prediction</span>
+                                    <span className='free-bot-card__condition-value'>{bot.prediction}</span>
+                                </div>
+                            )}
+                            {bot.duration && (
+                                <div className='free-bot-card__condition-item'>
+                                    <span className='free-bot-card__condition-label'>Duration</span>
+                                    <span className='free-bot-card__condition-value'>{bot.duration}</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            <div className='free-bot-card__features'>
+                {bot.features.map((feature, featureIndex) => (
+                    <span key={featureIndex} className='free-bot-card__feature'>
+                        {feature}
+                    </span>
+                ))}
+            </div>
+
+            <Button
+                className='free-bot-card__load-btn'
+                onClick={() => onLoad(bot)}
+                primary
+                has_effect
+                type='button'
+                disabled={!bot.xml} // Disable if XML not loaded yet
+            >
+                {bot.xml ? localize('Load Bot') : localize('Loading...')}
+            </Button>
+        </div>
+    );
+};
 
 const DEFAULT_FEATURES = ['Automated Trading', 'Risk Management', 'Profit Optimization'];
 
@@ -104,7 +217,7 @@ const FreeBots = observer(() => {
             // 0) Immediately render skeleton cards from a small fallback list
             const fallback = getXmlFiles().map(file => ({ name: file.replace('.xml', ''), file }));
             const initialSkeleton: BotData[] = fallback.map(item => {
-                const botName = formatBotName(item.name || item.file.replace('.xml', ''));
+                const botName = formatBotName((item as any).name || (item as any).file.replace('.xml', ''));
                 return {
                     name: botName,
                     description: `Advanced trading bot: ${botName}`,
@@ -112,7 +225,7 @@ const FreeBots = observer(() => {
                     strategy: 'Multi-Strategy',
                     features: DEFAULT_FEATURES,
                     xml: '',
-                    youtube_url: item.youtube_url,
+                    youtube_url: (item as any).youtube_url,
                 };
             });
             setAvailableBots(initialSkeleton);
@@ -140,11 +253,17 @@ const FreeBots = observer(() => {
                     return {
                         name: botName,
                         description: `Advanced trading bot: ${botName}`,
-                        difficulty: 'Intermediate',
-                        strategy: 'Multi-Strategy',
-                        features: DEFAULT_FEATURES,
+                        difficulty: item.difficulty || 'Intermediate',
+                        strategy: item.strategy || 'Multi-Strategy',
+                        features: item.features || DEFAULT_FEATURES,
                         xml: '',
                         youtube_url: item.youtube_url,
+                        market: item.market,
+                        symbol: item.symbol,
+                        tradeType: item.tradeType,
+                        purchaseType: item.purchaseType,
+                        prediction: item.prediction,
+                        duration: item.duration,
                     };
                 });
                 setAvailableBots(skeletonBots);
@@ -160,11 +279,17 @@ const FreeBots = observer(() => {
                             loadedBots.push({
                                 name: botName,
                                 description: `Advanced trading bot: ${botName}`,
-                                difficulty: 'Intermediate',
-                                strategy: 'Multi-Strategy',
-                                features: DEFAULT_FEATURES,
+                                difficulty: item.difficulty || 'Intermediate',
+                                strategy: item.strategy || 'Multi-Strategy',
+                                features: item.features || DEFAULT_FEATURES,
                                 xml,
                                 youtube_url: item.youtube_url,
+                                market: item.market,
+                                symbol: item.symbol,
+                                tradeType: item.tradeType,
+                                purchaseType: item.purchaseType,
+                                prediction: item.prediction,
+                                duration: item.duration,
                             });
                             setAvailableBots([...loadedBots, ...skeletonBots.slice(loadedBots.length)]);
                         }
@@ -209,58 +334,7 @@ const FreeBots = observer(() => {
                 ) : (
                     <div className='free-bots__grid'>
                         {availableBots.map((bot, index) => (
-                            <div key={index} className='free-bot-card'>
-                                <div className='free-bot-card__header'>
-                                    <div className='free-bot-card__title-row'>
-                                        <Text size='s' weight='bold' className='free-bot-card__title'>
-                                            {bot.name}
-                                        </Text>
-                                        {bot.youtube_url && (
-                                            <a
-                                                href={bot.youtube_url}
-                                                target='_blank'
-                                                rel='noopener noreferrer'
-                                                className='free-bot-card__youtube-link'
-                                                title={localize('Watch Guide')}
-                                                onClick={e => e.stopPropagation()}
-                                            >
-                                                <Youtube size={18} color='#FF0000' />
-                                            </a>
-                                        )}
-                                    </div>
-                                    <div className='free-bot-card__badges'>
-                                        <span className='free-bot-card__badge free-bot-card__badge--difficulty'>
-                                            {bot.difficulty}
-                                        </span>
-                                        <span className='free-bot-card__badge free-bot-card__badge--strategy'>
-                                            {bot.strategy}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <Text size='xs' color='general' className='free-bot-card__description'>
-                                    {bot.description}
-                                </Text>
-
-                                <div className='free-bot-card__features'>
-                                    {bot.features.map((feature, featureIndex) => (
-                                        <span key={featureIndex} className='free-bot-card__feature'>
-                                            {feature}
-                                        </span>
-                                    ))}
-                                </div>
-
-                                <Button
-                                    className='free-bot-card__load-btn'
-                                    onClick={() => loadBotIntoBuilder(bot)}
-                                    primary
-                                    has_effect
-                                    type='button'
-                                    disabled={!bot.xml} // Disable if XML not loaded yet
-                                >
-                                    {bot.xml ? localize('Load Bot') : localize('Loading...')}
-                                </Button>
-                            </div>
+                            <FreeBotCard key={index} bot={bot} onLoad={loadBotIntoBuilder} />
                         ))}
                     </div>
                 )}

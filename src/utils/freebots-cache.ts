@@ -9,6 +9,13 @@ export type TBotsManifestItem = {
     strategy?: string;
     features?: string[];
     youtube_url?: string;
+    // Purchase / trade conditions
+    market?: string;
+    symbol?: string;
+    tradeType?: string;
+    purchaseType?: string;
+    prediction?: string;
+    duration?: string;
 };
 
 const XML_CACHE_PREFIX = 'freebots:xml:';
