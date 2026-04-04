@@ -264,4 +264,13 @@
       </block>
     </statement>
   </block>
+  <block type="during_purchase" id="ISWQlIq00VSpFAh2ZYG8" x="0" y="1000">
+    <statement name="DURING_PURCHASE_STACK">
+      <block type="controls_if" id="!-@!13qFqkbot[NlF{qP" collapsed="true">
+        <value name="IF0">
+          <block type="check_sell" id=";BX4{|$aVogM?mZcgrOV"></block>
+        </value>
+      </block>
+    </statement>
+  </block>
 </xml>
