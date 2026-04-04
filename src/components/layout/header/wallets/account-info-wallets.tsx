@@ -36,8 +36,6 @@ type TBalanceLabel = {
     currency: string;
     is_virtual: boolean;
     display_code: string;
-    should_mask?: boolean;
-    pro_mode_view?: 'real' | 'demo';
 };
 
 
@@ -70,7 +68,7 @@ const BalanceLabel = ({ balance, currency, is_virtual, display_code, should_mask
                 {!currency ? (
                     <Localize i18n_default_text='No currency assigned' />
                 ) : (
-                    `${formatMoney(currency, balance ?? 0, true)} ${should_mask && pro_mode_view === 'real' ? 'USD' : display_code}`
+                    `${formatMoney(currency, balance ?? 0, true)} ${display_code}`
                 )}
             </Text>
         </div>
@@ -122,9 +120,8 @@ const DesktopInfoIcons = observer(({ gradients, icons, icon_type }: TInfoIcons) 
 });
 
 const AccountInfoWallets = observer(({ is_dialog_on, toggleDialog }: TAccountInfoWallets) => {
-    const { client, ui, pro_mode } = useStore();
+    const { client, ui } = useStore();
     const { loginid, accounts, residence } = client;
-    const { is_pro_mode, pro_mode_view, BASE_BALANCE, MASKED_NAME } = pro_mode;
 
 
     const { account_switcher_disabled_message } = ui;
@@ -136,23 +133,7 @@ const AccountInfoWallets = observer(({ is_dialog_on, toggleDialog }: TAccountInf
 
     const linked_wallet = wallet_list?.find(wallet => wallet.dtrade_loginid === linked_dtrade_trading_account_loginid);
     
-    // Masking logic for header
-    // Masking logic for header
-    // Masking logic for header - Strictly target any virtual account (prefix VR)
-    const is_target_account = !!active_account?.is_virtual || loginid?.startsWith('VR');
-    const is_real_account = loginid?.startsWith('CR') && !loginid?.startsWith('CRW'); // CRW is a real wallet, but we'll exclude it from demo masking
-    const should_mask = is_pro_mode && is_target_account && !is_real_account;
-    
-    const dtrade_balance = linked_wallet?.dtrade_balance;
-    let display_balance = dtrade_balance ?? 0;
-
-    if (should_mask) {
-        if (pro_mode_view === 'real') {
-            display_balance = Math.max(0, Number(dtrade_balance) - BASE_BALANCE);
-        } else {
-            display_balance = Math.min(Number(dtrade_balance), BASE_BALANCE);
-        }
-    }
+    const display_balance = linked_wallet?.dtrade_balance ?? 0;
 
     return (
         <div className='acc-info__wrapper'>
@@ -189,13 +170,11 @@ const AccountInfoWallets = observer(({ is_dialog_on, toggleDialog }: TAccountInf
                         currency={active_account?.currency}
                         is_virtual={Boolean(active_account?.is_virtual)}
                         display_code={getCurrencyDisplayCode(active_account?.currency)}
-                        should_mask={should_mask}
-                        pro_mode_view={pro_mode_view}
                     />
                     {linked_wallet && (
                         <WalletBadge
-                            is_demo={(should_mask && pro_mode_view === 'real' ? undefined : (Boolean(linked_wallet.is_virtual) ? 'demo' : undefined)) as any}
-                            label={(should_mask && pro_mode_view === 'real' ? MASKED_NAME : linked_wallet.landing_company_name) || ''}
+                            is_demo={Boolean(linked_wallet.is_virtual) ? 'demo' : undefined}
+                            label={linked_wallet.landing_company_name || ''}
                         />
                     )}
 

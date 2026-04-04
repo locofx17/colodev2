@@ -21,7 +21,6 @@ import ToolboxStore from './toolbox-store';
 import TransactionsStore from './transactions-store';
 import UiStore from './ui-store';
 import SniperStore from './sniper-store';
-import { ProModeStore } from './pro-mode-store';
 
 
 // TODO: need to write types for the individual classes and convert them to ts
@@ -52,7 +51,6 @@ export default class RootStore {
     public client: ClientStore;
     public common: CommonStore;
     public sniper: SniperStore;
-    public pro_mode: ProModeStore;
 
 
     core = {
@@ -89,7 +87,6 @@ export default class RootStore {
         this.dashboard = new DashboardStore(this, this.core);
         this.copycat = new CopycatStore(this);
         this.sniper = new SniperStore(this);
-        this.pro_mode = new ProModeStore();
 
 
         // need to be at last for dependency

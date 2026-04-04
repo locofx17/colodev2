@@ -10,26 +10,7 @@ type TAccountSwitcherWalletListProps = {
 };
 
 export const AccountSwitcherWalletList = observer(({ wallets, closeAccountsDialog }: TAccountSwitcherWalletListProps) => {
-    const { pro_mode } = useStore();
-    const { is_pro_mode, pro_mode_view } = pro_mode;
-
-    const filteredWallets = wallets.filter(account => {
-        if (account.is_dtrader_account_disabled) return false;
-        
-        if (is_pro_mode) {
-            const is_virtual_masked = !!account.is_virtual || account.dtrade_loginid?.toString()?.startsWith('VR');
-            const is_real = !is_virtual_masked;
-            
-            if (pro_mode_view === 'real') {
-                // Show all Real accounts plus the Virtual account (which will be masked)
-                return is_real || is_virtual_masked;
-            } else {
-                // Only show the Virtual account when in Demo view
-                return is_virtual_masked;
-            }
-        }
-        return true;
-    });
+    const filteredWallets = wallets.filter(account => !account.is_dtrader_account_disabled);
 
     const sortedWallets = [...filteredWallets].sort((a, b) => {
 

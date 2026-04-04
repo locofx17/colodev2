@@ -9,11 +9,6 @@ import './risk-calculator.scss';
 
 
 const RiskCalculator: React.FC = observer(() => {
-    const { pro_mode } = useStore();
-    const { is_pro_mode, setProMode, activate, is_activated } = pro_mode;
-    const [passwordInput, setPasswordInput] = React.useState('');
-    const [showPasswordPrompt, setShowPasswordPrompt] = React.useState(false);
-
     const [balance, setBalance] = React.useState(1000);
     const [balanceInput, setBalanceInput] = React.useState('1000');
     const [baseStake, setBaseStake] = React.useState(20);
@@ -523,59 +518,7 @@ const RiskCalculator: React.FC = observer(() => {
                 </div>
                 {/* Footnote removed */}
                 
-                <div className='pro-mode-activation'>
-                    {!is_activated ? (
-                        <div className='activation-trigger' onClick={() => setShowPasswordPrompt(!showPasswordPrompt)}>
-                            <Text size='xs' color='less-prominent'>
-                                <Localize i18n_default_text='Advanced Settings' />
-                            </Text>
-                        </div>
-                    ) : (
-                        <div className='stealth-toggle-container'>
-                            <label className='stealth-toggle'>
-                                <input
-                                    type='checkbox'
-                                    checked={is_pro_mode}
-                                    onChange={e => setProMode(e.target.checked)}
-                                />
-                                <span className='slider round'></span>
-                                <span className='label-text'>
-                                    <Localize i18n_default_text='Pro Mode' />
-                                </span>
-                            </label>
-                            {is_pro_mode && (
-                                <Text size='xxxs' color='profit-success'>
-                                    <Localize i18n_default_text='Masking Active' />
-                                </Text>
-                            )}
-                        </div>
-                    )}
-
-                    {showPasswordPrompt && !is_activated && (
-                        <div className='password-prompt'>
-                            <input
-                                type='password'
-                                value={passwordInput}
-                                onChange={e => setPasswordInput(e.target.value)}
-                                placeholder='Enter activation code'
-                                className='password-input'
-                            />
-                            <button
-                                className='btn btn-primary btn-small'
-                                onClick={() => {
-                                    if (activate(passwordInput)) {
-                                        setShowPasswordPrompt(false);
-                                        setPasswordInput('');
-                                    } else {
-                                        alert('Invalid code');
-                                    }
-                                }}
-                            >
-                                <Localize i18n_default_text='Activate' />
-                            </button>
-                        </div>
-                    )}
-                </div>
+                <div className='risk-calculator-results-placeholder'></div>
             </div>
         </div>
 
