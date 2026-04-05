@@ -25,6 +25,7 @@ Blockly.Blocks.digit_frequency = {
                     options: [
                         [localize('Digit'), 'DIGIT'],
                         [localize('Percentage'), 'PERCENTAGE'],
+                        [localize('Fraction (0-1)'), 'FRACTION'],
                     ],
                 },
                 {

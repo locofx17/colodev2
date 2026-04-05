@@ -138,6 +138,9 @@ export default Engine =>
             if (return_type === 'PERCENTAGE') {
                 return parseFloat(((result.c / lastN.length) * 100).toFixed(2));
             }
+            if (return_type === 'FRACTION') {
+                return result.c / Math.max(1, lastN.length);
+            }
             return result.d;
         }
 
@@ -256,6 +259,35 @@ export default Engine =>
             const under = lastN.filter(x => Number(x) < Number(threshold)).length;
             const val = type === 'UNDER' ? under : over;
             return Math.round((val / Math.max(1, lastN.length)) * 100);
+        }
+
+        async getDigitTrend({ digit = 0, nShort = 20, nLong = 1000 } = {}) {
+            const list = await this.getLastDigitList();
+            const lastNLong = list.slice(-Number(nLong || 0));
+            if (lastNLong.length === 0) return false;
+
+            const freqLong = lastNLong.filter(d => Number(d) === Number(digit)).length / lastNLong.length;
+            const lastNShort = list.slice(-Number(nShort || 0));
+            const freqShort = lastNShort.filter(d => Number(d) === Number(digit)).length / Math.max(1, lastNShort.length);
+
+            return freqShort < freqLong; // Returns true if frequency is decreasing
+        }
+
+        async getDigitAtRank({ rank = 1, n = 1000 } = {}) {
+            const list = await this.getLastDigitList();
+            const lastN = list.slice(-Number(n || 0));
+            if (lastN.length === 0) return 0;
+
+            const freq = Array(10).fill(0);
+            lastN.forEach(val => {
+                const i = Number(val);
+                if (i >= 0 && i <= 9) freq[i]++;
+            });
+            const entries = freq.map((c, i) => ({ d: i, c }));
+            entries.sort((a, b) => b.c - a.c); // Sort desc (rank 1 is most frequent)
+
+            const idx = Math.max(0, Math.min(9, Number(rank || 1) - 1));
+            return entries[idx].d;
         }
 
         async getMatchDiffPercent({ type = 'MATCH', val = 5, n = 1000 } = {}) {
