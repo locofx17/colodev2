@@ -65,19 +65,6 @@
     "strategy": "Even/Odd"
   },
   {
-    "name": "SB V1",
-    "file": "SB V1.xml",
-    "youtube_url": "https://www.youtube.com/@DBOTTRADERZ",
-    "market": "Volatility 25 (1s) Index",
-    "symbol": "1HZ25V",
-    "tradeType": "Digits – Even/Odd",
-    "purchaseType": "Digit Even",
-    "prediction": "N/A",
-    "duration": "1 tick",
-    "difficulty": "Intermediate",
-    "strategy": "Digit Even"
-  },
-  {
     "name": "ENTRY POINT BOT",
     "file": "Entry point Bot over 2.xml",
     "youtube_url": "https://www.youtube.com/@DBOTTRADERZ",

@@ -138,110 +138,7 @@ export default Engine =>
             if (return_type === 'PERCENTAGE') {
                 return parseFloat(((result.c / lastN.length) * 100).toFixed(2));
             }
-            if (return_type === 'FRACTION') {
-                return result.c / Math.max(1, lastN.length);
-            }
             return result.d;
-        }
-
-        async getSbV1Signal({ n = 1000 } = {}) {
-            const list = await this.getLastDigitList();
-            const lastN = list.slice(-Number(n || 0));
-            if (lastN.length === 0) return 'IDLE';
-
-            const freq = Array(10).fill(0);
-            lastN.forEach(val => {
-                const i = Number(val);
-                if (i >= 0 && i <= 9) freq[i]++;
-            });
-            const distribution = freq.map(c => c / Math.max(1, lastN.length));
-
-            const sortedRank = freq.map((c, i) => ({ digit: i, count: c })).sort((a, b) => b.count - a.count);
-
-            const recent20 = lastN.slice(-20);
-            const getFreq = (digits, target) => digits.filter(d => Number(d) === target).length / Math.max(1, digits.length);
-
-            const isDecreasing = (digit) => {
-                const currentFreq = getFreq(recent20, digit);
-                const overallFreq = distribution[digit];
-                return currentFreq < overallFreq;
-            };
-
-            const green = sortedRank[0].digit;
-            const yellow = sortedRank[8].digit; // 2nd least
-
-            const oddDigits = [1, 3, 5, 7, 9];
-            const evenDigits = [0, 2, 4, 6, 8];
-
-            const oddsAbove102 = oddDigits.filter(d => distribution[d] > 0.102).length;
-            const evensDecreasing = evenDigits.filter(d => distribution[d] < 0.102 && isDecreasing(d)).length;
-
-            const evensAbove102 = evenDigits.filter(d => distribution[d] >= 0.102).length;
-            const oddsDecreasing = oddDigits.filter(d => distribution[d] < 0.102 && isDecreasing(d)).length;
-
-            const isOddMatch = (
-                green % 2 !== 0 && 
-                yellow % 2 === 0 && 
-                oddsAbove102 >= 3 && 
-                evensDecreasing >= 3
-            );
-
-            const isEvenMatch = (
-                green % 2 === 0 && 
-                yellow % 2 !== 0 && 
-                evensAbove102 >= 3 && 
-                oddsDecreasing >= 3
-            );
-
-            // State Machine for Entry Point
-            if (!this._sbv1State) this._sbv1State = 'IDLE';
-            if (!this._sbv1Setup) this._sbv1Setup = null;
-
-            if (isOddMatch && this._sbv1State === 'IDLE') {
-                this._sbv1Setup = { type: 'ODD', greenDigit: green };
-            } else if (isEvenMatch && this._sbv1State === 'IDLE') {
-                this._sbv1Setup = { type: 'EVEN', greenDigit: green };
-            }
-
-            if (!this._sbv1Setup) {
-                this._sbv1State = 'IDLE';
-                return 'IDLE';
-            }
-
-            // Check conditions lost
-            if (this._sbv1State === 'IDLE' && !isOddMatch && !isEvenMatch) {
-                this._sbv1Setup = null;
-                return 'IDLE';
-            }
-
-            const currentTickDigit = Number(lastN[lastN.length - 1]);
-            const setup = this._sbv1Setup;
-
-            switch (this._sbv1State) {
-                case 'IDLE':
-                    if (currentTickDigit === setup.greenDigit) {
-                        this._sbv1State = 'HIT_GREEN';
-                    }
-                    return `${setup.type}_SENTIMENT`;
-                case 'HIT_GREEN': {
-                    const isExitMatch = setup.type === 'ODD' ? currentTickDigit % 2 === 0 : currentTickDigit % 2 !== 0;
-                    if (isExitMatch) {
-                        this._sbv1State = 'EXIT_DIGIT_MATCH';
-                    }
-                    return 'PHASE_HIT_GREEN';
-                }
-                case 'EXIT_DIGIT_MATCH':
-                    if (currentTickDigit === setup.greenDigit) {
-                        const trigger = setup.type === 'ODD' ? 'TRIGGER_ODD' : 'TRIGGER_EVEN';
-                        this._sbv1State = 'IDLE';
-                        this._sbv1Setup = null;
-                        return trigger;
-                    }
-                    return 'PHASE_EXIT_MATCH';
-                default: 
-                    this._sbv1State = 'IDLE';
-                    return 'IDLE';
-            }
         }
 
         async getEvenOddPercent({ type = 'EVEN', n = 1000 } = {}) {
@@ -259,35 +156,6 @@ export default Engine =>
             const under = lastN.filter(x => Number(x) < Number(threshold)).length;
             const val = type === 'UNDER' ? under : over;
             return Math.round((val / Math.max(1, lastN.length)) * 100);
-        }
-
-        async getDigitTrend({ digit = 0, nShort = 20, nLong = 1000 } = {}) {
-            const list = await this.getLastDigitList();
-            const lastNLong = list.slice(-Number(nLong || 0));
-            if (lastNLong.length === 0) return false;
-
-            const freqLong = lastNLong.filter(d => Number(d) === Number(digit)).length / lastNLong.length;
-            const lastNShort = list.slice(-Number(nShort || 0));
-            const freqShort = lastNShort.filter(d => Number(d) === Number(digit)).length / Math.max(1, lastNShort.length);
-
-            return freqShort < freqLong; // Returns true if frequency is decreasing
-        }
-
-        async getDigitAtRank({ rank = 1, n = 1000 } = {}) {
-            const list = await this.getLastDigitList();
-            const lastN = list.slice(-Number(n || 0));
-            if (lastN.length === 0) return 0;
-
-            const freq = Array(10).fill(0);
-            lastN.forEach(val => {
-                const i = Number(val);
-                if (i >= 0 && i <= 9) freq[i]++;
-            });
-            const entries = freq.map((c, i) => ({ d: i, c }));
-            entries.sort((a, b) => b.c - a.c); // Sort desc (rank 1 is most frequent)
-
-            const idx = Math.max(0, Math.min(9, Number(rank || 1) - 1));
-            return entries[idx].d;
         }
 
         async getMatchDiffPercent({ type = 'MATCH', val = 5, n = 1000 } = {}) {

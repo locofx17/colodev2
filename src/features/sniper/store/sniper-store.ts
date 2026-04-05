@@ -17,14 +17,6 @@ export interface StrategyResult {
     digitDistribution: number[];
 }
 
-export type SBV1State = 'IDLE' | 'HIT_GREEN' | 'EXIT_DIGIT_MATCH' | 'TRIGGER';
-
-export interface SBV1Setup {
-    type: 'ODD' | 'EVEN';
-    greenDigit: number;
-    symbol: string;
-}
-
 export default class SniperStore {
     root_store: RootStore;
 
@@ -37,9 +29,6 @@ export default class SniperStore {
 
     signals: StrategyResult[] = [];
     logs: string[] = [];
-
-    sbV1State: Record<string, SBV1State> = {};
-    sbV1Setup: Record<string, SBV1Setup | null> = {};
 
     ticks: Record<string, Tick[]> = {};
     subscribers: Record<string, any> = {};
@@ -68,8 +57,6 @@ export default class SniperStore {
             clearLogs: action,
             updateTicks: action,
             setSignals: action,
-            setSbV1State: action,
-            setSbV1Setup: action,
 
             startScan: action,
             stopScan: action,
@@ -110,14 +97,6 @@ export default class SniperStore {
         this.signals = signals;
     };
 
-    setSbV1State = (symbol: string, state: SBV1State) => {
-        this.sbV1State[symbol] = state;
-    };
-
-    setSbV1Setup = (symbol: string, setup: SBV1Setup | null) => {
-        this.sbV1Setup[symbol] = setup;
-    };
-
     updateTicks = (symbol: string, tick: Tick) => {
         if (!this.ticks[symbol]) this.ticks[symbol] = [];
         this.ticks[symbol] = [tick, ...this.ticks[symbol]].slice(0, this.MAX_TICKS);
@@ -125,76 +104,11 @@ export default class SniperStore {
         // Analyze after update
         const results = this.analyzeMarket(symbol, this.ticks[symbol]);
         
-        // Handle SB V1 State Machine
-        this.processSBV1Entry(symbol, tick, results);
-
         results.forEach(result => {
             if (result && result.match) {
                 this.handleSignalFound(symbol, result);
             }
         });
-    };
-
-    processSBV1Entry = (symbol: string, tick: Tick, results: StrategyResult[]) => {
-        const state = this.sbV1State[symbol] || 'IDLE';
-        const setup = this.sbV1Setup[symbol];
-
-        // 1. Detect setup
-        const sbV1Result = results.find(r => r.strategyId === 'SB_V1');
-        if (sbV1Result && sbV1Result.match) {
-            if (state === 'IDLE') {
-                const type = sbV1Result.entry === 'ODD' ? 'ODD' : 'EVEN';
-                const dist = sbV1Result.digitDistribution;
-                const greenDigit = dist.indexOf(Math.max(...dist));
-                
-                this.setSbV1Setup(symbol, { type, greenDigit, symbol });
-                this.setSbV1State(symbol, 'IDLE'); // Setup found, start sequence
-                this.addLog(`SB V1 ${type} Setup Found. Waiting for Green Bar (${greenDigit})...`);
-            }
-        } else if (state !== 'IDLE') {
-            // Setup lost, reset
-            this.setSbV1State(symbol, 'IDLE');
-            this.setSbV1Setup(symbol, null);
-            this.addLog('SB V1 Setup Lost. Resetting...');
-            return;
-        }
-
-        if (!setup) return;
-
-        switch (state) {
-            case 'IDLE':
-                if (tick.digit === setup.greenDigit) {
-                    this.setSbV1State(symbol, 'HIT_GREEN');
-                    this.addLog(`SB V1: Green Bar (${tick.digit}) Hit. Waiting for Exit Digit (${setup.type === 'ODD' ? 'Even' : 'Odd'})...`);
-                }
-                break;
-            case 'HIT_GREEN':
-                const isExitMatch = setup.type === 'ODD' ? tick.digit % 2 === 0 : tick.digit % 2 !== 0;
-                if (isExitMatch) {
-                    this.setSbV1State(symbol, 'EXIT_DIGIT_MATCH');
-                    this.addLog(`SB V1: Exit Digit Match (${tick.digit}). Waiting for Green Bar (${setup.greenDigit}) to trigger...`);
-                } else if (tick.digit === setup.greenDigit) {
-                    // Stay in HIT_GREEN or reset if it hits green again? 
-                    // Note says "exit to be [even/odd]... then click when touches green again".
-                    // So we wait for exit after green.
-                }
-                break;
-            case 'EXIT_DIGIT_MATCH':
-                if (tick.digit === setup.greenDigit) {
-                    this.setSbV1State(symbol, 'TRIGGER');
-                    this.addLog(`SB V1: TRIGGERED! Green Bar (${tick.digit}) reached again.`);
-                    this.executeTrade({
-                        marketId: symbol,
-                        entry: setup.type,
-                        entryDigit: setup.greenDigit,
-                        botName: 'SB V1',
-                    });
-                    // Reset after trade
-                    this.setSbV1State(symbol, 'IDLE');
-                    this.setSbV1Setup(symbol, null);
-                }
-                break;
-        }
     };
 
     startScan = (markets: string[]) => {
@@ -435,10 +349,9 @@ export default class SniperStore {
     executeTrade = async (signal: any) => {
         if (!signal) return;
 
-        const botName = signal.botName || 'Entry Point Bot';
-        const botFile = signal.botName === 'SB V1' ? 'SB V1.xml' : 'Entry point Bot over 2.xml';
+        const botFile = 'Entry point Bot over 2.xml';
 
-        this.addLog(`Loading ${botName} for ${signal.marketId} @ ${signal.entry}...`);
+        this.addLog(`Loading ${botFile} for ${signal.marketId} @ ${signal.entry}...`);
 
         try {
             const response = await fetch(`/xml/${botFile}`);
@@ -552,8 +465,8 @@ export default class SniperStore {
                 );
             }
 
-            // Bypass Entry Loop for SB V1 and Rise/Fall to ensure immediate execution
-            const shouldBypassLoop = signal.botName === 'SB V1' || !isDigitEntry;
+            // Bypass Entry Loop for Rise/Fall to ensure immediate execution
+            const shouldBypassLoop = !isDigitEntry;
             if (shouldBypassLoop) {
                 modifiedXml = modifiedXml.replace(
                     /<field name="VAR" id="\$68\*z!dO\|ZT~V6#FW8XN">entry_loop<\/field>\s*<value name="VALUE">\s*<block type="logic_boolean" [^>]*>\s*<field name="BOOL">TRUE<\/field>/g,
