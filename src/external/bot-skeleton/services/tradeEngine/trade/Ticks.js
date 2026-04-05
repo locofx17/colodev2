@@ -144,7 +144,7 @@ export default Engine =>
         async getSbV1Signal({ n = 1000 } = {}) {
             const list = await this.getLastDigitList();
             const lastN = list.slice(-Number(n || 0));
-            if (lastN.length === 0) return 'NONE';
+            if (lastN.length === 0) return 'IDLE';
 
             const freq = Array(10).fill(0);
             lastN.forEach(val => {
@@ -202,13 +202,13 @@ export default Engine =>
 
             if (!this._sbv1Setup) {
                 this._sbv1State = 'IDLE';
-                return 'NONE';
+                return 'IDLE';
             }
 
             // Check conditions lost
             if (this._sbv1State === 'IDLE' && !isOddMatch && !isEvenMatch) {
                 this._sbv1Setup = null;
-                return 'NONE';
+                return 'IDLE';
             }
 
             const currentTickDigit = Number(lastN[lastN.length - 1]);
@@ -219,26 +219,26 @@ export default Engine =>
                     if (currentTickDigit === setup.greenDigit) {
                         this._sbv1State = 'HIT_GREEN';
                     }
-                    break;
-                case 'HIT_GREEN':
+                    return `${setup.type}_SENTIMENT`;
+                case 'HIT_GREEN': {
                     const isExitMatch = setup.type === 'ODD' ? currentTickDigit % 2 === 0 : currentTickDigit % 2 !== 0;
                     if (isExitMatch) {
                         this._sbv1State = 'EXIT_DIGIT_MATCH';
                     }
-                    break;
+                    return 'PHASE_HIT_GREEN';
+                }
                 case 'EXIT_DIGIT_MATCH':
                     if (currentTickDigit === setup.greenDigit) {
-                        const trigger = setup.type;
+                        const trigger = setup.type === 'ODD' ? 'TRIGGER_ODD' : 'TRIGGER_EVEN';
                         this._sbv1State = 'IDLE';
                         this._sbv1Setup = null;
                         return trigger;
                     }
-                    break;
+                    return 'PHASE_EXIT_MATCH';
                 default: 
                     this._sbv1State = 'IDLE';
+                    return 'IDLE';
             }
-
-            return 'NONE';
         }
 
         async getEvenOddPercent({ type = 'EVEN', n = 1000 } = {}) {
